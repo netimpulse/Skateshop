@@ -312,6 +312,9 @@
             {%- liquid
               assign builder_page = block.settings.builder_page | default: pages['skateboard-builder']
               assign builder_url = builder_page.url
+              if kind == 'deck' and builder_url != blank
+                assign builder_url = builder_url | append: '?deck=' | append: product.handle
+              endif
               assign default_builder_heading = 'products.product.builder_heading' | t
               assign default_builder_text = 'products.product.builder_text' | t
               assign default_builder_link = 'products.product.builder_link' | t

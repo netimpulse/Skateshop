@@ -378,6 +378,22 @@
       "select_variant": "Select variant",
       "sold_out": "Sold out"
     },
+    "delivery": {
+      "backorder": "On backorder – ships in 5–10 business days",
+      "in_stock": "In stock – ships in 1–2 business days",
+      "low_stock": "Only [count] left",
+      "sold_out": "Sold out",
+      "unavailable": "This combination is unavailable"
+    },
+    "details": {
+      "description": "Description",
+      "eyebrow": "Details",
+      "features": "Features",
+      "heading": "Product details",
+      "read_more": "View full page",
+      "shipping": "Shipping & returns",
+      "size_guide": "Size guide"
+    },
     "placeholder": {
       "bearings": "Bearings – image coming soon",
       "deck": "Deck – image coming soon",
@@ -393,6 +409,56 @@
       "regular": "Regular price",
       "sale": "Sale price",
       "unit": "Unit price"
+    },
+    "product": {
+      "add_to_cart": "Add to cart",
+      "builder_heading": "Board builder",
+      "builder_link": "Open the board builder",
+      "builder_text": "This part fits your build: put together your complete board step by step.",
+      "gallery": "Product images",
+      "gallery_show": "Show image {{ index }} of {{ total }}",
+      "gallery_zoom": "Open image in full view",
+      "quantity": "Quantity",
+      "quantity_decrease": "Decrease quantity",
+      "quantity_increase": "Increase quantity",
+      "reviews_count": {
+        "one": "{{ count }} review",
+        "other": "{{ count }} reviews"
+      },
+      "shipping_html": "<a href=\"{{ link }}\">shipping</a> calculated at checkout",
+      "size_guide": "Size guide",
+      "sold_out": "Sold out",
+      "tax_excluded": "Excl. tax",
+      "tax_included": "Incl. tax",
+      "unavailable": "Unavailable",
+      "value_sold_out": "sold out",
+      "value_unavailable": "unavailable"
+    },
+    "recently_viewed": {
+      "editor_note": "Products the visitor viewed recently appear here. Without a history the section stays hidden in the store.",
+      "eyebrow": "History",
+      "heading": "Recently viewed"
+    },
+    "related": {
+      "eyebrow": "More like this",
+      "heading": "Goes well with"
+    },
+    "specs": {
+      "bearing_rating": "Rating",
+      "concave": "Concave",
+      "deck_length": "Length",
+      "deck_shape": "Shape",
+      "deck_width": "Width",
+      "grip_style": "Style",
+      "hardware_length": "Bolt length",
+      "heading": "Tech specs",
+      "riser_height": "Height",
+      "sku": "SKU",
+      "truck_height": "Height",
+      "truck_width": "Axle width",
+      "wheel_hardness": "Hardness",
+      "wheel_size": "Diameter",
+      "wheelbase": "Wheelbase"
     }
   },
   "search": {

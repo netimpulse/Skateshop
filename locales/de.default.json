@@ -378,6 +378,22 @@
       "select_variant": "Variante wählen",
       "sold_out": "Ausverkauft"
     },
+    "delivery": {
+      "backorder": "Nachbestellt – Versand in 5–10 Werktagen",
+      "in_stock": "Auf Lager – Versand in 1–2 Werktagen",
+      "low_stock": "Nur noch [count] verfügbar",
+      "sold_out": "Ausverkauft",
+      "unavailable": "Diese Kombination ist nicht verfügbar"
+    },
+    "details": {
+      "description": "Produktbeschreibung",
+      "eyebrow": "Details",
+      "features": "Features",
+      "heading": "Produktdetails",
+      "read_more": "Ganze Seite ansehen",
+      "shipping": "Versand & Rückgabe",
+      "size_guide": "Größenberatung"
+    },
     "placeholder": {
       "bearings": "Kugellager – Bild folgt",
       "deck": "Deck – Bild folgt",
@@ -393,6 +409,56 @@
       "regular": "Normaler Preis",
       "sale": "Angebotspreis",
       "unit": "Grundpreis"
+    },
+    "product": {
+      "add_to_cart": "In den Warenkorb",
+      "builder_heading": "Board Builder",
+      "builder_link": "In den Board Builder",
+      "builder_text": "Dieses Teil passt in deinen Build: Stell dir dein Komplettboard Schritt für Schritt zusammen.",
+      "gallery": "Produktbilder",
+      "gallery_show": "Bild {{ index }} von {{ total }} anzeigen",
+      "gallery_zoom": "Bild in Vollansicht öffnen",
+      "quantity": "Menge",
+      "quantity_decrease": "Menge verringern",
+      "quantity_increase": "Menge erhöhen",
+      "reviews_count": {
+        "one": "{{ count }} Bewertung",
+        "other": "{{ count }} Bewertungen"
+      },
+      "shipping_html": "zzgl. <a href=\"{{ link }}\">Versand</a>",
+      "size_guide": "Größenberatung",
+      "sold_out": "Ausverkauft",
+      "tax_excluded": "Zzgl. MwSt.",
+      "tax_included": "Inkl. MwSt.",
+      "unavailable": "Nicht verfügbar",
+      "value_sold_out": "ausverkauft",
+      "value_unavailable": "nicht verfügbar"
+    },
+    "recently_viewed": {
+      "editor_note": "Hier erscheinen die zuletzt besuchten Produkte des Besuchers. Ohne Verlauf bleibt die Section im Shop unsichtbar.",
+      "eyebrow": "Verlauf",
+      "heading": "Zuletzt angesehen"
+    },
+    "related": {
+      "eyebrow": "Mehr davon",
+      "heading": "Passt dazu"
+    },
+    "specs": {
+      "bearing_rating": "Rating",
+      "concave": "Concave",
+      "deck_length": "Länge",
+      "deck_shape": "Shape",
+      "deck_width": "Breite",
+      "grip_style": "Stil",
+      "hardware_length": "Schraubenlänge",
+      "heading": "Technische Daten",
+      "riser_height": "Höhe",
+      "sku": "Art.-Nr.",
+      "truck_height": "Höhe",
+      "truck_width": "Achsbreite",
+      "wheel_hardness": "Härte",
+      "wheel_size": "Durchmesser",
+      "wheelbase": "Wheelbase"
     }
   },
   "search": {
