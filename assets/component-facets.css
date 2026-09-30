@@ -64,7 +64,8 @@
   display: flex;
   align-items: center;
   min-height: 2.75rem;
-  padding-block-end: var(--space-xs);
+  /* same height as the toolbar so both rules line up */
+  padding-block-end: var(--space-s);
   border-bottom: var(--border-width) solid var(--color-text);
   font-family: var(--font-mono-family);
   font-weight: var(--font-mono-weight);
