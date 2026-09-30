@@ -1,0 +1,104 @@
+{% comment %}
+  Announcement bar (header group). Up to three short messages, optional link per message.
+  Desktop: messages side by side. Mobile: first message only, or a horizontally scrollable strip.
+  No autoplay carousel by design.
+{% endcomment %}
+
+{{ 'section-header.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign scheme = section.settings.color_scheme | default: 'scheme-3'
+  assign label = 'header.announcement.label' | t
+-%}
+
+{%- if section.blocks.size > 0 -%}
+  <div
+    class="announcement-bar scheme color-{{ scheme }}"
+    role="region"
+    aria-label="{{ label | escape }}"
+    data-section-id="{{ section.id }}"
+  >
+    <div class="page-width">
+      <ul
+        class="announcement-bar__list announcement-bar__list--{{ section.blocks.size }}"
+        role="list"
+        data-mobile="{{ section.settings.mobile_layout }}"
+      >
+        {%- for block in section.blocks -%}
+          <li class="announcement-bar__item" {{ block.shopify_attributes }}>
+            {%- if block.settings.link != blank -%}
+              <a class="announcement-bar__message announcement-bar__message--link" href="{{ block.settings.link }}">
+                <span>{{ block.settings.text }}</span>
+                {%- render 'icon', name: 'arrow-right', class: 'announcement-bar__arrow' -%}
+              </a>
+            {%- else -%}
+              <p class="announcement-bar__message">{{ block.settings.text }}</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Ankündigungsleiste",
+  "tag": "div",
+  "class": "section-announcement-bar",
+  "max_blocks": 3,
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-3"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobil-Darstellung",
+      "options": [
+        { "value": "first", "label": "Nur erste Meldung" },
+        { "value": "scroll", "label": "Alle, horizontal scrollbar" }
+      ],
+      "default": "scroll"
+    },
+    {
+      "type": "paragraph",
+      "content": "Kein automatisch wechselndes Karussell – alle Meldungen bleiben lesbar. Fett markierter Text erscheint in der Linkfarbe des Farbschemas."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "Meldung",
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "Board-Builder: <strong>dein Setup in 6 Schritten</strong>"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Mit Link wird die ganze Meldung verlinkt – dann keine Links im Text verwenden."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Ankündigungsleiste",
+      "blocks": [
+        { "type": "announcement" }
+      ]
+    }
+  ]
+}
+{% endschema %}
