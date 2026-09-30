@@ -9,7 +9,7 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests",
-  testIgnore: ["**/global-setup.ts", "**/fixtures.ts"],
+  testIgnore: ["**/global-setup.ts", "**/fixtures.ts", "**/unit/**"],
   timeout: 30_000,
   retries: 1,
   reporter: [["list"], ["html", { open: "never" }]],

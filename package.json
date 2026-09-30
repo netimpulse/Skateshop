@@ -1,19 +1,21 @@
 {
-  "name": "shopify-theme-template",
-  "version": "0.1.0",
+  "name": "skateshop-theme",
+  "version": "1.0.0",
   "private": true,
-  "description": "Template fuer neue Shopify-Theme-Repos mit integriertem Visual-QA-Workflow (Shopify CLI + Playwright).",
+  "type": "module",
+  "description": "Shopify OS 2.0 Theme für einen Skateboard-Shop mit Board-Builder, inkl. Visual-QA-Workflow (Shopify CLI + Playwright).",
   "scripts": {
+    "validate": "node scripts/validate-theme.mjs",
+    "locales:merge": "node scripts/merge-locales.mjs",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "theme:check": "shopify theme check",
-    "theme:push:dev": "shopify theme push -e development --unpublished",
-    "theme:push:prod": "shopify theme push -e production",
+    "theme:push:dev": "shopify theme push -e development",
     "qa:visual": "playwright test",
-    "qa:full": "npm run theme:check && npm run qa:visual",
-    "playwright:install": "playwright install chromium"
+    "qa:full": "npm run validate && npm run theme:check && npm run test:unit && npm run qa:visual",
+    "demo:seed": "NODE_USE_ENV_PROXY=1 node scripts/demo-data/seed.mjs",
+    "demo:cleanup": "NODE_USE_ENV_PROXY=1 node scripts/demo-data/cleanup.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
-    "@shopify/cli": "^3.66.0",
-    "@shopify/theme": "^3.66.0"
+    "@playwright/test": "1.56.1"
   }
 }

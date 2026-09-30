@@ -28,5 +28,9 @@ ignore = [
   ".gitignore",
   ".claude/**",
   ".mcp.json",
-  "CLAUDE.md"
+  "CLAUDE.md",
+  "scripts/**",
+  "docs/**",
+  ".werkbank-tmp/**",
+  "README.md"
 ]
