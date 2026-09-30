@@ -1,0 +1,480 @@
+/*
+ * Search dialog (header) + predictive search results (sections/predictive-search.liquid).
+ * The dialog is a top sheet: full width, slides down, results scroll inside the dialog.
+ */
+
+predictive-search,
+.predictive-search {
+  display: block;
+}
+
+/* ================================================================ Dialog shell */
+.search-modal {
+  position: fixed;
+  inset: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.search-modal[open] {
+  animation: search-modal-in var(--duration-medium) var(--ease-out);
+}
+
+.search-modal::backdrop {
+  background: rgba(28, 29, 27, 0.45);
+  animation: fade-in var(--duration-medium) var(--ease-out);
+}
+
+.search-modal__inner {
+  padding-block: var(--space-xs) var(--space-xl);
+}
+
+@media (min-width: 750px) {
+  .search-modal {
+    height: auto;
+    border-bottom: var(--border-width) solid var(--color-text);
+  }
+
+  .search-modal__inner {
+    padding-block: var(--space-m) var(--space-2xl);
+  }
+}
+
+/* ================================================================ Form */
+.search-modal__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  min-height: 3rem;
+}
+
+.search-modal__label {
+  color: var(--color-text-muted);
+}
+
+.search-modal__close {
+  margin-inline-end: -0.625rem;
+}
+
+.search-modal__field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-block-start: var(--space-2xs);
+  padding-block: var(--space-2xs);
+  border-bottom: 2px solid var(--color-text);
+  transition: border-color var(--duration-short);
+}
+
+.search-modal__field:focus-within {
+  border-bottom-color: var(--color-link);
+}
+
+.search-modal__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.search-modal__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.25rem 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: var(--font-body-weight-semibold);
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-modal__input:focus-visible {
+  outline: none;
+}
+
+.search-modal__input::placeholder {
+  color: var(--color-text-muted);
+  font-weight: var(--font-body-weight);
+  opacity: 1;
+}
+
+.search-modal__input::-webkit-search-cancel-button,
+.search-modal__input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-modal__spinner {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--color-text-muted);
+}
+
+.search-modal__clear .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.search-modal__submit {
+  flex: none;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+}
+
+.search-modal__submit-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (min-width: 750px) {
+  .search-modal__input {
+    font-size: clamp(1.5rem, 1rem + 1.4vw, 2.25rem);
+  }
+
+  .search-modal__submit {
+    padding-inline: 1.25rem;
+  }
+
+  .search-modal__submit-label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- Popular searches (empty state) */
+.search-modal__popular {
+  display: grid;
+  gap: var(--space-s);
+  margin-block-start: var(--space-l);
+}
+
+.search-modal__popular-title {
+  color: var(--color-text-muted);
+}
+
+.search-modal__chips,
+.predictive-search__queries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.search-modal__chip,
+.predictive-search__query {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: var(--space-m);
+  border: var(--border-width) solid var(--color-text);
+  border-radius: var(--radius-button);
+  color: inherit;
+  font-family: var(--font-mono-family);
+  font-weight: var(--font-mono-weight);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color var(--duration-short),
+    color var(--duration-short);
+}
+
+.search-modal__chip:hover,
+.predictive-search__query:hover {
+  background-color: var(--color-text);
+  color: var(--color-background);
+}
+
+.predictive-search__query mark {
+  background: none;
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-1);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+}
+
+@media (min-width: 990px) {
+  .search-modal__chip,
+  .predictive-search__query {
+    min-height: 2.5rem;
+  }
+}
+
+/* ================================================================ Results */
+.predictive-search__results {
+  margin-block-start: var(--space-l);
+  transition: opacity var(--duration-short);
+}
+
+.predictive-search__results[aria-busy='true'] {
+  opacity: 0.55;
+}
+
+.predictive-search__group + .predictive-search__group {
+  margin-block-start: var(--space-l);
+}
+
+.predictive-search__heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-block-end: var(--space-s);
+  padding-block-end: var(--space-xs);
+  border-bottom: var(--border-width) solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.predictive-search__count {
+  color: var(--color-link);
+}
+
+.predictive-search__layout {
+  display: grid;
+  gap: var(--space-l);
+  margin-block-start: var(--space-l);
+}
+
+.predictive-search__group--queries + .predictive-search__layout {
+  margin-block-start: var(--space-l);
+}
+
+.predictive-search__content > .predictive-search__layout:first-child {
+  margin-block-start: 0;
+}
+
+/* ---------------------------------------------------------------- Products (rows on mobile, cards on desktop) */
+.predictive-search__products {
+  display: grid;
+}
+
+.predictive-search__product-link {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: var(--space-m);
+  align-items: center;
+  padding-block: var(--space-s);
+  border-bottom: var(--border-width) solid var(--color-border);
+  color: inherit;
+  text-decoration: none;
+}
+
+.predictive-search__product-link:focus-visible {
+  outline-offset: 2px;
+}
+
+.predictive-search__thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-media);
+  background-color: var(--color-surface);
+}
+
+.predictive-search__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: var(--card-image-fit, contain);
+  transition: transform var(--duration-medium) var(--ease-out);
+}
+
+.predictive-search__thumb .placeholder-skate__label {
+  display: none;
+}
+
+.predictive-search__info {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.predictive-search__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+}
+
+.predictive-search__meta > span + span::before {
+  content: '·';
+  margin-inline-end: 0.5rem;
+}
+
+.predictive-search__title {
+  font-weight: var(--font-body-weight-semibold);
+  line-height: 1.3;
+}
+
+.predictive-search__product-link:hover .predictive-search__title {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-1);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+}
+
+.predictive-search__price {
+  font-size: var(--text-small);
+}
+
+@media (min-width: 990px) {
+  .predictive-search__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 17rem);
+    gap: var(--space-2xl);
+  }
+
+  .predictive-search__layout--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .predictive-search__products {
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: var(--space-l) var(--grid-gap);
+  }
+
+  .predictive-search__product-link {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-s);
+    padding-block: 0;
+    border-bottom: 0;
+  }
+
+  .predictive-search__product-link:hover .predictive-search__image {
+    transform: scale(1.04);
+  }
+}
+
+/* ---------------------------------------------------------------- Collections / pages */
+.predictive-search__rows {
+  display: grid;
+}
+
+.predictive-search__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  min-height: 2.75rem;
+  border-bottom: var(--border-width) solid var(--color-border);
+  color: inherit;
+  font-weight: var(--font-body-weight-semibold);
+  text-decoration: none;
+}
+
+.predictive-search__row:hover .predictive-search__row-title {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-1);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+}
+
+.predictive-search__row:focus-visible {
+  outline-offset: 2px;
+}
+
+.predictive-search__row-meta {
+  color: var(--color-text-muted);
+}
+
+.predictive-search__row-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* ---------------------------------------------------------------- Footer, empty state, messages */
+.predictive-search__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  margin-block-start: var(--space-xl);
+}
+
+.predictive-search__all {
+  width: 100%;
+}
+
+.predictive-search__hint {
+  display: none;
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 750px) {
+  .predictive-search__all {
+    width: auto;
+  }
+}
+
+@media (min-width: 990px) {
+  .predictive-search__hint {
+    display: block;
+  }
+}
+
+.predictive-search__empty,
+.predictive-search__message {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-s);
+  padding-block: var(--space-m);
+}
+
+.predictive-search__message p {
+  max-width: 40rem;
+}
+
+/* ================================================================ Motion */
+@keyframes search-modal-in {
+  from {
+    transform: translateY(-1.5rem);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-modal[open],
+  .search-modal::backdrop {
+    animation: none;
+  }
+
+  .predictive-search__image,
+  .predictive-search__results,
+  .search-modal__field,
+  .search-modal__chip,
+  .predictive-search__query {
+    transition: none;
+  }
+
+  .predictive-search__product-link:hover .predictive-search__image {
+    transform: none;
+  }
+}
