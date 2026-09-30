@@ -97,6 +97,12 @@
               elsif shop.shipping_policy.body != blank
                 assign content = shop.shipping_policy.body
                 assign page_link = shop.shipping_policy.url
+              else
+                assign shipping_page = pages['versand']
+                if shipping_page.content != blank
+                  assign content = shipping_page.content
+                  assign page_link = shipping_page.url
+                endif
               endif
             when 'custom'
               if block.settings.content != blank
@@ -288,7 +294,7 @@
           "type": "richtext",
           "id": "content",
           "label": "Text",
-          "info": "Leer = gewählte Seite, sonst Versandrichtlinie des Shops"
+          "info": "Leer = gewählte Seite, sonst Versandrichtlinie des Shops, sonst Seite „versand“"
         },
         {
           "type": "page",
