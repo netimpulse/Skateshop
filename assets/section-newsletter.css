@@ -1,0 +1,122 @@
+/* Newsletter (sections/newsletter.liquid). */
+.newsletter__box {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.newsletter__box--border {
+  gap: 0;
+  border: var(--border-width) solid var(--color-text);
+}
+
+.newsletter__box--border > * {
+  padding: var(--space-l) var(--space-m);
+}
+
+.newsletter__box--border > * + * {
+  border-block-start: var(--border-width) solid var(--color-text);
+}
+
+.newsletter__intro {
+  display: grid;
+  align-content: start;
+  gap: var(--space-m);
+}
+
+.newsletter__title {
+  font-size: calc(clamp(2.5rem, 1.6rem + 3.6vw, 4.75rem) * var(--font-heading-scale));
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  max-width: 12ch;
+}
+
+.newsletter__text {
+  max-width: 40ch;
+  color: var(--color-text-muted);
+}
+
+.newsletter__form-wrap {
+  display: grid;
+  align-content: center;
+}
+
+.newsletter__form {
+  display: grid;
+  gap: var(--space-m);
+}
+
+.newsletter__field {
+  gap: var(--space-xs);
+}
+
+.newsletter__row {
+  display: flex;
+  align-items: stretch;
+}
+
+.newsletter__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 3.5rem;
+  border-color: var(--color-text);
+  border-inline-end-width: 0;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+  font-size: 1rem;
+}
+
+.newsletter__input:focus-visible {
+  outline-offset: -3px;
+}
+
+.newsletter__submit {
+  flex: none;
+  min-height: 3.5rem;
+  padding-inline: var(--space-m);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.newsletter__message {
+  align-items: center;
+}
+
+.newsletter__privacy {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.newsletter__privacy a {
+  color: inherit;
+}
+
+@media (min-width: 750px) {
+  .newsletter__box {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2xl);
+  }
+
+  .newsletter__box--border {
+    gap: 0;
+  }
+
+  .newsletter__box--border > * {
+    padding: var(--space-2xl) var(--space-xl);
+  }
+
+  .newsletter__box--border > * + * {
+    border-block-start: 0;
+    border-inline-start: var(--border-width) solid var(--color-text);
+  }
+
+  .newsletter__submit {
+    padding-inline: var(--space-l);
+  }
+}
+
+@media (min-width: 990px) {
+  .newsletter__box--border > * {
+    padding: var(--space-3xl) var(--space-2xl);
+  }
+}

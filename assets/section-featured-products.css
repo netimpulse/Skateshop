@@ -1,0 +1,128 @@
+/* Featured products (sections/featured-products.liquid): grid, slider and horizontal card layouts.
+   Card styles come from component-product-card.css, the slider behaviour from <scroll-slider> in theme.js. */
+.featured-products--cols-2 { --fp-columns: 2; }
+.featured-products--cols-3 { --fp-columns: 3; }
+.featured-products--cols-4 { --fp-columns: 4; }
+.featured-products--cols-5 { --fp-columns: 5; }
+
+.featured-products__item {
+  display: flex;
+  min-width: 0;
+}
+
+.featured-products__item > .product-card {
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------- Grid */
+.featured-products--grid .featured-products__grid {
+  --grid-columns-mobile: 2;
+  --grid-columns-tablet: 3;
+  --grid-columns-desktop: var(--fp-columns, 4);
+  row-gap: var(--space-xl);
+}
+
+/* ---------------------------------------------------------------- Horizontal cards in a hairline grid */
+.featured-products--horizontal .featured-products__grid {
+  --grid-columns-mobile: 1;
+  --grid-columns-tablet: min(var(--fp-columns, 2), 2);
+  --grid-columns-desktop: var(--fp-columns, 2);
+  gap: 0;
+  border-block-start: var(--border-width) solid var(--color-border);
+  border-inline-start: var(--border-width) solid var(--color-border);
+}
+
+.featured-products--horizontal .product-card--horizontal {
+  border: 0;
+  border-inline-end: var(--border-width) solid var(--color-border);
+  border-block-end: var(--border-width) solid var(--color-border);
+  background: transparent;
+}
+
+.featured-products--horizontal .product-card--horizontal .product-card__media {
+  --media-ratio: 1 / 1;
+}
+
+.featured-products--horizontal .product-card__excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (min-width: 750px) {
+  .featured-products--horizontal .product-card--horizontal {
+    padding: var(--space-l);
+    gap: var(--space-xl);
+  }
+
+  .featured-products--horizontal .product-card__excerpt {
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* ---------------------------------------------------------------- Slider */
+/* Mobile: arrows below the heading block (right-aligned), so the heading keeps the full width. */
+.featured-products__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--space-m);
+}
+
+.featured-products__head .section-heading {
+  margin-block-end: var(--space-m);
+}
+
+.featured-products__controls {
+  justify-self: end;
+  margin-block-end: var(--space-m);
+}
+
+@media (min-width: 750px) {
+  .featured-products__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .featured-products__head .section-heading,
+  .featured-products__controls {
+    margin-block-end: var(--space-xl);
+  }
+}
+
+.featured-products__controls .icon-button {
+  transition:
+    background-color var(--duration-short),
+    color var(--duration-short);
+}
+
+.featured-products__controls .icon-button:not([disabled]):hover {
+  background-color: var(--color-text);
+  color: var(--color-background);
+}
+
+.featured-products__viewport {
+  max-width: calc(var(--page-width) + var(--page-margin) * 2);
+  margin-inline: auto;
+}
+
+.featured-products__track {
+  --scroller-item-tablet: calc((100% - var(--grid-gap) * 2) / 2.4);
+  --scroller-item-desktop: calc((100% - var(--grid-gap) * (var(--fp-columns, 4) - 1)) / var(--fp-columns, 4));
+  padding-block: var(--space-2xs) var(--space-l);
+}
+
+.featured-products__track:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ---------------------------------------------------------------- Editor-only note */
+.featured-products__editor-note {
+  margin-block-start: var(--space-m);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-products__controls .icon-button {
+    transition: none;
+  }
+}
