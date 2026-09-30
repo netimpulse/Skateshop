@@ -11,7 +11,21 @@
   "sections": {
     "main": {
       "type": "article",
-      "settings": {}
+      "settings": {
+        "show_breadcrumbs": true,
+        "heading_size": "h1",
+        "show_excerpt": true,
+        "show_date": true,
+        "show_author": true,
+        "show_reading_time": true,
+        "show_image": true,
+        "image_ratio": "16-9",
+        "drop_cap": true,
+        "show_tags": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 96
+      }
     }
   },
   "order": [
