@@ -51,9 +51,17 @@
         <span>{{ total_padded }}</span>
       </p>
       <p class="mega-menu__title h3">{{ link.title | escape }}</p>
+      {%- liquid
+        assign label_words = view_all_label | split: ' '
+        assign label_last = label_words | last
+        assign label_head_size = label_words.size | minus: 1
+      -%}
       <a href="{{ link.url }}" class="mega-menu__all link-mono">
-        <span>{{ view_all_label }}</span>
-        {%- render 'icon', name: 'arrow-right' -%}
+        {%- for word in label_words limit: label_head_size -%}{{ word }} {% endfor -%}
+        <span class="mega-menu__nowrap">
+          {{- label_last -}}
+          {%- render 'icon', name: 'arrow-right' -%}
+        </span>
       </a>
     </div>
 

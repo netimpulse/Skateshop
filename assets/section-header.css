@@ -465,7 +465,11 @@
   color: inherit;
 }
 
-/* The arrow follows the last word when the label wraps. */
+/* The arrow stays glued to the last word when the label wraps. */
+.mega-menu__nowrap {
+  white-space: nowrap;
+}
+
 .mega-menu__all .icon {
   display: inline-block;
   margin-inline-start: 0.375rem;
