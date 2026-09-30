@@ -90,6 +90,8 @@ const PLATFORM_NOISE = [
   /status of 404 \(Not Found\)$/i,
   /preview_bar|previewBar|admin-bar/i,
   /Failed to load resource: net::ERR_/i,
+  // Store throttling (Cloudflare/Shopify rate limit) – the theme handles it (e.g. builder retry button), not a theme error.
+  /status of 429 \(Too Many Requests\)/i,
 ];
 
 export function isPlatformNoise(message: string): boolean {

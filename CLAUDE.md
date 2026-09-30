@@ -488,7 +488,8 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   (`/products/<handle>.js`); ausverkaufte Zeilen bekommen `.is-unavailable`. Bei Fehlern nach Teil-Add baut `rollback()`
   alle Zeilen mit derselben `_build_id` zurück (Quelle `builder:silent` → Drawer bleibt zu).
   E2E (`tests/builder.spec.ts`): HTTP 429 auf `?view=builder-data` = Store-Drosselung → Test wird übersprungen, andere
-  Ladefehler lassen den Test fehlschlagen. Kompatibilitätsregeln nur in `board-builder-rules.js` ändern
+  Ladefehler lassen den Test fehlschlagen. Der „Erneut versuchen“-Button liegt in `[data-bb-status]` (nicht in der Liste
+  `[data-bb-list]`). `collectThemeErrors` (`tests/fixtures.ts`) wertet „status of 429“-Konsolenmeldungen als Plattform-Rauschen. Kompatibilitätsregeln nur in `board-builder-rules.js` ändern
   (+ Locale `builder.rules.*`). Regel-Toleranz/Riser-Schwelle zusätzlich als Section-Settings.
 - **Offen / To-do:** Search-&-Discovery-Filter für die Collection-Seiten legt der Händler an (Builder filtert clientseitig und
   braucht sie nicht).

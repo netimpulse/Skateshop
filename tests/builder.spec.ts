@@ -23,7 +23,7 @@ let dataThrottled = false;
 
 async function selectFirst(page: Page, preferFit = false) {
   const cards = page.locator(".bb-card__select:not([disabled])");
-  const loadError = page.locator("[data-bb-list] [data-bb-retry]");
+  const loadError = page.locator("[data-bb-status] [data-bb-retry]");
   await expect(cards.first().or(loadError)).toBeVisible();
   if (await loadError.isVisible()) {
     // Same policy as the page-load challenge: a throttled store is not a theme defect; any other load error fails.
@@ -161,7 +161,7 @@ test.describe("Board Builder", () => {
     const trucksData = /\/collections\/builder-trucks\?[^#]*view=builder-data/;
     await page.route(trucksData, (route) => route.fulfill({ status: 500, body: "" }));
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.locator("[data-bb-list] [data-bb-retry]")).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator("[data-bb-status] [data-bb-retry]")).toBeVisible({ timeout: 20_000 });
     await expect
       .poll(() =>
         page.evaluate(() => {
@@ -172,9 +172,11 @@ test.describe("Board Builder", () => {
       .toBe(true);
     await page.unroute(trucksData);
 
-    await page.locator("[data-bb-list] [data-bb-retry]").click();
+    const retry = page.locator("[data-bb-status] [data-bb-retry]");
+    await retry.click();
     await expect(page.locator("[data-bb-list]")).toHaveAttribute("aria-busy", "false", { timeout: 20_000 });
-    test.skip(dataThrottled, "Store drosselt die Builder-Daten (HTTP 429) – später erneut ausführen");
+    // Only a retry that itself got throttled is a skip; any other remaining error fails below.
+    if (await retry.isVisible()) test.skip(dataThrottled, "Store drosselt die Builder-Daten (HTTP 429) – später erneut ausführen");
     await expect(page.locator(".bb-card.is-selected")).toHaveCount(1);
     await expect(page.locator(".bb-legend__row.is-done")).toHaveCount(2);
   });
