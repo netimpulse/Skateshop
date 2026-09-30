@@ -1,0 +1,99 @@
+{% doc %}
+  Technical spec table ("blueprint" style) for skate parts. Rows depend on custom.builder_category
+  (fallback product.type): deck → width, length, wheelbase, concave, shape; trucks → axle width, height;
+  wheels → diameter, hardness; bearings → rating; griptape → style; hardware → length; riser → height.
+  Values come from the selected variant (variant metafield before product metafield). Rows without a value are
+  omitted; rows that only some variants fill are rendered hidden so product.js can reveal them ([data-spec]).
+  Renders nothing when there is no value at all.
+
+  @param {product} product - The product
+  @param {variant} [variant] - Selected variant (default: selected or first available)
+  @param {string} [heading] - Heading text (default: products.specs.heading)
+  @param {string} [heading_id] - id for the heading (aria-labelledby of the table)
+  @param {boolean} [show_sku] - Adds an SKU row
+  @param {string} [class] - Extra class
+
+  @example
+  {% render 'product-specs', product: product, variant: product.selected_or_first_available_variant %}
+{% enddoc %}
+
+{%- liquid
+  assign variant = variant | default: product.selected_or_first_available_variant
+  assign default_heading = 'products.specs.heading' | t
+  assign heading = heading | default: default_heading
+  assign heading_id = heading_id | default: 'ProductSpecs'
+
+  capture spec_keys
+    render 'product-kind', product: product, output: 'spec_keys'
+  endcapture
+  assign key_list = spec_keys | strip | split: ','
+  assign row_count = 0
+-%}
+
+{%- capture rows -%}
+  {%- for key in key_list -%}
+    {%- capture value -%}{%- render 'product-spec-value', product: product, variant: variant, key: key -%}{%- endcapture -%}
+    {%- assign value = value | strip -%}
+    {%- assign has_any = false -%}
+    {%- if value != blank -%}
+      {%- assign has_any = true -%}
+    {%- else -%}
+      {%- for other in product.variants -%}
+        {%- capture other_value -%}{%- render 'product-spec-value', product: product, variant: other, key: key -%}{%- endcapture -%}
+        {%- if other_value != blank -%}
+          {%- assign has_any = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {%- if has_any -%}
+      {%- assign row_count = row_count | plus: 1 -%}
+      {%- assign label_key = 'products.specs.' | append: key -%}
+      <tr
+        class="product-specs__row"
+        data-spec-row="{{ key }}"
+        {% if value == blank %}
+          hidden
+        {% endif %}
+      >
+        <th scope="row" class="product-specs__label">{{ label_key | t }}</th>
+        <td class="product-specs__value" data-spec="{{ key }}">{{ value }}</td>
+      </tr>
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if show_sku and product.variants.size > 0 -%}
+    {%- assign has_sku = false -%}
+    {%- for other in product.variants -%}
+      {%- if other.sku != blank -%}
+        {%- assign has_sku = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if has_sku -%}
+      {%- assign row_count = row_count | plus: 1 -%}
+      <tr
+        class="product-specs__row product-specs__row--sku"
+        data-spec-row="sku"
+        {% if variant.sku == blank %}
+          hidden
+        {% endif %}
+      >
+        <th scope="row" class="product-specs__label">{{ 'products.specs.sku' | t }}</th>
+        <td class="product-specs__value" data-spec="sku">{{ variant.sku | escape }}</td>
+      </tr>
+    {%- endif -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if row_count > 0 -%}
+  <div class="product-specs {{ class }}" data-product-specs data-testid="product-specs">
+    <h2 class="product-specs__heading eyebrow eyebrow--rule" id="{{ heading_id }}">{{ heading | escape }}</h2>
+    <table class="product-specs__table" aria-labelledby="{{ heading_id }}">
+      <tbody>
+        {{ rows }}
+      </tbody>
+    </table>
+  </div>
+{%- endif -%}

@@ -1,0 +1,25 @@
+{% doc %}
+  Prints the stock state of a variant for the delivery status: in_stock | low:<count> | backorder | sold_out | unavailable.
+  The exact inventory count is only exposed when it is at or below the low-stock threshold.
+
+  @param {variant} [variant] - The variant (blank = combination does not exist)
+  @param {number} [threshold] - Low-stock threshold (0 = never show "only X left")
+
+  @example
+  {%- capture state -%}{% render 'product-stock-state', variant: variant, threshold: 5 %}{%- endcapture -%}
+{% enddoc %}
+
+{%- liquid
+  assign threshold = threshold | default: 0
+  if variant == blank
+    echo 'unavailable'
+  elsif variant.available == false
+    echo 'sold_out'
+  elsif variant.inventory_management == 'shopify' and variant.inventory_quantity <= 0
+    echo 'backorder'
+  elsif variant.inventory_management == 'shopify' and variant.inventory_quantity <= threshold
+    echo 'low:' | append: variant.inventory_quantity
+  else
+    echo 'in_stock'
+  endif
+-%}

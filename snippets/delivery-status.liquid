@@ -1,0 +1,64 @@
+{% doc %}
+  Delivery status for the selected variant: in stock, only X left, backorder, sold out or unavailable.
+  All texts are stored as data attributes so product.js can switch the state on variant change without a fetch.
+  Empty text parameters fall back to the translations in products.delivery.*; "[count]" is replaced by the stock.
+
+  @param {variant} [variant] - Selected variant
+  @param {number} [threshold] - Low-stock threshold (0 = off)
+  @param {string} [in_stock_text] - Text for "in stock"
+  @param {string} [low_stock_text] - Text for "only [count] left"
+  @param {string} [backorder_text] - Text for "sold via backorder"
+  @param {string} [sold_out_text] - Text for "sold out"
+  @param {string} [class] - Extra class
+
+  @example
+  {% render 'delivery-status', variant: product.selected_or_first_available_variant, threshold: 5 %}
+{% enddoc %}
+
+{%- liquid
+  assign default_in_stock = 'products.delivery.in_stock' | t
+  assign default_low_stock = 'products.delivery.low_stock' | t
+  assign default_backorder = 'products.delivery.backorder' | t
+  assign default_sold_out = 'products.delivery.sold_out' | t
+  assign text_unavailable = 'products.delivery.unavailable' | t
+
+  assign text_in_stock = in_stock_text | default: default_in_stock
+  assign text_low_stock = low_stock_text | default: default_low_stock
+  assign text_backorder = backorder_text | default: default_backorder
+  assign text_sold_out = sold_out_text | default: default_sold_out
+
+  capture stock
+    render 'product-stock-state', variant: variant, threshold: threshold
+  endcapture
+  assign stock_parts = stock | strip | split: ':'
+  assign state = stock_parts[0]
+  assign count = stock_parts[1]
+
+  case state
+    when 'low'
+      assign text = text_low_stock | replace: '[count]', count
+    when 'backorder'
+      assign text = text_backorder
+    when 'sold_out'
+      assign text = text_sold_out
+    when 'unavailable'
+      assign text = text_unavailable
+    else
+      assign text = text_in_stock
+  endcase
+-%}
+
+<div
+  class="product-delivery {{ class }}"
+  data-product-delivery
+  data-state="{{ state }}"
+  data-testid="product-delivery"
+  data-text-in-stock="{{ text_in_stock | escape }}"
+  data-text-low="{{ text_low_stock | escape }}"
+  data-text-backorder="{{ text_backorder | escape }}"
+  data-text-sold-out="{{ text_sold_out | escape }}"
+  data-text-unavailable="{{ text_unavailable | escape }}"
+>
+  <span class="product-delivery__led" aria-hidden="true"></span>
+  <p class="product-delivery__text" data-delivery-text aria-live="polite">{{ text | escape }}</p>
+</div>

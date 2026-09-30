@@ -1,0 +1,290 @@
+{% doc %}
+  Product media gallery. Mobile: scroll-snap slider with counter and dots. Desktop: main image + thumbnails
+  (layout "thumbnails"), two-column image grid ("grid") or one column ("stack"). The selected variant's featured
+  media is rendered first (LCP image: eager + fetchpriority high, all others lazy). Every slide has a fixed
+  aspect ratio (no layout shift). Images open a <dialog> lightbox. Without media a shop-style placeholder is shown.
+  product.js (<product-gallery>) switches to variant.featured_media on `variant:changed`.
+
+  @param {product} product - The product
+  @param {string} section_id - Section id (unique ids, event scope)
+  @param {variant} [variant] - Selected variant
+  @param {string} [layout] - thumbnails | grid | stack
+  @param {string} [ratio] - square | portrait | adapt
+  @param {string} [fit] - contain | cover
+  @param {boolean} [lightbox] - Enables the zoom dialog
+  @param {string} [column] - large | medium (desktop column width, used for sizes)
+  @param {string} [kind] - Placeholder kind (see placeholder-skate)
+
+  @example
+  {% render 'product-gallery', product: product, section_id: section.id, layout: 'thumbnails', ratio: 'square' %}
+{% enddoc %}
+
+{%- liquid
+  assign layout = layout | default: 'thumbnails'
+  assign variant = variant | default: product.selected_or_first_available_variant
+  assign media_count = product.media.size
+  assign gallery_id = 'ProductGallery-' | append: section_id
+  assign lightbox_id = 'ProductLightbox-' | append: section_id
+
+  assign first_media = variant.featured_media | default: product.featured_media
+  assign first_pos = 0
+  for media in product.media
+    if media.id == first_media.id
+      assign first_pos = forloop.index0
+      break
+    endif
+  endfor
+
+  assign order = ''
+  if media_count > 0
+    assign last = media_count | minus: 1
+    for i in (0..last)
+      if i == 0
+        assign position = first_pos
+      elsif i <= first_pos
+        assign position = i | minus: 1
+      else
+        assign position = i
+      endif
+      assign order = order | append: position | append: ','
+    endfor
+  endif
+  assign order_list = order | split: ','
+
+  case ratio
+    when 'portrait'
+      assign ratio_value = '4 / 5'
+    when 'adapt'
+      assign ratio_value = first_media.preview_image.aspect_ratio | default: 1
+    else
+      assign ratio_value = '1 / 1'
+  endcase
+
+  if column == 'medium'
+    assign column_vw = 48
+  else
+    assign column_vw = 56
+  endif
+  assign sizes_full = '(min-width: 990px) ' | append: column_vw | append: 'vw, 100vw'
+  assign half_vw = column_vw | divided_by: 2
+  assign sizes_half = '(min-width: 990px) ' | append: half_vw | append: 'vw, 100vw'
+
+  assign image_count = 0
+  for media in product.media
+    if media.media_type == 'image'
+      assign image_count = image_count | plus: 1
+    endif
+  endfor
+
+  assign label_gallery = 'products.product.gallery' | t
+  assign label_zoom = 'products.product.gallery_zoom' | t
+  assign fit_class = ''
+  if fit == 'cover'
+    assign fit_class = ' product-gallery--cover'
+  endif
+-%}
+
+{% style %}
+  #{{ gallery_id }} { --gallery-ratio: {{ ratio_value }}; }
+{% endstyle %}
+
+<product-gallery
+  id="{{ gallery_id }}"
+  class="product-gallery product-gallery--{{ layout }}{{ fit_class }}{% if media_count > 1 %} product-gallery--multiple{% endif %}"
+  data-section-id="{{ section_id }}"
+  data-layout="{{ layout }}"
+  data-testid="product-gallery"
+>
+  <div class="product-gallery__viewport">
+    <ul class="product-gallery__track" role="list" aria-label="{{ label_gallery | escape }}" data-gallery-track>
+      {%- if media_count == 0 -%}
+        <li class="product-gallery__slide" data-gallery-slide>
+          <div class="product-gallery__media media">
+            {% render 'placeholder-skate', kind: kind, label: product.title %}
+          </div>
+        </li>
+      {%- endif -%}
+
+      {%- for position in order_list -%}
+        {%- liquid
+          assign media_index = position | plus: 0
+          assign media = product.media[media_index]
+          assign alt = media.alt | default: product.title
+          if forloop.first
+            assign loading = 'eager'
+            assign priority = 'high'
+          else
+            assign loading = 'lazy'
+            assign priority = 'auto'
+          endif
+          assign sizes = sizes_full
+          if layout == 'grid'
+            assign odd = media_count | modulo: 2
+            unless forloop.first and odd == 1
+              assign sizes = sizes_half
+            endunless
+          endif
+        -%}
+        <li
+          class="product-gallery__slide product-gallery__slide--{{ media.media_type }}"
+          data-gallery-slide
+          data-media-id="{{ media.id }}"
+        >
+          {%- case media.media_type -%}
+            {%- when 'image' -%}
+              {%- capture image -%}
+                {{
+                  media
+                  | image_url: width: 1800
+                  | image_tag:
+                    widths: '360, 540, 720, 900, 1080, 1296, 1512, 1800',
+                    sizes: sizes,
+                    loading: loading,
+                    fetchpriority: priority,
+                    alt: alt,
+                    class: 'product-gallery__image'
+                }}
+              {%- endcapture -%}
+              {%- if lightbox -%}
+                <button
+                  type="button"
+                  class="product-gallery__zoom"
+                  data-lightbox-open="{{ media.id }}"
+                  aria-haspopup="dialog"
+                  aria-controls="{{ lightbox_id }}"
+                >
+                  <span class="product-gallery__media media">{{ image }}</span>
+                  <span class="visually-hidden">{{ label_zoom }}</span>
+                  <span class="product-gallery__zoom-icon" aria-hidden="true">{% render 'icon', name: 'plus' %}</span>
+                </button>
+              {%- else -%}
+                <div class="product-gallery__media media">{{ image }}</div>
+              {%- endif -%}
+            {%- when 'video' -%}
+              <div class="product-gallery__media media product-gallery__media--video">
+                {{ media | video_tag: image_size: '1200x', controls: true, preload: 'none', playsinline: true }}
+              </div>
+            {%- when 'external_video' -%}
+              <div class="product-gallery__media media product-gallery__media--video">
+                {{ media | external_video_tag: class: 'product-gallery__iframe', loading: 'lazy' }}
+              </div>
+            {%- else -%}
+              <div class="product-gallery__media media">
+                {%- if media.preview_image -%}
+                  {{
+                    media.preview_image
+                    | image_url: width: 1400
+                    | image_tag: widths: '540, 900, 1400', sizes: sizes, loading: loading, alt: alt, class: 'product-gallery__image'
+                  }}
+                {%- else -%}
+                  {% render 'placeholder-skate', kind: kind, label: product.title %}
+                {%- endif -%}
+              </div>
+          {%- endcase -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+
+  {%- if media_count > 1 -%}
+    <div class="product-gallery__controls">
+      <p class="product-gallery__counter label-mono" aria-hidden="true">
+        <span data-gallery-current>01</span>
+        <span class="product-gallery__counter-sep">/</span>
+        <span>{% if media_count < 10 %}0{% endif %}{{ media_count }}</span>
+      </p>
+      <div class="product-gallery__dots">
+        {%- for position in order_list -%}
+          <button
+            type="button"
+            class="product-gallery__dot"
+            data-gallery-dot="{{ forloop.index0 }}"
+            aria-label="{{ 'products.product.gallery_show' | t: index: forloop.index, total: media_count }}"
+            {% if forloop.first %}
+              aria-current="true"
+            {% endif %}
+          ></button>
+        {%- endfor -%}
+      </div>
+      <div class="product-gallery__arrows">
+        <button type="button" class="product-gallery__arrow" data-gallery-prev aria-label="{{ 'accessibility.previous_slide' | t }}" disabled>
+          {%- render 'icon', name: 'arrow-left' -%}
+        </button>
+        <button type="button" class="product-gallery__arrow" data-gallery-next aria-label="{{ 'accessibility.next_slide' | t }}">
+          {%- render 'icon', name: 'arrow-right' -%}
+        </button>
+      </div>
+    </div>
+
+    {%- if layout == 'thumbnails' -%}
+      <ul class="product-gallery__thumbs" role="list">
+        {%- for position in order_list -%}
+          {%- liquid
+            assign media_index = position | plus: 0
+            assign media = product.media[media_index]
+          -%}
+          <li>
+            <button
+              type="button"
+              class="product-gallery__thumb"
+              data-gallery-thumb="{{ forloop.index0 }}"
+              aria-label="{{ 'products.product.gallery_show' | t: index: forloop.index, total: media_count }}"
+              {% if forloop.first %}
+                aria-current="true"
+              {% endif %}
+            >
+              {%- if media.preview_image -%}
+                {{
+                  media.preview_image
+                  | image_url: width: 240
+                  | image_tag: widths: '120, 180, 240', sizes: '6rem', loading: 'lazy', alt: '', class: 'product-gallery__thumb-image'
+                }}
+              {%- endif -%}
+              {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+                <span class="product-gallery__thumb-badge">{% render 'icon', name: 'play' %}</span>
+              {%- endif -%}
+            </button>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if lightbox and image_count > 0 -%}
+    <dialog
+      id="{{ lightbox_id }}"
+      class="product-lightbox scheme color-scheme-1"
+      aria-label="{{ label_gallery | escape }}"
+      data-lightbox
+    >
+      <div class="product-lightbox__bar">
+        <p class="product-lightbox__title label-mono">{{ product.title | escape }}</p>
+        <button type="button" class="icon-button product-lightbox__close" data-dialog-close aria-label="{{ 'accessibility.close' | t }}">
+          {%- render 'icon', name: 'close' -%}
+        </button>
+      </div>
+      <ul class="product-lightbox__list" role="list">
+        {%- for position in order_list -%}
+          {%- liquid
+            assign media_index = position | plus: 0
+            assign media = product.media[media_index]
+          -%}
+          {%- if media.media_type == 'image' -%}
+            <li class="product-lightbox__item" data-lightbox-item="{{ media.id }}">
+              {{
+                media
+                | image_url: width: 2400
+                | image_tag:
+                  widths: '900, 1200, 1600, 2000, 2400',
+                  sizes: 'min(100vw, 1400px)',
+                  loading: 'lazy',
+                  alt: media.alt,
+                  class: 'product-lightbox__image'
+              }}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </dialog>
+  {%- endif -%}
+</product-gallery>
