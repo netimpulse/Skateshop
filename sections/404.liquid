@@ -19,7 +19,10 @@
   if heading == blank
     assign heading = '404.heading' | t
   endif
-  assign display_code = section.settings.display_text | default: '404'
+  assign display_code = section.settings.display_text
+  if display_code == blank
+    assign display_code = '404.title' | t
+  endif
 
   assign menu = section.settings.menu
   assign builder_page = section.settings.builder_page
@@ -33,7 +36,10 @@
 >
   <div class="page-width">
     <div class="content-404__inner">
-      <p class="content-404__eyebrow eyebrow eyebrow--rule">{{ '404.eyebrow' | t }}</p>
+      <p class="content-404__eyebrow eyebrow eyebrow--rule">
+        <span class="eyebrow__index">{{ '404.title' | t }}</span>
+        <span>{{ '404.not_found' | t }}</span>
+      </p>
 
       <p class="content-404__code" aria-hidden="true">
         <span class="content-404__code-text" data-text="{{ display_code | escape }}">{{ display_code | escape }}</span>
