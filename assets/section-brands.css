@@ -231,14 +231,11 @@
 /* ================================================================ Letter groups */
 .brands-group {
   display: grid;
-  gap: var(--space-m);
-  padding-block: var(--space-l) var(--space-xl);
-  border-top: var(--border-width) solid var(--color-border);
+  align-content: start;
+  gap: var(--space-s);
+  padding-block: var(--space-m) var(--space-xl);
+  border-top: var(--border-width) solid var(--color-text);
   scroll-margin-top: calc(var(--header-height) + var(--space-m));
-}
-
-.brands-group:first-child {
-  border-top: 0;
 }
 
 .brands-group:target .brands-group__letter {
@@ -253,7 +250,7 @@
 
 .brands-group__letter {
   min-width: 1ch;
-  font-size: clamp(2.75rem, 2rem + 2.6vw, 4.75rem);
+  font-size: clamp(2.5rem, 2rem + 2vw, 4rem);
   line-height: 0.85;
   letter-spacing: -0.03em;
 }
@@ -293,13 +290,12 @@
     transform var(--duration-short) var(--ease-out);
 }
 
-/* List layout: names in columns, hairline under each entry */
-.brands-list--list .brands-group__list {
-  columns: 2;
-  column-gap: var(--grid-gap);
+/* List layout: letter groups flow through columns like a printed register */
+.brands-list--list .brands-register__groups {
+  column-gap: var(--space-2xl);
 }
 
-.brands-list--list .brands-group__item {
+.brands-list--list .brands-group {
   break-inside: avoid;
 }
 
@@ -327,7 +323,7 @@
   transform: none;
 }
 
-/* Grid layout: bordered tiles */
+/* Grid layout: one row per letter, brands as bordered tiles */
 .brands-list--grid .brands-group__list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -367,8 +363,8 @@
 }
 
 @media (min-width: 750px) {
-  .brands-list--list .brands-group__list {
-    columns: 3;
+  .brands-list--list .brands-register__groups {
+    columns: 2;
   }
 
   .brands-list--grid .brands-group__list {
@@ -377,27 +373,12 @@
 }
 
 @media (min-width: 990px) {
-  .brands-group {
-    padding-block: var(--space-xl) var(--space-2xl);
-  }
-
-  .brands-list--list .brands-group {
-    grid-template-columns: minmax(8rem, 2fr) minmax(0, 10fr);
-    gap: var(--space-2xl);
-  }
-
-  .brands-list--list .brands-group__head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-xs);
-  }
-
-  .brands-list--list .brands-group__top {
-    margin-inline-start: 0;
-  }
-
-  .brands-list--list .brands-group__list {
+  .brands-list--list .brands-register__groups {
     columns: var(--brands-columns, 4);
+  }
+
+  .brands-list--grid .brands-group {
+    padding-block: var(--space-l) var(--space-2xl);
   }
 
   .brands-list--grid .brands-group__list {

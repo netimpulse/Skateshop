@@ -127,6 +127,9 @@ test.describe("Inhaltsseiten", () => {
     const phone = form.locator('input[type="tel"]');
     if ((await phone.count()) > 0) expect(await phone.getAttribute("required")).toBeNull();
 
+    await expectNoHorizontalOverflow(page);
+    await shot(page, info.project.name, "contact");
+
     // Empty submit is blocked by the browser (no request is sent – the form is never really submitted).
     const before = page.url();
     await form.locator('button[type="submit"]').click();
@@ -136,9 +139,6 @@ test.describe("Inhaltsseiten", () => {
     ).toBe(true);
     await expect(form.locator(":invalid").first()).toBeFocused();
     expect(page.url()).toBe(before);
-
-    await expectNoHorizontalOverflow(page);
-    await shot(page, info.project.name, "contact");
     expect(errors, errors.join("\n")).toEqual([]);
   });
 

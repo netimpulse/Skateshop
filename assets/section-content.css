@@ -21,7 +21,7 @@
   align-items: center;
   min-height: 2.25rem;
   padding: 0.35rem 0.8rem;
-  border: var(--border-width) solid rgba(var(--color-text-rgb), 0.25);
+  border: var(--border-width) solid rgb(var(--color-text-rgb) / 0.25);
   border-radius: var(--radius-button);
   font-family: var(--font-mono-family);
   font-weight: var(--font-mono-weight);
@@ -369,6 +369,11 @@
   position: relative;
 }
 
+/* The image snippet renders a link (<a class="media">) when given a url – make it a sized box. */
+.content-card__media > .media {
+  display: block;
+}
+
 .content-card__media .media > img {
   transition: transform var(--duration-long) var(--ease-out);
 }
@@ -490,6 +495,8 @@
   gap: var(--space-m);
   max-width: 56rem;
   margin-block-end: var(--space-2xl);
+  /* Left edge flush with the 42rem reading column, headline may run wider to the right. */
+  margin-inline: max(0px, calc((100% - 42rem) / 2)) auto;
 }
 
 .content-article__kicker {
