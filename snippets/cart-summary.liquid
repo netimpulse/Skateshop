@@ -1,0 +1,74 @@
+{% doc %}
+  Cart totals and checkout (drawer footer and cart page aside): items subtotal and cart-level discounts
+  (only when present), subtotal, taxes/shipping hint, optional order note (settings.cart_show_note,
+  saved via cart/update.js by cart-drawer.js) and the checkout button (name="checkout" in the cart form).
+
+  @param {string} id_prefix - Unique id prefix (section id)
+  @param {string} form_id - Id of the cart form (action routes.cart_url)
+  @param {boolean} [show_view_cart] - Show the "view cart" link (drawer)
+
+  @example
+  {% render 'cart-summary', id_prefix: section.id, form_id: form_id, show_view_cart: true %}
+{% enddoc %}
+
+<div class="cart-summary" data-testid="cart-summary">
+  <dl class="cart-summary__rows">
+    {%- if cart.cart_level_discount_applications.size > 0 -%}
+      <div class="cart-summary__row">
+        <dt>{{ 'cart.summary.items' | t }}</dt>
+        <dd>{% render 'cart-money', amount: cart.items_subtotal_price %}</dd>
+      </div>
+      {%- for discount in cart.cart_level_discount_applications -%}
+        <div class="cart-summary__row cart-summary__row--discount">
+          <dt>{{ discount.title | escape }}</dt>
+          <dd>−{% render 'cart-money', amount: discount.total_allocated_amount %}</dd>
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+    <div class="cart-summary__row cart-summary__row--total">
+      <dt>{{ 'cart.summary.subtotal' | t }}</dt>
+      <dd data-testid="cart-subtotal">{% render 'cart-money', amount: cart.total_price %}</dd>
+    </div>
+  </dl>
+
+  <p class="cart-summary__taxes">
+    {%- if cart.taxes_included -%}
+      {{ 'cart.summary.taxes_included' | t }}
+    {%- else -%}
+      {{ 'cart.summary.taxes_excluded' | t }}
+    {%- endif -%}
+  </p>
+
+  {%- if settings.cart_show_note -%}
+    {%- assign note_placeholder = 'cart.summary.note_placeholder' | t -%}
+    <details class="cart-summary__note"{% if cart.note != blank %} open{% endif %}>
+      <summary class="cart-summary__note-toggle label-mono">
+        {{- 'cart.summary.note' | t -}}
+        {%- render 'icon', name: 'chevron-down' -%}
+      </summary>
+      <label class="visually-hidden" for="CartNote-{{ id_prefix }}">{{ 'cart.summary.note' | t }}</label>
+      <textarea
+        class="field__textarea cart-summary__note-input"
+        id="CartNote-{{ id_prefix }}"
+        name="note"
+        form="{{ form_id }}"
+        rows="3"
+        maxlength="500"
+        placeholder="{{ note_placeholder | escape }}"
+        data-cart-note
+        data-focus-id="note"
+      >{{ cart.note | escape }}</textarea>
+    </details>
+  {%- endif -%}
+
+  <button type="submit" name="checkout" form="{{ form_id }}" class="button button--full cart-summary__checkout" data-testid="cart-checkout">
+    {%- render 'icon', name: 'lock' -%}
+    {{- 'cart.checkout' | t -}}
+  </button>
+
+  {%- if show_view_cart -%}
+    <a href="{{ routes.cart_url }}" class="cart-summary__view link-mono" data-testid="cart-view">
+      {{- 'cart.summary.view_cart' | t -}}
+    </a>
+  {%- endif -%}
+</div>

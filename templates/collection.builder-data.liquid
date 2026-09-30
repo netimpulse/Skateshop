@@ -1,0 +1,118 @@
+{%- layout none -%}
+{%- comment -%}
+  Board builder data endpoint: GET {collection.url}?view=builder-data&page=n
+  Returns the products of a builder step collection as JSON (contract v1, see CLAUDE.md "Board Builder").
+  Prices in cents; formatted prices from the store's money format. Specs: product metafields,
+  variant specs only when the variant metafield is set.
+{%- endcomment -%}
+{%- paginate collection.products by 50 -%}
+{
+  "v": 1,
+  "collection": {
+    "handle": {{ collection.handle | json }},
+    "title": {{ collection.title | json }},
+    "url": {{ collection.url | json }}
+  },
+  "page": {{ paginate.current_page | default: 1 }},
+  "pages": {{ paginate.pages | default: 1 }},
+  "count": {{ collection.products_count | default: 0 }},
+  "products": [
+    {%- for product in collection.products -%}
+      {%- liquid
+        assign meta = product.metafields.custom
+        assign image = product.featured_media.preview_image
+        assign image2 = nil
+        for media in product.media
+          if media.media_type == 'image' and media.id != product.featured_media.id
+            assign image2 = media.preview_image
+            break
+          endif
+        endfor
+        assign preview_color = meta.preview_color.value | append: ''
+        assign layer = meta.preview_layer.value
+      -%}
+      {
+        "id": {{ product.id }},
+        "handle": {{ product.handle | json }},
+        "title": {{ product.title | json }},
+        "vendor": {{ product.vendor | json }},
+        "type": {{ product.type | json }},
+        "url": {{ product.url | json }},
+        "available": {{ product.available | json }},
+        "category": {{ meta.builder_category.value | json }},
+        "price_min": {{ product.price_min }},
+        "price_min_fmt": {{ product.price_min | money | strip_html | json }},
+        "compare_at_min": {% if product.compare_at_price_min > product.price_min %}{{ product.compare_at_price_min }}{% else %}null{% endif %},
+        "image": {% if image -%}
+          {%- capture srcset -%}
+            {{ image | image_url: width: 300 }} 300w, {{ image | image_url: width: 450 }} 450w, {{ image | image_url: width: 600 }} 600w, {{ image | image_url: width: 900 }} 900w
+          {%- endcapture -%}
+          {
+            "src": {{ image | image_url: width: 600 | json }},
+            "srcset": {{ srcset | strip | json }},
+            "alt": {{ image.alt | default: product.title | json }},
+            "w": {{ image.width | default: 600 }},
+            "h": {{ image.height | default: 750 }}
+          }
+        {%- else -%}null{%- endif %},
+        "image2": {% if image2 %}{{ image2 | image_url: width: 600 | json }}{% else %}null{% endif %},
+        "preview": {
+          "layer": {% if layer %}{{ layer | image_url: width: 1600 | json }}{% else %}null{% endif %},
+          "layerRatio": {% if layer %}{{ layer.aspect_ratio | default: 0 }}{% else %}null{% endif %},
+          "color": {{ preview_color | json }}
+        },
+        "options": {{ product.options | json }},
+        "specs": {
+          "deck_width": {{ meta.deck_width.value | json }},
+          "deck_length": {{ meta.deck_length.value | json }},
+          "wheelbase": {{ meta.wheelbase.value | json }},
+          "concave": {{ meta.concave.value | json }},
+          "deck_shape": {{ meta.deck_shape.value | json }},
+          "truck_width": {{ meta.truck_width.value | json }},
+          "truck_height": {{ meta.truck_height.value | json }},
+          "wheel_size": {{ meta.wheel_size.value | json }},
+          "wheel_hardness": {{ meta.wheel_hardness.value | json }},
+          "bearing_rating": {{ meta.bearing_rating.value | json }},
+          "grip_style": {{ meta.grip_style.value | json }},
+          "hardware_length": {{ meta.hardware_length.value | json }},
+          "riser_height": {{ meta.riser_height.value | json }}
+        },
+        "variants": [
+          {%- for variant in product.variants -%}
+            {%- liquid
+              assign vmeta = variant.metafields.custom
+              assign variant_color = vmeta.preview_color.value | append: ''
+              assign variant_image = variant.featured_media.preview_image
+              assign variant_layer = vmeta.preview_layer.value
+            -%}
+            {
+              "id": {{ variant.id }},
+              "title": {{ variant.title | json }},
+              "available": {{ variant.available | json }},
+              "price": {{ variant.price }},
+              "price_fmt": {{ variant.price | money | strip_html | json }},
+              "compare_at": {% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price }}{% else %}null{% endif %},
+              "options": {{ variant.options | json }},
+              "image": {% if variant_image %}{{ variant_image | image_url: width: 600 | json }}{% else %}null{% endif %},
+              "specs": {
+                {%- assign spec_written = false -%}
+                {%- if vmeta.deck_width.value != blank -%}"deck_width": {{ vmeta.deck_width.value | json }}{%- assign spec_written = true -%}{%- endif -%}
+                {%- if vmeta.deck_length.value != blank -%}{% if spec_written %},{% endif %}"deck_length": {{ vmeta.deck_length.value | json }}{%- assign spec_written = true -%}{%- endif -%}
+                {%- if vmeta.wheelbase.value != blank -%}{% if spec_written %},{% endif %}"wheelbase": {{ vmeta.wheelbase.value | json }}{%- assign spec_written = true -%}{%- endif -%}
+                {%- if vmeta.truck_width.value != blank -%}{% if spec_written %},{% endif %}"truck_width": {{ vmeta.truck_width.value | json }}{%- assign spec_written = true -%}{%- endif -%}
+                {%- if vmeta.wheel_size.value != blank -%}{% if spec_written %},{% endif %}"wheel_size": {{ vmeta.wheel_size.value | json }}{%- assign spec_written = true -%}{%- endif -%}
+                {%- if vmeta.hardware_length.value != blank -%}{% if spec_written %},{% endif %}"hardware_length": {{ vmeta.hardware_length.value | json }}{%- endif -%}
+              },
+              "preview": {
+                "color": {{ variant_color | json }},
+                "layer": {% if variant_layer %}{{ variant_layer | image_url: width: 1600 | json }}{% else %}null{% endif %},
+                "layerRatio": {% if variant_layer %}{{ variant_layer.aspect_ratio | default: 0 }}{% else %}null{% endif %}
+              }
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}
+{%- endpaginate -%}

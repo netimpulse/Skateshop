@@ -1,0 +1,96 @@
+{
+  "sections": {
+    "main": {
+      "type": "board-builder",
+      "blocks": {
+        "step_deck": {
+          "type": "step",
+          "settings": {
+            "part": "deck",
+            "label": "Deck",
+            "title": "Wähle dein Deck",
+            "intro": "Die Deckbreite bestimmt alles Weitere: Schultergröße und Style entscheiden – 8.0\" bis 8.25\" für Street, 8.5\"+ für Transition.",
+            "collection": "builder-decks",
+            "filters": "",
+            "required": true
+          }
+        },
+        "step_trucks": {
+          "type": "step",
+          "settings": {
+            "part": "trucks",
+            "label": "Trucks",
+            "title": "Wähle deine Achsen",
+            "intro": "Die Achsbreite sollte ungefähr der Deckbreite entsprechen – so stehen die Rollen bündig unter der Kante.",
+            "collection": "builder-trucks",
+            "filters": "",
+            "required": true
+          }
+        },
+        "step_wheels": {
+          "type": "step",
+          "settings": {
+            "part": "wheels",
+            "label": "Wheels",
+            "title": "Wähle deine Rollen",
+            "intro": "Klein und hart für Street und Technik, größer und weicher für Bowl, Cruisen und raue Böden.",
+            "collection": "builder-wheels",
+            "filters": "",
+            "required": true
+          }
+        },
+        "step_bearings": {
+          "type": "step",
+          "settings": {
+            "part": "bearings",
+            "label": "Bearings",
+            "title": "Wähle deine Kugellager",
+            "intro": "Ein Set enthält 8 Lager – genug für alle vier Rollen.",
+            "collection": "builder-bearings",
+            "filters": "",
+            "required": true
+          }
+        },
+        "step_griptape": {
+          "type": "step",
+          "settings": {
+            "part": "griptape",
+            "label": "Grip",
+            "title": "Wähle dein Griptape",
+            "intro": "Klassisch schwarz, farbig oder mit Muster – wir kleben es auf Wunsch direkt auf.",
+            "collection": "builder-griptape",
+            "filters": "",
+            "required": true
+          }
+        },
+        "step_hardware": {
+          "type": "step",
+          "settings": {
+            "part": "hardware",
+            "label": "Hardware",
+            "title": "Wähle deine Schrauben",
+            "intro": "7/8\" ohne Riser, ab 1\" mit Riser Pads.",
+            "collection": "builder-hardware",
+            "filters": "",
+            "required": true
+          }
+        }
+      },
+      "block_order": ["step_deck", "step_trucks", "step_wheels", "step_bearings", "step_griptape", "step_hardware"],
+      "settings": {
+        "eyebrow": "Konfigurator · 6 Schritte",
+        "heading": "BUILD YOUR BOARD.",
+        "intro": "<p>Sechs Schritte, geprüfte Kombinationen. Deine Auswahl bleibt gespeichert, auch wenn du zurückgehst.</p>",
+        "show_breadcrumbs": true,
+        "available_only": true,
+        "truck_tolerance": 250,
+        "riser_threshold": 56,
+        "riser_collection": "builder-risers",
+        "color_scheme": "scheme-1",
+        "padding_top": 32,
+        "padding_bottom": 0
+      }
+    }
+  },
+  "order": ["main"]
+}

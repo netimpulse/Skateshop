@@ -1,0 +1,233 @@
+{%- comment -%}
+  Community / Instagram grid: manually curated images (no third-party script), handle and profile link,
+  hover overlay with caption.
+{%- endcomment -%}
+{{ 'section-community-grid.css' | asset_url | stylesheet_tag }}
+{% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
+
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'Heading-' | append: section.id
+  assign columns_class = 'community-grid__list--' | append: s.desktop_layout | append: ' community-grid__list--mobile-' | append: s.mobile_layout
+  if s.desktop_layout == 'row'
+    assign sizes = '(min-width: 990px) 16vw, (min-width: 750px) 33vw, 50vw'
+  else
+    assign sizes = '(min-width: 990px) 33vw, (min-width: 750px) 33vw, 50vw'
+  endif
+-%}
+
+<section
+  class="section community-grid scheme color-{{ s.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-testid="home-community-grid"
+  {% if s.heading != blank %}
+    aria-labelledby="{{ heading_id }}"
+  {% endif %}
+>
+  <div class="page-width">
+    {% render 'section-heading',
+      eyebrow: s.eyebrow,
+      index: s.index,
+      heading: s.heading,
+      heading_id: heading_id,
+      text: s.text,
+      link_label: s.handle,
+      link_url: s.profile_url
+    %}
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="community-grid__list {{ columns_class }}" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign tile = block.settings
+            assign art_index = forloop.index0 | modulo: 6
+            case art_index
+              when 0
+                assign art = 'deck'
+              when 1
+                assign art = 'wheels'
+              when 2
+                assign art = 'complete'
+              when 3
+                assign art = 'trucks'
+              when 4
+                assign art = 'griptape'
+              else
+                assign art = 'bearings'
+            endcase
+            assign tile_url = tile.link | default: s.profile_url
+            assign fallback_label = 'sections.community.tile_label' | t: number: forloop.index
+          -%}
+          <li class="community-grid__item reveal" data-reveal-index="{{ forloop.index0 | modulo: 3 }}" {{ block.shopify_attributes }}>
+            {%- if tile_url != blank -%}
+              <a class="community-grid__tile" href="{{ tile_url }}">
+            {%- else -%}
+              <div class="community-grid__tile">
+            {%- endif -%}
+                <div class="community-grid__media media">
+                  {%- if tile.image != blank -%}
+                    {{
+                      tile.image
+                      | image_url: width: 900
+                      | image_tag:
+                        widths: '240, 360, 480, 640, 900',
+                        sizes: sizes,
+                        loading: 'lazy',
+                        class: 'community-grid__image',
+                        alt: tile.image.alt
+                    }}
+                  {%- else -%}
+                    {% render 'placeholder-skate', kind: art, label: fallback_label %}
+                  {%- endif -%}
+                </div>
+                <span class="community-grid__overlay">
+                  {%- render 'icon', name: 'instagram', class: 'community-grid__icon' -%}
+                  {%- if tile.caption != blank -%}
+                    <span class="community-grid__caption">{{ tile.caption | escape }}</span>
+                  {%- elsif tile.image.alt == blank and tile_url != blank -%}
+                    <span class="visually-hidden">{{ fallback_label }}</span>
+                  {%- endif -%}
+                </span>
+            {%- if tile_url != blank -%}
+              </a>
+            {%- else -%}
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Community",
+  "class": "section-community-grid",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "index",
+      "label": "Rubrik-Nummer",
+      "default": "08"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Rubrik",
+      "default": "Community"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Seen on the street"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "handle",
+      "label": "Handle",
+      "info": "Z. B. @kerbside.skate – wird als Link zum Profil gezeigt.",
+      "default": "@kerbside.skate"
+    },
+    {
+      "type": "url",
+      "id": "profile_url",
+      "label": "Profil-Link"
+    },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "Layout auf Desktop",
+      "options": [
+        { "value": "row", "label": "6 in einer Reihe" },
+        { "value": "grid", "label": "Raster 3 × 2" }
+      ],
+      "default": "row"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Layout auf Mobilgeräten",
+      "options": [
+        { "value": "grid", "label": "Raster, 2 Spalten" },
+        { "value": "scroller", "label": "Seitlich wischen" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Bild",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Bild",
+          "info": "Quadratisch empfohlen."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Leer = Profil-Link der Section."
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Bildunterschrift"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Community",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,5 +1,9 @@
 name: CI
 on: [push]
+# theme-check-action reports its result as a check run; the default read-only token cannot create one.
+permissions:
+  contents: read
+  checks: write
 jobs:
   theme-check:
     name: Theme Check

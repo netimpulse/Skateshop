@@ -8,7 +8,6 @@ Template-Repo fuer neue Shopify-Themes mit integriertem Visual-QA-Workflow
 - `package.json` – Dependencies & npm-Scripts
 - `playwright.config.ts` – Test-Runner Konfiguration mit hardcoded Preview-URL
 - `tests/_base.spec.ts` – Generische Visual-Tests, die fuer jeden Block laufen
-- `templates/page.qa-block-test.json` – QA-Page Inhalt (wird von Claude pro Block ueberschrieben)
 - `shopify.theme.toml` – Shopify CLI Config mit Dev-/Prod-Environments
 - `.gitignore`, `.env.example` – Standard-Boilerplate
 - `ignore`-Block in `shopify.theme.toml` – verhindert, dass QA-Dateien beim Production-Push landen
@@ -38,13 +37,6 @@ Skeleton-Theme-Dateien (sections, snippets, layout, assets) werden ueber den
    - `shopify.theme.toml` -> `theme = "..."`
    - `playwright.config.ts` -> `preview_theme_id=...` (Platzhalter `__THEME_ID__` ersetzen)
 
-## Im Dev-Store einmalig pro Theme
-
-Damit Playwright eine echte URL ansprechen kann, muss die QA-Page existieren:
-
-1. Online Store -> Pages -> "QA Block Test" anlegen
-2. Theme-Template auf `qa-block-test` setzen (rechte Seitenleiste)
-3. Page veroeffentlichen
 
 ## QA-Workflow pro Block
 

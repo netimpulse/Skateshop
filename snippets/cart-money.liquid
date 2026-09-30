@@ -1,0 +1,14 @@
+{% doc %}
+  Formats an amount in cents for the cart UI and respects the global "show currency code" setting.
+
+  @param {number} amount - Amount in cents
+
+  @example
+  {% render 'cart-money', amount: item.final_line_price %}
+{% enddoc %}
+
+{%- if settings.currency_code_enabled -%}
+  {{- amount | money_with_currency -}}
+{%- else -%}
+  {{- amount | money -}}
+{%- endif -%}

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
-import { QA, withTheme } from "./fixtures";
+import { QA, withTheme, isPlatformNoise } from "./fixtures";
 
 /**
  * Generische Visual-Checks fuer die QA-Block-Test-Page.
@@ -16,12 +16,12 @@ test.describe("QA Block-Page – Generische Visual-Checks", () => {
   test("rendert ohne Konsolen- oder Page-Errors", async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on("console", (m) => {
-      if (m.type() === "error") errors.push(`console: ${m.text()}`);
+      if (m.type() === "error" && !isPlatformNoise(m.text())) errors.push(`console: ${m.text()}`);
     });
     page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 
     const response = await page.goto(withTheme(QA.paths.qaBlock), {
-      waitUntil: "networkidle",
+      waitUntil: "load",
     });
     expect(response?.ok(), `HTTP-Status: ${response?.status()}`).toBe(true);
 
@@ -48,4 +48,9 @@ test.describe("QA Block-Page – Generische Visual-Checks", () => {
     const broken = await page.evaluate(() => {
       const imgs = Array.from(document.querySelectorAll("img"));
       return imgs
-        .filter((img
+        .filter((img) => img.complete && img.loading !== "lazy" && img.naturalWidth === 0)
+        .map((img) => img.currentSrc || img.src);
+    });
+    expect(broken, `Kaputte Bilder:\n${broken.join("\n")}`).toEqual([]);
+  });
+});

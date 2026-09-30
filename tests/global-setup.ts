@@ -16,7 +16,7 @@ import * as path from "path";
  * des shopify-visual-qa Skills.
  */
 export default async function globalSetup(_config: FullConfig) {
-  const STORE_BASE = "https://__STORE_DOMAIN__.myshopify.com";
+  const STORE_BASE = "https://dev-store-4ogqgshg.myshopify.com";
   const password = process.env.SHOPIFY_STOREFRONT_PASSWORD;
 
   const authDir = path.resolve("playwright/.auth");
@@ -29,11 +29,14 @@ export default async function globalSetup(_config: FullConfig) {
   // 1) Storefront-Passwort-Login (falls Passwort gesetzt UND aktiv)
   if (password) {
     try {
-      await page.goto(`${STORE_BASE}/password`, { waitUntil: "networkidle" });
+      await page.goto(`${STORE_BASE}/password`, { waitUntil: "domcontentloaded" });
       const hasPasswordForm = await page.locator('input[type="password"]').count() > 0;
       if (hasPasswordForm) {
-        await page.locator('input[type="password"]').first().fill(password);
-        await page.locator('form button[type="submit"]').first().click();
+        const toggle = page.locator('details:has(input[type="password"]):not([open]) > summary').first();
+        if (await toggle.count()) await toggle.click();
+        const form = page.locator('form:has(input[type="password"])').first();
+        await form.locator('input[type="password"]').fill(password);
+        await form.locator('[type="submit"]').first().click();
         await page.waitForURL((url) => !url.pathname.startsWith("/password"), { timeout: 15_000 });
       }
     } catch (e) {

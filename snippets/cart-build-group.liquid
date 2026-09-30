@@ -1,0 +1,88 @@
+{% doc %}
+  Groups all cart lines of one custom board build (same `_build_id`) into a framed block with the sticker
+  label "CUSTOM BOARD BUILD". Parts are sorted by `_build_pos` (1–7); lines with a missing/unknown position
+  follow in cart order. Builds can only be removed as a whole ("Build entfernen" = updates[key]=0 for every
+  line of the group – a real form, so it also works without JS) and edited in the builder.
+
+  @param {string} build_id - Validated build id (^b-[a-z0-9]{6,24}$)
+  @param {string} [builder_url] - Builder page for "Build bearbeiten" (default: /pages/skateboard-builder)
+  @param {string} [context] - drawer | page
+
+  @example
+  {% render 'cart-build-group', build_id: build_id, builder_url: section.settings.builder_url, context: 'drawer' %}
+{% enddoc %}
+
+{%- liquid
+  assign positions = '1,2,3,4,5,6,7' | split: ','
+  assign group_total = 0
+  assign part_count = 0
+  for item in cart.items
+    if item.properties['_build_id'] == build_id
+      assign group_total = group_total | plus: item.final_line_price
+      assign part_count = part_count | plus: 1
+    endif
+  endfor
+
+  assign edit_url = builder_url
+  if edit_url == blank
+    if routes.root_url == '/'
+      assign edit_url = '/pages/skateboard-builder'
+    else
+      assign edit_url = routes.root_url | append: '/pages/skateboard-builder'
+    endif
+  endif
+-%}
+
+<li class="cart-build" data-cart-build data-testid="cart-build">
+  <div class="cart-build__head">
+    <p class="cart-build__sticker badge badge--sticker badge--custom" data-testid="cart-build-label">
+      {{- 'cart.build.label' | t -}}
+    </p>
+    <p class="cart-build__count label-mono">{{ 'cart.build.parts' | t: count: part_count }}</p>
+  </div>
+
+  <ul role="list" class="cart-build__parts">
+    {%- for position in positions -%}
+      {%- for item in cart.items -%}
+        {%- if item.properties['_build_id'] == build_id and item.properties['_build_pos'] == position -%}
+          {%- render 'cart-build-part', item: item, context: context -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endfor -%}
+    {%- for item in cart.items -%}
+      {%- if item.properties['_build_id'] == build_id -%}
+        {%- assign item_position = item.properties['_build_pos'] | default: '' -%}
+        {%- unless positions contains item_position -%}
+          {%- render 'cart-build-part', item: item, context: context -%}
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  <div class="cart-build__foot">
+    <p class="cart-build__total">
+      <span class="label-mono">{{ 'cart.build.total' | t }}</span>
+      <span class="cart-build__total-value" data-testid="cart-build-total">
+        {%- render 'cart-money', amount: group_total -%}
+      </span>
+    </p>
+    <p class="cart-build__hint">{{ 'cart.build.hint' | t }}</p>
+    <div class="cart-build__actions">
+      <a href="{{ edit_url }}" class="cart-build__action link-mono" data-focus-id="build-edit" data-testid="cart-build-edit">
+        {%- render 'icon', name: 'wrench' -%}
+        {{- 'cart.build.edit' | t -}}
+      </a>
+      <form action="{{ routes.cart_update_url }}" method="post" class="cart-build__remove-form" data-build-remove-form>
+        {%- for item in cart.items -%}
+          {%- if item.properties['_build_id'] == build_id -%}
+            <input type="hidden" name="updates[{{ item.key }}]" value="0">
+          {%- endif -%}
+        {%- endfor -%}
+        <button type="submit" class="cart-build__action link-mono" data-focus-id="build-remove" data-testid="cart-build-remove">
+          {%- render 'icon', name: 'trash' -%}
+          {{- 'cart.build.remove' | t -}}
+        </button>
+      </form>
+    </div>
+  </div>
+</li>

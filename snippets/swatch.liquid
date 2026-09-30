@@ -1,0 +1,63 @@
+{% doc %}
+  A single color swatch for a product option value. Uses Shopify swatch data (color or image) and falls
+  back to a small map of common color names; unknown values are shown as text.
+  Colors are set via SVG fill attributes (no inline styles).
+
+  @param {product_option_value} value - The option value
+  @param {string} [class] - Extra class
+
+  @example
+  {% render 'swatch', value: value %}
+{% enddoc %}
+
+{%- liquid
+  assign hex = value.swatch.color
+  if hex == blank
+    assign name = value.name | downcase | strip
+    case name
+      when 'schwarz', 'black', 'blackout'
+        assign hex = '#1c1d1b'
+      when 'weiß', 'weiss', 'white'
+        assign hex = '#ffffff'
+      when 'rot', 'red', 'signal red'
+        assign hex = '#c8401f'
+      when 'blau', 'blue', 'retro blue', 'navy'
+        assign hex = '#2b4bd8'
+      when 'grün', 'gruen', 'green'
+        assign hex = '#2f7d4f'
+      when 'lime', 'neon'
+        assign hex = '#c9e43a'
+      when 'gelb', 'yellow'
+        assign hex = '#f6c945'
+      when 'orange'
+        assign hex = '#f26b1d'
+      when 'pink', 'rosa'
+        assign hex = '#f2a1c0'
+      when 'lila', 'purple', 'violett'
+        assign hex = '#7a4ed8'
+      when 'grau', 'grey', 'gray'
+        assign hex = '#8c8a84'
+      when 'silber', 'silver', 'polished', 'raw'
+        assign hex = '#c9c7c2'
+      when 'gold'
+        assign hex = '#c9a23a'
+      when 'natur', 'natural', 'holz', 'wood'
+        assign hex = '#d8c39a'
+      when 'beige', 'creme', 'cream'
+        assign hex = '#efe6d2'
+    endcase
+  endif
+-%}
+
+{%- if value.swatch.image -%}
+  <span class="swatch swatch--image {{ class }}" title="{{ value.name | escape }}">
+    {{ value.swatch.image | image_url: width: 48 | image_tag: width: 14, height: 14, alt: value.name, loading: 'lazy' }}
+  </span>
+{%- elsif hex != blank -%}
+  <svg class="swatch {{ class }}" viewBox="0 0 10 10" role="img" aria-label="{{ value.name | escape }}">
+    <title>{{ value.name | escape }}</title>
+    <rect width="10" height="10" fill="{{ hex }}"/>
+  </svg>
+{%- else -%}
+  <span class="swatch-text label-mono {{ class }}">{{ value.name | escape }}</span>
+{%- endif -%}

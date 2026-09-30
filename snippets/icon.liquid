@@ -1,0 +1,101 @@
+{% doc %}
+  Renders an inline SVG icon (decorative, aria-hidden). Stroke icons inherit currentColor.
+
+  @param {string} name - Icon name, e.g. search, account, cart, close, menu, chevron-down, arrow-right
+  @param {string} [class] - Additional CSS class
+
+  @example
+  {% render 'icon', name: 'cart' %}
+{% enddoc %}
+
+{%- capture paths -%}
+  {%- case name -%}
+    {%- when 'search' -%}
+      <circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/>
+    {%- when 'account' -%}
+      <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+    {%- when 'cart' -%}
+      <path d="M5 8h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 8Z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/>
+    {%- when 'close' -%}
+      <path d="m6 6 12 12M18 6 6 18"/>
+    {%- when 'menu' -%}
+      <path d="M3 7h18M3 12h18M3 17h12"/>
+    {%- when 'chevron-down' -%}
+      <path d="m6 9 6 6 6-6"/>
+    {%- when 'chevron-up' -%}
+      <path d="m6 15 6-6 6 6"/>
+    {%- when 'chevron-right' -%}
+      <path d="m9 6 6 6-6 6"/>
+    {%- when 'chevron-left' -%}
+      <path d="m15 6-6 6 6 6"/>
+    {%- when 'arrow-right' -%}
+      <path d="M4 12h15M13 6l6 6-6 6"/>
+    {%- when 'arrow-left' -%}
+      <path d="M20 12H5M11 6l-6 6 6 6"/>
+    {%- when 'arrow-up-right' -%}
+      <path d="M7 17 17 7M8 7h9v9"/>
+    {%- when 'plus' -%}
+      <path d="M12 5v14M5 12h14"/>
+    {%- when 'minus' -%}
+      <path d="M5 12h14"/>
+    {%- when 'check' -%}
+      <path d="m5 12.5 4.5 4.5L19 7.5"/>
+    {%- when 'filter' -%}
+      <path d="M4 6h16M7 12h10M10 18h4"/>
+    {%- when 'sort' -%}
+      <path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/>
+    {%- when 'info' -%}
+      <circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>
+    {%- when 'alert' -%}
+      <path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17v.5"/>
+    {%- when 'trash' -%}
+      <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
+    {%- when 'truck' -%}
+      <path d="M2 6h12v10H2zM14 10h4l4 4v2h-8"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/>
+    {%- when 'return' -%}
+      <path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>
+    {%- when 'lock' -%}
+      <rect x="5" y="11" width="14" height="10"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+    {%- when 'star' -%}
+      <path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.4l-5.6 2.9 1.1-6.2L3 9.7l6.2-.9L12 3Z"/>
+    {%- when 'pause' -%}
+      <path d="M9 5v14M15 5v14"/>
+    {%- when 'play' -%}
+      <path d="M7 5v14l12-7L7 5Z"/>
+    {%- when 'grid' -%}
+      <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>
+    {%- when 'board' -%}
+      <rect x="8" y="2.5" width="8" height="19" rx="4"/><path d="M6 6.5h3M15 6.5h3M6 17.5h3M15 17.5h3"/>
+    {%- when 'wrench' -%}
+      <path d="M14.5 5.5a4 4 0 0 0 4.9 4.9l-9 9a2.1 2.1 0 0 1-3-3l9-9a4 4 0 0 0-1.9-1.9Z"/>
+    {%- when 'mail' -%}
+      <path d="M3 5h18v14H3z"/><path d="m3 6 9 7 9-7"/>
+    {%- when 'external' -%}
+      <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>
+    {%- when 'instagram' -%}
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="4"/><path d="M17 7v.5"/>
+    {%- when 'tiktok' -%}
+      <path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5M14 3c.4 2.6 2.2 4.4 5 4.6"/>
+    {%- when 'youtube' -%}
+      <rect x="2.5" y="5.5" width="19" height="13" rx="3"/><path d="m10 9 5 3-5 3V9Z"/>
+    {%- when 'facebook' -%}
+      <path d="M14 21v-8h3l.5-3.5H14V7.8c0-1 .3-1.8 1.8-1.8h1.8V3a24 24 0 0 0-2.6-.1c-2.6 0-4.4 1.6-4.4 4.5v3.1H7.7V13h2.9v8"/>
+    {%- when 'pinterest' -%}
+      <circle cx="12" cy="12" r="9"/><path d="m10.5 21 2-8.5M9.7 14.5c-.6-.8-.9-1.8-.9-2.7 0-2.6 2-4.3 4.3-4.3 2.2 0 3.7 1.4 3.7 3.5 0 2.4-1.2 4.2-3 4.2-.9 0-1.6-.8-1.4-1.7"/>
+    {%- when 'x' -%}
+      <path d="M4 4l16 16M20 4 4 20"/>
+    {%- else -%}
+      <circle cx="12" cy="12" r="2"/>
+  {%- endcase -%}
+{%- endcapture -%}
+
+<svg
+  class="icon icon--{{ name }} {{ class }}"
+  aria-hidden="true"
+  focusable="false"
+  viewBox="0 0 24 24"
+  width="24"
+  height="24"
+>
+  {{- paths -}}
+</svg>

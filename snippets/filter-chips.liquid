@@ -1,0 +1,63 @@
+{% doc %}
+  Active storefront filters as removable chips plus a "clear all" link.
+  Chip links use Shopify's value.url_to_remove / filter.url_to_remove; facets.js intercepts them ([data-facets-link]).
+  Renders nothing when no filter is active.
+
+  @param {filter[]} filters - collection.filters or search.filters
+  @param {string} clear_url - URL without any filter parameters (keeps sort order / search terms)
+
+  @example
+  {% render 'filter-chips', filters: collection.filters, clear_url: clear_url %}
+{% enddoc %}
+
+{%- capture chips -%}
+  {%- for filter in filters -%}
+    {%- if filter.type == 'price_range' -%}
+      {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+        {%- liquid
+          assign min_money = filter.min_value.value | money | strip_html
+          assign max_money = filter.max_value.value | money | strip_html
+          if filter.min_value.value != nil and filter.max_value.value != nil
+            assign price_label = min_money | append: ' – ' | append: max_money
+          elsif filter.min_value.value != nil
+            assign price_label = 'filters.price_chip_from' | t: price: min_money
+          else
+            assign price_label = 'filters.price_chip_to' | t: price: max_money
+          endif
+        -%}
+        <li>
+          <a class="facet-chip" href="{{ filter.url_to_remove }}" data-facets-link data-testid="facet-chip">
+            <span class="facet-chip__group">{{ filter.label | escape }}</span>
+            <span class="facet-chip__value">{{ price_label }}</span>
+            {% render 'icon', name: 'close', class: 'facet-chip__icon' %}
+            <span class="visually-hidden">{{ 'filters.remove' | t }}</span>
+          </a>
+        </li>
+      {%- endif -%}
+    {%- else -%}
+      {%- for value in filter.active_values -%}
+        <li>
+          <a class="facet-chip" href="{{ value.url_to_remove }}" data-facets-link data-testid="facet-chip">
+            <span class="facet-chip__group">{{ filter.label | escape }}</span>
+            <span class="facet-chip__value">{{ value.label | escape }}</span>
+            {% render 'icon', name: 'close', class: 'facet-chip__icon' %}
+            <span class="visually-hidden">{{ 'filters.remove' | t }}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if chips != blank -%}
+  <div class="facet-chips" role="group" aria-label="{{ 'filters.active' | t }}">
+    <ul class="facet-chips__list" role="list">
+      {{ chips }}
+      <li>
+        <a class="facet-chips__clear" href="{{ clear_url }}" data-facets-link data-testid="facets-clear-all">
+          {{- 'filters.clear_all' | t -}}
+        </a>
+      </li>
+    </ul>
+  </div>
+{%- endif -%}

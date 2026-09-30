@@ -1,20 +1,468 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
-    "main": {
-      "type": "hello-world",
-      "settings": {}
+    "hero": {
+      "type": "skate-hero",
+      "blocks": {
+        "stat_steps": {
+          "type": "stat",
+          "settings": {
+            "value": "6 Schritte",
+            "label": "zum eigenen Complete"
+          }
+        },
+        "stat_brands": {
+          "type": "stat",
+          "settings": {
+            "value": "8 Marken",
+            "label": "unabhängig & geprüft"
+          }
+        },
+        "stat_fit": {
+          "type": "stat",
+          "settings": {
+            "value": "100 %",
+            "label": "Passform-Check"
+          }
+        }
+      },
+      "block_order": [
+        "stat_steps",
+        "stat_brands",
+        "stat_fit"
+      ],
+      "settings": {
+        "eyebrow": "No. 01 — Herbst / Winter 26",
+        "heading_line_1": "BUILD.",
+        "heading_line_2": "RIDE.",
+        "heading_line_3": "REPEAT.",
+        "accent_dots": true,
+        "text": "<p>Decks, Achsen, Rollen und Kugellager von unabhängigen Herstellern – geprüft, kombinierbar und schnell unterwegs. Oder du stellst dein Board Teil für Teil selbst zusammen.</p>",
+        "button_label_1": "BUILD YOUR BOARD",
+        "button_link_1": "shopify://pages/skateboard-builder",
+        "button_label_2": "SHOP SKATEBOARDS",
+        "button_link_2": "shopify://collections/completes",
+        "image": "shopify://shop_images/skate-demo-hero.png",
+        "image_fit": "cover",
+        "image_caption": "Fig. 01 — Quarry Lane Voltage 8.25″",
+        "enable_parallax": true,
+        "show_stamp": true,
+        "stamp_text": "BUILD · RIDE · REPEAT · KERBSIDE · ",
+        "stamp_center": "26",
+        "layout_desktop": "image-right",
+        "layout_mobile": "image-bottom",
+        "height": "viewport",
+        "enable_grain": false,
+        "color_scheme": "scheme-1",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "categories": {
+      "type": "category-grid",
+      "blocks": {
+        "cat_decks": {
+          "type": "category",
+          "settings": {
+            "collection": "decks",
+            "image": "shopify://shop_images/skate-demo-cat-decks.png",
+            "text": "Popsicle, Shaped, Cruiser – sortiert nach Breite und Concave.",
+            "link_label": "Zu den Decks",
+            "art": "deck"
+          }
+        },
+        "cat_trucks": {
+          "type": "category",
+          "settings": {
+            "collection": "trucks",
+            "image": "shopify://shop_images/skate-demo-cat-trucks.png",
+            "text": "Achsen passend zur Deckbreite – von Low bis High.",
+            "link_label": "Zu den Trucks",
+            "art": "trucks"
+          }
+        },
+        "cat_wheels": {
+          "type": "category",
+          "settings": {
+            "collection": "wheels",
+            "image": "shopify://shop_images/skate-demo-cat-wheels.png",
+            "text": "Street bis Cruiser, mit Härte-Guide von 78A bis 101A.",
+            "link_label": "Zu den Wheels",
+            "art": "wheels"
+          }
+        },
+        "cat_bearings": {
+          "type": "category",
+          "settings": {
+            "collection": "bearings",
+            "image": "shopify://shop_images/skate-demo-cat-bearings.png",
+            "text": "Stahl, Swiss oder Keramik – vorgeschmiert und startklar.",
+            "link_label": "Zu den Bearings",
+            "art": "bearings"
+          }
+        },
+        "cat_completes": {
+          "type": "category",
+          "settings": {
+            "collection": "completes",
+            "image": "shopify://shop_images/skate-demo-cat-completes.png",
+            "text": "Fertig montiert und abgestimmt – auspacken, losrollen.",
+            "link_label": "Zu den Completes",
+            "art": "complete"
+          }
+        }
+      },
+      "block_order": [
+        "cat_decks",
+        "cat_trucks",
+        "cat_wheels",
+        "cat_bearings",
+        "cat_completes"
+      ],
+      "settings": {
+        "index": "01",
+        "eyebrow": "Kategorien",
+        "heading": "Shop by Category",
+        "text": "<p>Jedes Teil mit Maßen, Härte und Passform – damit dein Setup beim ersten Push stimmt.</p>",
+        "link_label": "Alle Kategorien",
+        "link_url": "/collections",
+        "show_count": true,
+        "desktop_layout": "row",
+        "mobile_layout": "grid",
+        "color_scheme": "scheme-1",
+        "padding_top": 96,
+        "padding_bottom": 48
+      }
+    },
+    "featured_boards": {
+      "type": "featured-products",
+      "settings": {
+        "index": "02",
+        "eyebrow": "Ausgewählt",
+        "heading": "Featured Boards",
+        "text": "<p>Neu eingetroffen, gerade reduziert oder schnell weg – unsere Boards der Saison.</p>",
+        "link_label": "Alle Boards",
+        "collection": "featured-boards",
+        "products_to_show": 4,
+        "layout": "horizontal",
+        "columns_desktop": 2,
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 96
+      }
+    },
+    "builder_promo": {
+      "type": "builder-promo",
+      "blocks": {
+        "step_deck": {
+          "type": "step",
+          "settings": {
+            "title": "Deck"
+          }
+        },
+        "step_trucks": {
+          "type": "step",
+          "settings": {
+            "title": "Trucks"
+          }
+        },
+        "step_wheels": {
+          "type": "step",
+          "settings": {
+            "title": "Wheels"
+          }
+        },
+        "step_bearings": {
+          "type": "step",
+          "settings": {
+            "title": "Bearings"
+          }
+        },
+        "step_grip": {
+          "type": "step",
+          "settings": {
+            "title": "Grip"
+          }
+        },
+        "step_hardware": {
+          "type": "step",
+          "settings": {
+            "title": "Hardware"
+          }
+        }
+      },
+      "block_order": [
+        "step_deck",
+        "step_trucks",
+        "step_wheels",
+        "step_bearings",
+        "step_grip",
+        "step_hardware"
+      ],
+      "settings": {
+        "index": "03",
+        "eyebrow": "Konfigurator",
+        "heading": "YOUR BOARD.",
+        "heading_accent": "YOUR RULES.",
+        "text": "<p>Deck wählen, Achsen passend zur Breite, Rollen nach Härte – der Builder prüft jede Kombination und legt alles in einem Schritt in den Warenkorb.</p>",
+        "button_label": "START BUILDING",
+        "button_link": "shopify://pages/skateboard-builder",
+        "image": "shopify://shop_images/skate-demo-builder-promo.png",
+        "image_fit": "contain",
+        "enable_parallax": false,
+        "layout": "figure-right",
+        "enable_grain": true,
+        "color_scheme": "scheme-3",
+        "padding_top": 96,
+        "padding_bottom": 96
+      }
+    },
+    "brand_marquee": {
+      "type": "brand-marquee",
+      "blocks": {
+        "brand_nine_ply": {
+          "type": "brand",
+          "settings": {
+            "name": "Nine Ply Co."
+          }
+        },
+        "brand_quarry_lane": {
+          "type": "brand",
+          "settings": {
+            "name": "Quarry Lane"
+          }
+        },
+        "brand_duskline": {
+          "type": "brand",
+          "settings": {
+            "name": "Duskline"
+          }
+        },
+        "brand_axlemoor": {
+          "type": "brand",
+          "settings": {
+            "name": "Axlemoor"
+          }
+        },
+        "brand_rolltype": {
+          "type": "brand",
+          "settings": {
+            "name": "Rolltype"
+          }
+        },
+        "brand_swiftbore": {
+          "type": "brand",
+          "settings": {
+            "name": "Swiftbore"
+          }
+        },
+        "brand_gritfield": {
+          "type": "brand",
+          "settings": {
+            "name": "Gritfield"
+          }
+        },
+        "brand_boltworks": {
+          "type": "brand",
+          "settings": {
+            "name": "Boltworks"
+          }
+        }
+      },
+      "block_order": [
+        "brand_nine_ply",
+        "brand_quarry_lane",
+        "brand_duskline",
+        "brand_axlemoor",
+        "brand_rolltype",
+        "brand_swiftbore",
+        "brand_gritfield",
+        "brand_boltworks"
+      ],
+      "settings": {
+        "index": "04",
+        "heading": "Marken",
+        "show_count": true,
+        "source": "blocks",
+        "link_brands": true,
+        "duration": 45,
+        "direction": "left",
+        "separator": "diamond",
+        "color_scheme": "scheme-1",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "editorial": {
+      "type": "editorial-grid",
+      "blocks": {
+        "story_ramp": {
+          "type": "story",
+          "settings": {
+            "size": "large",
+            "image": "shopify://shop_images/skate-demo-editorial-ramp.png",
+            "eyebrow": "Reportage",
+            "meta": "8 Min. Lesezeit",
+            "heading": "Concrete Diaries: Ein Sommer zwischen den DIY-Spots",
+            "text": "Sechs Crews, zwei Tonnen Zement und eine Quarterpipe, die dreimal abgerissen wurde. Wie Selbstbau-Spots entstehen – und warum sie bleiben.",
+            "link_label": "Weiterlesen",
+            "link_url": "shopify://blogs/news"
+          }
+        },
+        "story_curb": {
+          "type": "story",
+          "settings": {
+            "size": "small",
+            "image": "shopify://shop_images/skate-demo-editorial-curb.png",
+            "eyebrow": "Guide",
+            "meta": "5 Min.",
+            "heading": "Welche Deckbreite passt zu dir?",
+            "text": "Schuhgröße, Terrain, Style – der Größenratgeber in drei Fragen.",
+            "link_label": "Zum Guide",
+            "link_url": "shopify://pages/groessenberatung"
+          }
+        },
+        "story_city": {
+          "type": "story",
+          "settings": {
+            "size": "small",
+            "image": "shopify://shop_images/skate-demo-editorial-city.png",
+            "eyebrow": "Material",
+            "meta": "6 Min.",
+            "heading": "Urethan erklärt: Härte, Form, Grip",
+            "text": "Warum 99A nicht gleich 99A ist – und welche Rolle zu deinem Spot passt.",
+            "link_label": "Zu den Wheels",
+            "link_url": "shopify://collections/wheels"
+          }
+        }
+      },
+      "block_order": [
+        "story_ramp",
+        "story_curb",
+        "story_city"
+      ],
+      "settings": {
+        "index": "05",
+        "eyebrow": "Journal",
+        "heading": "Skate Culture",
+        "text": "<p>Spots, Menschen, Material – Geschichten aus der Szene.</p>",
+        "link_label": "Zum Journal",
+        "link_url": "shopify://blogs/news",
+        "color_scheme": "scheme-1",
+        "padding_top": 96,
+        "padding_bottom": 48
+      }
+    },
+    "best_sellers": {
+      "type": "featured-products",
+      "settings": {
+        "index": "06",
+        "eyebrow": "Meistverkauft",
+        "heading": "Best Sellers",
+        "text": "<p>Was die Crew gerade am häufigsten bestellt.</p>",
+        "link_label": "Alle Bestseller",
+        "collection": "bestsellers",
+        "products_to_show": 10,
+        "layout": "slider",
+        "columns_desktop": 4,
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "index": "07",
+        "eyebrow": "Newsletter",
+        "heading": "Stay in the loop.",
+        "text": "<p>Neue Drops, Restocks und Builder-Setups der Crew – einmal im Monat, ohne Spam.</p>",
+        "privacy_text": "<p>Abmeldung jederzeit über den Link in jeder Mail.</p>",
+        "show_privacy_link": true,
+        "show_border": true,
+        "enable_grain": false,
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    },
+    "community": {
+      "type": "community-grid",
+      "blocks": {
+        "post_1": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/skate-demo-community-1.png",
+            "caption": "Deck-Wall im Laden"
+          }
+        },
+        "post_2": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/skate-demo-community-2.png",
+            "caption": "Frisch gegossen: Rolltype 54"
+          }
+        },
+        "post_3": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/skate-demo-community-3.png",
+            "caption": "Stair Set, Sonntagmorgen"
+          }
+        },
+        "post_4": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/skate-demo-community-4.png",
+            "caption": "Checker Grip, frisch aufgezogen"
+          }
+        },
+        "post_5": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/skate-demo-community-5.png",
+            "caption": "Sunset Session"
+          }
+        },
+        "post_6": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/skate-demo-community-6.png",
+            "caption": "Sticker-Drop No. 3"
+          }
+        }
+      },
+      "block_order": [
+        "post_1",
+        "post_2",
+        "post_3",
+        "post_4",
+        "post_5",
+        "post_6"
+      ],
+      "settings": {
+        "index": "08",
+        "eyebrow": "Community",
+        "heading": "Seen on the street",
+        "text": "<p>Markiere deine Session mit <strong>#kerbsidecrew</strong> – die besten Shots landen hier.</p>",
+        "handle": "@kerbside.skate",
+        "profile_url": "https://www.instagram.com/",
+        "desktop_layout": "row",
+        "mobile_layout": "grid",
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 96
+      }
     }
   },
   "order": [
-    "main"
+    "hero",
+    "categories",
+    "featured_boards",
+    "builder_promo",
+    "brand_marquee",
+    "editorial",
+    "best_sellers",
+    "newsletter",
+    "community"
   ]
 }

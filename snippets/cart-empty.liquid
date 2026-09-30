@@ -1,0 +1,58 @@
+{% doc %}
+  Empty cart state with two call-to-action links (drawer and cart page).
+  Blank labels/URLs fall back to translated defaults: "Board bauen" → builder page, "Decks ansehen" → decks collection.
+
+  @param {string} [context] - drawer | page
+  @param {string} [cta_1_label] - Label of the primary link
+  @param {string} [cta_1_url] - URL of the primary link
+  @param {string} [cta_2_label] - Label of the secondary link
+  @param {string} [cta_2_url] - URL of the secondary link
+
+  @example
+  {% render 'cart-empty', context: 'drawer', cta_1_label: section.settings.empty_cta_1_label, cta_1_url: section.settings.empty_cta_1_url %}
+{% enddoc %}
+
+{%- liquid
+  assign context = context | default: 'drawer'
+
+  if routes.root_url == '/'
+    assign locale_root = ''
+  else
+    assign locale_root = routes.root_url
+  endif
+
+  assign label_1 = 'cart.empty.cta_build' | t
+  if cta_1_label != blank
+    assign label_1 = cta_1_label | escape
+  endif
+  assign url_1 = locale_root | append: '/pages/skateboard-builder'
+  if cta_1_url != blank
+    assign url_1 = cta_1_url
+  endif
+
+  assign label_2 = 'cart.empty.cta_decks' | t
+  if cta_2_label != blank
+    assign label_2 = cta_2_label | escape
+  endif
+  assign url_2 = locale_root | append: '/collections/decks'
+  if cta_2_url != blank
+    assign url_2 = cta_2_url
+  endif
+-%}
+
+<div class="cart-empty cart-empty--{{ context }}" data-testid="cart-empty">
+  <span class="tri-stripe cart-empty__stripe" aria-hidden="true"><span></span></span>
+  {%- if context == 'page' -%}
+    <h2 class="h2 cart-empty__title">{{ 'cart.empty.title' | t }}</h2>
+  {%- else -%}
+    <p class="h3 cart-empty__title">{{ 'cart.empty.title' | t }}</p>
+  {%- endif -%}
+  <p class="cart-empty__text text-muted">{{ 'cart.empty.text' | t }}</p>
+  <div class="cart-empty__actions">
+    <a href="{{ url_1 }}" class="button">
+      {{- label_1 -}}
+      {%- render 'icon', name: 'arrow-right' -%}
+    </a>
+    <a href="{{ url_2 }}" class="button button--secondary">{{ label_2 }}</a>
+  </div>
+</div>

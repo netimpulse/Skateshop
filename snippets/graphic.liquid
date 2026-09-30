@@ -1,0 +1,42 @@
+{% doc %}
+  Decorative retro graphics (always aria-hidden): round stamp with circular text, star, burst, checker strip.
+
+  @param {string} name - stamp | star | burst | checker
+  @param {string} [text] - Circular text for the stamp
+  @param {string} [center] - Big center text for the stamp
+  @param {string} [id] - Unique id suffix (needed for the stamp's text path)
+  @param {string} [class] - Extra class
+
+  @example
+  {% render 'graphic', name: 'stamp', text: 'BUILD · RIDE · REPEAT · ', center: '26', id: section.id %}
+{% enddoc %}
+
+{%- case name -%}
+  {%- when 'stamp' -%}
+    {%- assign path_id = 'stamp-path-' | append: id -%}
+    <svg class="graphic graphic--stamp {{ class }}" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+      <defs>
+        <path id="{{ path_id }}" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/>
+      </defs>
+      <circle class="graphic__fill" cx="100" cy="100" r="96"/>
+      <circle class="graphic__line" cx="100" cy="100" r="58" fill="none"/>
+      <text class="graphic__ring-text">
+        <textPath href="#{{ path_id }}" startOffset="0">{{ text | escape }}</textPath>
+      </text>
+      {%- if center != blank -%}
+        <text class="graphic__center-text" x="100" y="100" text-anchor="middle" dominant-baseline="central">{{ center | escape }}</text>
+      {%- endif -%}
+    </svg>
+  {%- when 'star' -%}
+    <svg class="graphic graphic--star {{ class }}" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <path class="graphic__fill" d="M50 2l9 30 31-8-22 23 22 23-31-8-9 30-9-30-31 8 22-23L10 24l31 8z"/>
+    </svg>
+  {%- when 'burst' -%}
+    <svg class="graphic graphic--burst {{ class }}" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <path class="graphic__line" d="M50 4v18M50 78v18M4 50h18M78 50h18M17 17l13 13M70 70l13 13M83 17 70 30M30 70 17 83" fill="none"/>
+    </svg>
+  {%- when 'checker' -%}
+    <svg class="graphic graphic--checker {{ class }}" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path class="graphic__fill" d="M0 0h10v10H0zM20 0h10v10H20zM40 0h10v10H40zM60 0h10v10H60zM80 0h10v10H80zM100 0h10v10h-10zM10 10h10v10H10zM30 10h10v10H30zM50 10h10v10H50zM70 10h10v10H70zM90 10h10v10H90zM110 10h10v10h-10z"/>
+    </svg>
+{%- endcase -%}

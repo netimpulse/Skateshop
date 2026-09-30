@@ -1,0 +1,62 @@
+{% doc %}
+  One checkbox row of a list/boolean storefront filter (used by filter-sidebar).
+  Name and value come straight from Shopify (filter.param_name, value.value).
+  Swatch presentation shows the color/image swatch, image presentation a thumbnail.
+
+  @param {filter} filter - The parent filter
+  @param {filter_value} value - The filter value
+  @param {string} input_id - Id prefix of the filter group (unique per form instance)
+  @param {number} index - Position of the value (keeps ids unique)
+  @param {boolean} [show_counts] - Show the product count
+
+  @example
+  {% render 'facet-value', filter: filter, value: value, input_id: group_id, index: forloop.index, show_counts: true %}
+{% enddoc %}
+
+{%- liquid
+  assign value_handle = value.value | handleize
+  assign checkbox_id = 'Filter-' | append: input_id | append: '-' | append: value_handle | append: '-' | append: index
+  assign is_disabled = false
+  if value.count == 0 and value.active == false
+    assign is_disabled = true
+  endif
+-%}
+
+<li class="facet__item">
+  <input
+    class="facet__checkbox"
+    type="checkbox"
+    id="{{ checkbox_id }}"
+    name="{{ filter.param_name | escape }}"
+    value="{{ value.value | escape }}"
+    {% if value.active %}
+      checked
+    {% endif %}
+    {% if is_disabled %}
+      disabled
+    {% endif %}
+  >
+  <label class="facet__option{% if is_disabled %} is-disabled{% endif %}" for="{{ checkbox_id }}">
+    <span class="facet__box" aria-hidden="true"></span>
+    {%- if filter.presentation == 'swatch' -%}
+      {%- if value.swatch.image -%}
+        <span class="facet__swatch facet__swatch--image" aria-hidden="true">
+          {{- value.swatch.image | image_url: width: 48 | image_tag: width: 18, height: 18, alt: '', loading: 'lazy' -}}
+        </span>
+      {%- elsif value.swatch.color -%}
+        <svg class="facet__swatch" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
+          <rect width="10" height="10" fill="{{ value.swatch.color }}"/>
+        </svg>
+      {%- endif -%}
+    {%- elsif filter.presentation == 'image' and value.image -%}
+      <span class="facet__thumb" aria-hidden="true">
+        {{- value.image | image_url: width: 64 | image_tag: width: 24, height: 24, alt: '', loading: 'lazy' -}}
+      </span>
+    {%- endif -%}
+    <span class="facet__value">{{ value.label | escape }}</span>
+    {%- if show_counts -%}
+      <span class="facet__count" aria-hidden="true">{{ value.count }}</span>
+      <span class="visually-hidden">({{ 'collections.product_count' | t: count: value.count }})</span>
+    {%- endif -%}
+  </label>
+</li>

@@ -9,13 +9,66 @@
  */
 {
   "type": "footer",
-  "name": "t:general.footer",
+  "name": "Footer",
   "sections": {
     "footer": {
       "type": "footer",
+      "blocks": {
+        "brand": {
+          "type": "brand",
+          "settings": {
+            "show_logo": true,
+            "text": "<p>Skate Supply mit Werkstatt-Know-how: unabhängige Marken, ehrliche Beratung und ein Board-Builder, der mitdenkt.</p>",
+            "show_stripe": true
+          }
+        },
+        "links-shop": {
+          "type": "links",
+          "settings": {
+            "heading": "Shop",
+            "menu": "skate-footer-shop"
+          }
+        },
+        "links-help": {
+          "type": "links",
+          "settings": {
+            "heading": "Hilfe",
+            "menu": "skate-footer-help"
+          }
+        },
+        "links-about": {
+          "type": "links",
+          "settings": {
+            "heading": "Über uns",
+            "menu": "skate-footer-about"
+          }
+        },
+        "social": {
+          "type": "social",
+          "settings": {
+            "heading": "Social",
+            "show_labels": true
+          }
+        }
+      },
+      "block_order": [
+        "brand",
+        "links-shop",
+        "links-help",
+        "links-about",
+        "social"
+      ],
       "settings": {
-        "menu": "",
-        "show_payment_icons": true
+        "color_scheme": "scheme-1",
+        "show_wordmark": true,
+        "wordmark_text": "",
+        "copyright_text": "",
+        "show_policies": true,
+        "show_payment_icons": true,
+        "show_country_selector": true,
+        "show_language_selector": true,
+        "padding_top": 72,
+        "padding_bottom": 0
       }
     }
   },

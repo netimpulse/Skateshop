@@ -1,18 +1,96 @@
+{%- liquid
+  assign heading_font = settings.type_heading_font
+  assign body_font = settings.type_body_font
+  assign mono_font = settings.type_mono_font
+  assign body_font_bold = body_font | font_modify: 'weight', 'bold'
+  assign body_font_semibold = body_font | font_modify: 'weight', '600'
+  assign body_font_italic = body_font | font_modify: 'style', 'italic'
+  assign body_bold_weight = body_font_bold.weight | default: 700
+  assign body_semibold_weight = body_font_semibold.weight | default: body_bold_weight
+
+  assign heading_scale = settings.heading_scale | divided_by: 100.0
+  assign body_scale = settings.body_scale | divided_by: 100.0
+-%}
+
 {% style %}
-  {% # Loads all font variantions with display: swap %}
-  {{ settings.type_primary_font | font_face: font_display: 'swap' }}
-  {{ settings.type_primary_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
-  {{ settings.type_primary_font | font_modify: 'weight', 'bold' | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
-  {{ settings.type_primary_font | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
+  {{ heading_font | font_face: font_display: 'swap' }}
+  {{ body_font | font_face: font_display: 'swap' }}
+  {{ body_font_bold | font_face: font_display: 'swap' }}
+  {{ body_font_semibold | font_face: font_display: 'swap' }}
+  {{ body_font_italic | font_face: font_display: 'swap' }}
+  {{ mono_font | font_face: font_display: 'swap' }}
 
   :root {
-    --font-primary--family: {{ settings.type_primary_font.family }}, {{ settings.type_primary_font.fallback_families }};
-    --font-primary--style: {{ settings.type_primary_font.style }};
-    --font-primary--weight: {{ settings.type_primary_font.weight }};
-    --page-width: {{ settings.max_page_width }};
-    --page-margin: {{ settings.min_page_margin }}px;
-    --color-background: {{ settings.background_color }};
-    --color-foreground: {{ settings.foreground_color }};
-    --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
+    --font-heading-family: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+    --font-heading-style: {{ heading_font.style }};
+    --font-heading-weight: {{ heading_font.weight }};
+    --font-heading-transform: {% if settings.heading_uppercase %}uppercase{% else %}none{% endif %};
+    --font-heading-scale: {{ heading_scale }};
+
+    --font-body-family: {{ body_font.family }}, {{ body_font.fallback_families }};
+    --font-body-style: {{ body_font.style }};
+    --font-body-weight: {{ body_font.weight }};
+    --font-body-weight-semibold: {{ body_semibold_weight }};
+    --font-body-weight-bold: {{ body_bold_weight }};
+    --font-body-scale: {{ body_scale }};
+
+    --font-mono-family: {{ mono_font.family }}, {{ mono_font.fallback_families }};
+    --font-mono-weight: {{ mono_font.weight }};
+
+    --page-width: {{ settings.page_width }};
+    --page-margin-mobile: {{ settings.page_margin_mobile }}px;
+    --page-margin-desktop: {{ settings.page_margin_desktop }}px;
+    --grid-gap: {{ settings.grid_gap }}px;
+
+    --radius-button: {{ settings.radius_buttons }}px;
+    --radius-media: {{ settings.radius_media }}px;
+    --border-width: {{ settings.border_width }}px;
+    --button-hover-shadow-size: {% if settings.retro_button_shadow %}3px{% else %}0px{% endif %};
+    --button-hover-shift: {% if settings.retro_button_shadow %}-2px{% else %}0px{% endif %};
+    --grain-opacity: {{ settings.grain_opacity | divided_by: 100.0 }};
+
+    --color-accent-1: {{ settings.accent_1 }};
+    --color-accent-1-rgb: {{ settings.accent_1.rgb }};
+    --color-accent-2: {{ settings.accent_2 }};
+    --color-accent-3: {{ settings.accent_3 }};
+    --color-accent-4: {{ settings.accent_4 }};
+    --color-accent-5: {{ settings.accent_5 }};
+    {%- comment -%} Text on accent surfaces (badges, counters): white or ink, whichever contrasts more. {%- endcomment -%}
+    {%- assign ink_hex = settings.color_schemes.first.settings.text | default: '#1C1D1B' | append: '' -%}
+    {%- for i in (1..5) -%}
+      {%- assign accent_key = 'accent_' | append: i -%}
+      {%- assign accent_hex = settings[accent_key] | append: '' -%}
+      {%- assign contrast_white = accent_hex | color_contrast: '#FFFFFF' -%}
+      {%- assign contrast_ink = accent_hex | color_contrast: ink_hex %}
+    --color-accent-{{ i }}-label: {% if contrast_white >= contrast_ink %}#FFFFFF{% else %}{{ ink_hex }}{% endif %};
+    {%- endfor %}
+    --color-success: {{ settings.color_success }};
+    --color-error: {{ settings.color_error }};
+
+    --card-image-ratio: {% case settings.card_image_ratio %}{% when 'square' %}1 / 1{% when 'tall' %}2 / 3{% else %}4 / 5{% endcase %};
+    --card-image-fit: {{ settings.card_image_fit }};
   }
+
+  {% for scheme in settings.color_schemes %}
+    {% if forloop.first %}
+      :root {
+        --color-ink: {{ scheme.settings.text }};
+        --color-paper: {{ scheme.settings.background }};
+      }
+      :root,
+    {% endif %}
+    .color-{{ scheme.id }} {
+      --color-background: {{ scheme.settings.background }};
+      --color-background-rgb: {{ scheme.settings.background.rgb }};
+      --color-surface: {{ scheme.settings.surface }};
+      --color-text: {{ scheme.settings.text }};
+      --color-text-rgb: {{ scheme.settings.text.rgb }};
+      --color-text-muted: {{ scheme.settings.text_muted }};
+      --color-border: {{ scheme.settings.border }};
+      --color-button: {{ scheme.settings.button }};
+      --color-button-label: {{ scheme.settings.button_label }};
+      --color-button-secondary: {{ scheme.settings.secondary_button_label }};
+      --color-link: {{ scheme.settings.link }};
+    }
+  {% endfor %}
 {% endstyle %}

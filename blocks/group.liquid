@@ -1,104 +1,103 @@
 {% doc %}
-  Renders a group of blocks with configurable layout direction, gap and
-  alignment.
-
-  All settings apply to only one dimension to reduce configuration complexity.
-
-  This component is a wrapper concerned only with rendering its children in
-  the specified layout direction with appropriate padding and alignment.
+  Renders a group of theme blocks in a row or column with a fixed spacing scale.
 
   @example
   {% content_for 'block', type: 'group', id: 'group' %}
 {% enddoc %}
 
 <div
-  class="group {{ block.settings.layout_direction }}"
-  style="
-    --padding: {{ block.settings.padding }}px;
-    --alignment: {{ block.settings.alignment }};
-  "
+  class="block-group block-group--{{ block.settings.layout_direction }} block-group--align-{{ block.settings.alignment }} block-group--gap-{{ block.settings.gap }}"
   {{ block.shopify_attributes }}
 >
   {% content_for 'blocks' %}
 </div>
 
 {% stylesheet %}
-  .group {
+  .block-group {
     display: flex;
-    flex-wrap: nowrap;
-    overflow: hidden;
     width: 100%;
   }
-
-  .group--horizontal {
+  .block-group--row {
     flex-direction: row;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
-    padding: 0 var(--padding);
+    justify-content: space-between;
   }
-
-  .group--vertical {
+  .block-group--column {
     flex-direction: column;
-    align-items: var(--alignment);
-    padding: var(--padding) 0;
+  }
+  .block-group--column.block-group--align-center {
+    align-items: center;
+    text-align: center;
+  }
+  .block-group--column.block-group--align-end {
+    align-items: flex-end;
+    text-align: end;
+  }
+  .block-group--gap-none {
+    gap: 0;
+  }
+  .block-group--gap-small {
+    gap: 0.75rem;
+  }
+  .block-group--gap-medium {
+    gap: 1.5rem;
+  }
+  .block-group--gap-large {
+    gap: 3rem;
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.group",
+  "name": "Gruppe",
   "blocks": [{ "type": "@theme" }],
   "settings": [
     {
       "type": "select",
       "id": "layout_direction",
-      "label": "t:labels.layout_direction",
-      "default": "group--vertical",
+      "label": "Anordnung",
+      "default": "column",
       "options": [
-        { "value": "group--horizontal", "label": "t:options.direction.horizontal" },
-        { "value": "group--vertical", "label": "t:options.direction.vertical" }
+        { "value": "row", "label": "Nebeneinander" },
+        { "value": "column", "label": "Untereinander" }
       ]
     },
     {
-      "visible_if": "{{ block.settings.layout_direction == 'group--vertical' }}",
       "type": "select",
       "id": "alignment",
-      "label": "t:labels.alignment",
-      "default": "flex-start",
+      "label": "Ausrichtung",
+      "default": "start",
+      "visible_if": "{{ block.settings.layout_direction == 'column' }}",
       "options": [
-        { "value": "flex-start", "label": "t:options.alignment.left" },
-        { "value": "center", "label": "t:options.alignment.center" },
-        { "value": "flex-end", "label": "t:options.alignment.right" }
+        { "value": "start", "label": "Links" },
+        { "value": "center", "label": "Mitte" },
+        { "value": "end", "label": "Rechts" }
       ]
     },
     {
-      "type": "range",
-      "id": "padding",
-      "label": "t:labels.padding",
-      "default": 0,
-      "min": 0,
-      "max": 200,
-      "step": 2,
-      "unit": "px"
+      "type": "select",
+      "id": "gap",
+      "label": "Abstand",
+      "default": "medium",
+      "options": [
+        { "value": "none", "label": "Kein" },
+        { "value": "small", "label": "Klein" },
+        { "value": "medium", "label": "Mittel" },
+        { "value": "large", "label": "Groß" }
+      ]
     }
   ],
   "presets": [
     {
-      "name": "t:general.column",
-      "category": "t:general.layout",
-      "settings": {
-        "layout_direction": "group--vertical",
-        "alignment": "flex-start",
-        "padding": 0
-      }
+      "name": "Spalte",
+      "category": "Layout",
+      "settings": { "layout_direction": "column" }
     },
     {
-      "name": "t:general.row",
-      "category": "t:general.layout",
-      "settings": {
-        "layout_direction": "group--horizontal",
-        "padding": 0
-      }
+      "name": "Zeile",
+      "category": "Layout",
+      "settings": { "layout_direction": "row" }
     }
   ]
 }

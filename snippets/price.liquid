@@ -1,0 +1,70 @@
+{% doc %}
+  Price with optional compare-at price and unit price. Uses the variant when given,
+  otherwise the product's lowest price ("ab …" when prices vary).
+
+  @param {product} [product] - Product (card context)
+  @param {variant} [variant] - Variant (product page context)
+  @param {string} [class] - Extra class
+
+  @example
+  {% render 'price', product: product %}
+  {% render 'price', variant: product.selected_or_first_available_variant %}
+{% enddoc %}
+
+{%- liquid
+  if variant
+    assign price = variant.price
+    assign compare_at = variant.compare_at_price
+    assign varies = false
+    assign unit_price = variant.unit_price
+    assign unit_measurement = variant.unit_price_measurement
+  else
+    assign price = product.price_min
+    assign compare_at = product.compare_at_price_min
+    assign varies = product.price_varies
+    assign unit_price = product.selected_or_first_available_variant.unit_price
+    assign unit_measurement = product.selected_or_first_available_variant.unit_price_measurement
+  endif
+
+  assign on_sale = false
+  if compare_at > price
+    assign on_sale = true
+  endif
+
+  if settings.currency_code_enabled
+    assign price_formatted = price | money_with_currency
+    assign compare_formatted = compare_at | money_with_currency
+  else
+    assign price_formatted = price | money
+    assign compare_formatted = compare_at | money
+  endif
+-%}
+
+<div class="price{% if on_sale %} price--sale{% endif %} {{ class }}" data-price>
+  {%- if on_sale -%}
+    <span class="visually-hidden">{{ 'products.price.sale' | t }}</span>
+  {%- else -%}
+    <span class="visually-hidden">{{ 'products.price.regular' | t }}</span>
+  {%- endif -%}
+  <span class="price__current">
+    {%- if varies -%}
+      {{ 'products.price.from_html' | t: price: price_formatted }}
+    {%- else -%}
+      {{ price_formatted }}
+    {%- endif -%}
+  </span>
+  {%- if on_sale -%}
+    <span class="visually-hidden">{{ 'products.price.compare_at' | t }}</span>
+    <s class="price__compare">{{ compare_formatted }}</s>
+  {%- endif -%}
+  {%- if unit_price -%}
+    <span class="price__unit">
+      <span class="visually-hidden">{{ 'products.price.unit' | t }}</span>
+      {{ unit_price | money }}/
+      {%- if unit_measurement.reference_value != 1 -%}
+        {{- unit_measurement.reference_value -}}
+      {%- endif -%}
+      {{ unit_measurement.reference_unit }}
+    </span>
+  {%- endif -%}
+</div>

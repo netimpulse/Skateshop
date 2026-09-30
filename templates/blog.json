@@ -11,7 +11,22 @@
   "sections": {
     "main": {
       "type": "blog",
-      "settings": {}
+      "settings": {
+        "show_breadcrumbs": true,
+        "eyebrow": "Journal",
+        "heading_size": "h-display",
+        "show_tags": true,
+        "articles_per_page": 9,
+        "columns_desktop": "3",
+        "lead_story": true,
+        "image_ratio": "4-3",
+        "show_date": true,
+        "show_author": true,
+        "show_excerpt": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 96
+      }
     }
   },
   "order": [

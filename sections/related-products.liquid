@@ -1,0 +1,185 @@
+{%- comment -%}
+  Related products via Shopify Product Recommendations (intent=related).
+  The first render is empty (recommendations.performed? is false); product.js (<product-recommendations>) fetches
+  this section through routes.productRecommendations with section_id from data-section-id and swaps in
+  [data-recommendations-content]. When there are no results the section stays hidden.
+{%- endcomment -%}
+
+{{ 'section-product.css' | asset_url | stylesheet_tag }}
+{% render 'section-style',
+  section_id: section.id,
+  padding_top: section.settings.padding_top,
+  padding_bottom: section.settings.padding_bottom
+%}
+
+{%- liquid
+  assign heading_id = 'Heading-' | append: section.id
+  assign default_eyebrow = 'products.related.eyebrow' | t
+  assign eyebrow = section.settings.eyebrow | default: default_eyebrow
+  unless section.settings.show_eyebrow
+    assign eyebrow = blank
+  endunless
+  assign default_heading = 'products.related.heading' | t
+  assign heading = section.settings.heading | default: default_heading
+  assign has_results = false
+  if recommendations.performed? and recommendations.products_count > 0
+    assign has_results = true
+  endif
+  assign columns = section.settings.columns_desktop
+-%}
+
+<section
+  class="section product-related scheme color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  aria-labelledby="{{ heading_id }}"
+  data-testid="related-products"
+  {% unless has_results %}
+    hidden
+  {% endunless %}
+>
+  <product-recommendations
+    class="product-related__inner"
+    data-section-id="{{ section.id }}"
+    data-product-id="{{ product.id }}"
+    data-limit="{{ section.settings.limit }}"
+  >
+    <div data-recommendations-content>
+      {%- if has_results -%}
+        <div class="page-width">
+          {% render 'section-heading',
+            eyebrow: eyebrow,
+            heading: heading,
+            heading_id: heading_id,
+            heading_class: 'h3'
+          %}
+        </div>
+
+        {%- if section.settings.layout == 'slider' -%}
+          <scroll-slider class="product-related__slider">
+            <div class="page-width product-related__controls scroller-controls">
+              <button type="button" class="icon-button" data-slider-prev aria-label="{{ 'accessibility.previous_slide' | t }}">
+                {%- render 'icon', name: 'arrow-left' -%}
+              </button>
+              <button type="button" class="icon-button" data-slider-next aria-label="{{ 'accessibility.next_slide' | t }}">
+                {%- render 'icon', name: 'arrow-right' -%}
+              </button>
+            </div>
+            <ul class="scroller product-related__track product-related__track--d{{ columns }}" role="list" data-slider-track>
+              {%- for recommendation in recommendations.products -%}
+                <li class="product-related__item">
+                  {% render 'product-card', product: recommendation, index: forloop.index %}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </scroll-slider>
+        {%- else -%}
+          <div class="page-width">
+            <ul class="grid product-related__grid product-related__grid--d{{ columns }}" role="list">
+              {%- for recommendation in recommendations.products -%}
+                <li class="product-related__item">
+                  {% render 'product-card', product: recommendation, index: forloop.index %}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </product-recommendations>
+</section>
+
+<script type="module" src="{{ 'product.js' | asset_url }}"></script>
+
+{% schema %}
+{
+  "name": "Passende Produkte",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Empfehlungen berechnet Shopify automatisch (oder die App „Search & Discovery“). Ohne Treffer bleibt die Section unsichtbar."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_eyebrow",
+      "label": "Label über der Überschrift anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Label-Text",
+      "info": "Leer = Standardtext"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "info": "Leer = Standardtext „Passt dazu“"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Anzahl Produkte",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Darstellung",
+      "options": [
+        { "value": "grid", "label": "Raster" },
+        { "value": "slider", "label": "Slider" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Spalten (Desktop)",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" },
+        { "value": "5", "label": "5" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "presets": [
+    {
+      "name": "Passende Produkte"
+    }
+  ]
+}
+{% endschema %}

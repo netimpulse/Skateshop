@@ -1,0 +1,71 @@
+{% doc %}
+  Shop-style placeholder shown whenever a product, collection or section has no image.
+  Renders a technical line drawing on grid paper (never a broken image).
+
+  @param {string} [kind] - deck | trucks | wheels | bearings | griptape | hardware | riser | complete | generic
+  @param {string} [label] - Accessible label (defaults to a translated "image coming soon")
+  @param {string} [class] - Additional CSS class
+
+  @example
+  {% render 'placeholder-skate', kind: 'deck', label: product.title %}
+{% enddoc %}
+
+{%- liquid
+  assign kind = kind | default: 'generic'
+  case kind
+    when 'deck', 'trucks', 'wheels', 'bearings', 'griptape', 'hardware'
+      assign label_key = 'products.placeholder.' | append: kind
+    else
+      assign label_key = 'products.placeholder.generic'
+  endcase
+  assign fallback_label = label_key | t
+  assign aria_label = label | default: fallback_label
+-%}
+
+<div class="placeholder-skate {{ class }}" role="img" aria-label="{{ aria_label | escape }}">
+  <svg class="placeholder-skate__art" viewBox="0 0 200 240" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5">
+    {%- case kind -%}
+      {%- when 'deck', 'complete' -%}
+        <rect x="68" y="12" width="64" height="216" rx="32"/>
+        <circle cx="100" cy="96" r="22" class="ph-fill-1"/>
+        <path d="M76 140h48M76 148h48M76 156h48" class="ph-stroke-3" stroke-width="3"/>
+        <rect x="84" y="40" width="32" height="18"/>
+        <rect x="84" y="182" width="32" height="18"/>
+        {%- if kind == 'complete' -%}
+          <rect x="56" y="36" width="12" height="26" rx="3"/><rect x="132" y="36" width="12" height="26" rx="3"/>
+          <rect x="56" y="178" width="12" height="26" rx="3"/><rect x="132" y="178" width="12" height="26" rx="3"/>
+        {%- endif -%}
+      {%- when 'trucks', 'riser' -%}
+        <path d="M60 104h80l-12 36H72z" class="ph-fill-surface"/>
+        <path d="M30 150h140" stroke-width="4"/>
+        <rect x="22" y="140" width="10" height="20"/><rect x="168" y="140" width="10" height="20"/>
+        <rect x="80" y="80" width="40" height="24" class="ph-fill-1"/>
+        <path d="M70 80h60"/>
+        <circle cx="100" cy="122" r="5"/>
+      {%- when 'wheels' -%}
+        <circle cx="72" cy="120" r="44"/><circle cx="72" cy="120" r="18" class="ph-fill-5"/><circle cx="72" cy="120" r="6"/>
+        <circle cx="140" cy="120" r="30" stroke-dasharray="4 4"/><circle cx="140" cy="120" r="12"/>
+      {%- when 'bearings' -%}
+        <circle cx="100" cy="120" r="56"/><circle cx="100" cy="120" r="26"/><circle cx="100" cy="120" r="10" class="ph-fill-2"/>
+        <circle cx="100" cy="79" r="7"/><circle cx="141" cy="120" r="7"/><circle cx="100" cy="161" r="7"/><circle cx="59" cy="120" r="7"/>
+        <circle cx="129" cy="91" r="7"/><circle cx="129" cy="149" r="7"/><circle cx="71" cy="149" r="7"/><circle cx="71" cy="91" r="7"/>
+      {%- when 'griptape' -%}
+        <rect x="56" y="16" width="88" height="208"/>
+        <path d="M56 60h88" class="ph-stroke-1" stroke-width="3"/>
+        <path d="M70 80h4M86 80h4M102 80h4M118 80h4M70 96h4M86 96h4M102 96h4M118 96h4M70 112h4M86 112h4M102 112h4M118 112h4" stroke-width="2"/>
+      {%- when 'hardware' -%}
+        <path d="M70 60h24M82 60v110M130 60h24M142 60v110"/>
+        <path d="M76 176h12M136 176h12" stroke-width="6" class="ph-stroke-1"/>
+        <path d="M82 80l-6 4M82 96l-6 4M82 112l-6 4M142 80l-6 4M142 96l-6 4M142 112l-6 4"/>
+      {%- else -%}
+        <path d="M24 118c10 0 14 6 26 6h100c12 0 16-6 26-6" stroke-width="3"/>
+        <path d="M58 124h24l-6 14H64zM118 124h24l-6 14h-12z"/>
+        <circle cx="64" cy="150" r="10"/><circle cx="136" cy="150" r="10"/>
+        <circle cx="100" cy="70" r="16" class="ph-fill-1"/>
+    {%- endcase -%}
+  </svg>
+  <span class="placeholder-skate__label" aria-hidden="true">
+    <span>Fig. — {{ kind }}</span>
+    <span>{{ fallback_label }}</span>
+  </span>
+</div>

@@ -1,0 +1,386 @@
+{%- comment -%}
+  Homepage hero: numbered rubric line, three-line H1 (the page's only H1), text, two CTAs,
+  large image (LCP: eager + fetchpriority high) with optional parallax, caption and round stamp, up to three stats.
+{%- endcomment -%}
+{{ 'section-skate-hero.css' | asset_url | stylesheet_tag }}
+{% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
+
+{%- liquid
+  assign s = section.settings
+  assign image = s.image
+
+  assign link_1 = s.button_link_1
+  if link_1 == blank
+    assign link_1 = pages['skateboard-builder'].url
+  endif
+  assign link_2 = s.button_link_2
+  if link_2 == blank
+    assign link_2 = collections['completes'].url | default: routes.all_products_collection_url
+  endif
+
+  assign classes = 'skate-hero--' | append: s.layout_desktop | append: ' skate-hero--mobile-' | append: s.layout_mobile | append: ' skate-hero--height-' | append: s.height | append: ' skate-hero--fit-' | append: s.image_fit
+  if s.enable_grain
+    assign classes = classes | append: ' has-grain'
+  endif
+
+  assign heading_id = 'Heading-' | append: section.id
+-%}
+
+{%- if image and image.presentation.focal_point != blank -%}
+  {% style %}
+    #shopify-section-{{ section.id }} .skate-hero__img {
+      object-position: {{ image.presentation.focal_point }};
+    }
+  {% endstyle %}
+{%- endif -%}
+
+<section
+  class="section skate-hero scheme color-{{ s.color_scheme }} {{ classes }}"
+  data-section-id="{{ section.id }}"
+  data-testid="home-hero"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="page-width skate-hero__inner">
+    <div class="skate-hero__copy">
+      {%- if s.eyebrow != blank -%}
+        <p class="eyebrow eyebrow--rule skate-hero__eyebrow skate-hero__rise">{{ s.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      <h1 class="skate-hero__title" id="{{ heading_id }}">
+        {%- for i in (1..3) -%}
+          {%- liquid
+            assign key = 'heading_line_' | append: i
+            assign line = s[key] | strip
+            assign last_char = line | slice: -1
+            assign body_length = line.size | minus: 1
+          -%}
+          {%- if line != blank -%}
+            <span class="skate-hero__line skate-hero__line--{{ i }}">
+              {%- if s.accent_dots and last_char == '.' and body_length > 0 -%}
+                <span class="skate-hero__line-inner">{{ line | slice: 0, body_length | escape }}<span class="skate-hero__dot">.</span></span>
+              {%- else -%}
+                <span class="skate-hero__line-inner">{{ line | escape }}</span>
+              {%- endif -%}
+            </span>
+            {{ ' ' }}
+          {%- endif -%}
+        {%- endfor -%}
+      </h1>
+
+      {%- if s.text != blank -%}
+        <div class="skate-hero__text rte skate-hero__rise">{{ s.text }}</div>
+      {%- endif -%}
+
+      {%- liquid
+        assign show_button_1 = false
+        if s.button_label_1 != blank and link_1 != blank
+          assign show_button_1 = true
+        endif
+        assign show_button_2 = false
+        if s.button_label_2 != blank and link_2 != blank
+          assign show_button_2 = true
+        endif
+      -%}
+      {%- if show_button_1 or show_button_2 -%}
+        <div class="skate-hero__actions skate-hero__rise">
+          {%- if show_button_1 -%}
+            <a class="button skate-hero__button" href="{{ link_1 }}">
+              {{- s.button_label_1 | escape -}}
+              {%- render 'icon', name: 'arrow-right' -%}
+            </a>
+          {%- endif -%}
+          {%- if show_button_2 -%}
+            <a class="button button--secondary skate-hero__button" href="{{ link_2 }}">{{ s.button_label_2 | escape }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="skate-hero__stats skate-hero__rise" role="list">
+          {%- for block in section.blocks -%}
+            <li class="skate-hero__stat" {{ block.shopify_attributes }}>
+              <span class="skate-hero__stat-value">{{ block.settings.value | escape }}</span>
+              <span class="skate-hero__stat-label label-mono">{{ block.settings.label | escape }}</span>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+
+    <div class="skate-hero__visual">
+      <figure class="skate-hero__media">
+        {%- if s.enable_parallax -%}
+          <parallax-media class="skate-hero__parallax" data-strength="36">
+        {%- else -%}
+          <div class="skate-hero__parallax">
+        {%- endif -%}
+        {%- if image -%}
+          {{
+            image
+            | image_url: width: 2400
+            | image_tag:
+              widths: '480, 720, 960, 1200, 1440, 1680, 1920, 2400',
+              sizes: '(min-width: 990px) 50vw, 100vw',
+              loading: 'eager',
+              fetchpriority: 'high',
+              class: 'skate-hero__img',
+              alt: image.alt
+          }}
+        {%- else -%}
+          {% render 'placeholder-skate', kind: 'complete', class: 'skate-hero__placeholder' %}
+        {%- endif -%}
+        {%- if s.enable_parallax -%}
+          </parallax-media>
+        {%- else -%}
+          </div>
+        {%- endif -%}
+        {%- if s.image_caption != blank -%}
+          <figcaption class="skate-hero__caption label-mono">{{ s.image_caption | escape }}</figcaption>
+        {%- endif -%}
+      </figure>
+
+      {%- if s.show_stamp and s.stamp_text != blank -%}
+        <div class="skate-hero__stamp">
+          {% render 'graphic', name: 'stamp', text: s.stamp_text, center: s.stamp_center, id: section.id %}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero (Skate)",
+  "class": "section-skate-hero",
+  "limit": 1,
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Rubrik-Zeile",
+      "default": "No. 01 — Herbst / Winter 26"
+    },
+    {
+      "type": "text",
+      "id": "heading_line_1",
+      "label": "Headline – Zeile 1",
+      "default": "BUILD."
+    },
+    {
+      "type": "text",
+      "id": "heading_line_2",
+      "label": "Headline – Zeile 2",
+      "default": "RIDE."
+    },
+    {
+      "type": "text",
+      "id": "heading_line_3",
+      "label": "Headline – Zeile 3",
+      "default": "REPEAT."
+    },
+    {
+      "type": "checkbox",
+      "id": "accent_dots",
+      "label": "Schlusspunkt in Akzentfarbe",
+      "info": "Färbt einen Punkt am Zeilenende in der Button-Farbe des Farbschemas.",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Decks, Achsen, Rollen und Kugellager von unabhängigen Herstellern – geprüft, kombinierbar und schnell unterwegs. Oder du stellst dein Board Teil für Teil selbst zusammen.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "button_label_1",
+      "label": "Button 1 – Text",
+      "default": "BUILD YOUR BOARD"
+    },
+    {
+      "type": "url",
+      "id": "button_link_1",
+      "label": "Button 1 – Link",
+      "info": "Leer = Seite mit dem Handle „skateboard-builder“."
+    },
+    {
+      "type": "text",
+      "id": "button_label_2",
+      "label": "Button 2 – Text",
+      "default": "SHOP SKATEBOARDS"
+    },
+    {
+      "type": "url",
+      "id": "button_link_2",
+      "label": "Button 2 – Link",
+      "info": "Leer = Kollektion „completes“ (sonst alle Produkte)."
+    },
+    {
+      "type": "header",
+      "content": "Bild"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Bild",
+      "info": "Wird als wichtigstes Bild sofort geladen. Empfohlen: mindestens 1600 px breit."
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Bilddarstellung",
+      "options": [
+        { "value": "cover", "label": "Fläche füllen" },
+        { "value": "contain", "label": "Ganz zeigen" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "text",
+      "id": "image_caption",
+      "label": "Bildunterschrift",
+      "default": "Fig. 01 — Complete 8.25″"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Leichte Parallax-Bewegung",
+      "info": "Entfällt automatisch bei „Bewegung reduzieren“.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Stempel"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stamp",
+      "label": "Runden Stempel zeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "stamp_text",
+      "label": "Umlaufender Text",
+      "info": "Etwa 30–36 Zeichen füllen den Ring.",
+      "default": "BUILD · RIDE · REPEAT · KERBSIDE · "
+    },
+    {
+      "type": "text",
+      "id": "stamp_center",
+      "label": "Text in der Mitte",
+      "info": "Kurz halten, z. B. „26“.",
+      "default": "26"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_desktop",
+      "label": "Bild auf Desktop",
+      "options": [
+        { "value": "image-right", "label": "Rechts" },
+        { "value": "image-left", "label": "Links" }
+      ],
+      "default": "image-right"
+    },
+    {
+      "type": "select",
+      "id": "layout_mobile",
+      "label": "Bild auf Mobilgeräten",
+      "options": [
+        { "value": "image-top", "label": "Über dem Text" },
+        { "value": "image-bottom", "label": "Unter dem Text" }
+      ],
+      "default": "image-bottom"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Höhe auf Desktop",
+      "options": [
+        { "value": "viewport", "label": "Bildschirmhöhe ohne Header" },
+        { "value": "auto", "label": "Nach Inhalt" }
+      ],
+      "default": "viewport"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_grain",
+      "label": "Körnung (Grain)",
+      "info": "Empfohlen nur für dunkle oder farbige Schemata.",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Kennzahl",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Wert",
+          "default": "6 Schritte"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Beschriftung",
+          "default": "zum Complete"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "presets": [
+    {
+      "name": "Hero (Skate)",
+      "blocks": [
+        { "type": "stat", "settings": { "value": "500+", "label": "Teile auf Lager" } },
+        { "type": "stat", "settings": { "value": "6 Schritte", "label": "zum Complete" } },
+        { "type": "stat", "settings": { "value": "100 %", "label": "Passform geprüft" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

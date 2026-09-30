@@ -1,0 +1,53 @@
+{% doc %}
+  Sticker badges for a product: SALE (compare-at), NEW (tag or age), BESTSELLER, LIMITED (tags), SOLD OUT.
+  Tag names come from theme settings (case-insensitive). At most `limit` badges are shown.
+
+  @param {product} product - The product
+  @param {number} [limit] - Maximum badges (default 2)
+
+  @example
+  {% render 'product-badge', product: product %}
+{% enddoc %}
+
+{%- liquid
+  assign limit = limit | default: 2
+  assign tags = product.tags | join: '|' | downcase | split: '|'
+  assign tag_new = settings.badge_tag_new | downcase | strip
+  assign tag_bestseller = settings.badge_tag_bestseller | downcase | strip
+  assign tag_limited = settings.badge_tag_limited | downcase | strip
+
+  assign is_new = false
+  if tag_new != blank and tags contains tag_new
+    assign is_new = true
+  elsif settings.new_badge_days > 0 and product.published_at
+    assign published_s = product.published_at | date: '%s' | plus: 0
+    assign now_s = 'now' | date: '%s' | plus: 0
+    assign age_days = now_s | minus: published_s | divided_by: 86400
+    if age_days <= settings.new_badge_days
+      assign is_new = true
+    endif
+  endif
+
+  assign badges = ''
+  if product.available == false
+    assign badges = badges | append: 'sold-out,'
+  endif
+  if product.compare_at_price_min > product.price_min
+    assign badges = badges | append: 'sale,'
+  endif
+  if is_new
+    assign badges = badges | append: 'new,'
+  endif
+  if tag_bestseller != blank and tags contains tag_bestseller
+    assign badges = badges | append: 'bestseller,'
+  endif
+  if tag_limited != blank and tags contains tag_limited
+    assign badges = badges | append: 'limited,'
+  endif
+  assign badge_list = badges | split: ','
+-%}
+
+{%- for badge in badge_list limit: limit -%}
+  {%- assign badge_key = badge | replace: '-', '_' | prepend: 'products.badges.' -%}
+  <span class="badge badge--sticker badge--{{ badge }}">{{ badge_key | t }}</span>
+{%- endfor -%}

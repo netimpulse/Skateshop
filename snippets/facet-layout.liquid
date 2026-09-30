@@ -1,0 +1,229 @@
+{% doc %}
+  Shared results layout for collection and search pages inside <facet-filters> (assets/facets.js):
+  desktop filter sidebar, mobile filter drawer, toolbar (filter button, result count, sort), active-filter chips,
+  results (passed in as HTML) and numbered pagination. Every [data-facets-part] is swapped after an AJAX update,
+  so the names must stay in sync with facets.js. Without JS everything works as a plain GET form.
+
+  @param {string} section_id - The section id (Section Rendering target)
+  @param {filter[]} filters - collection.filters or search.filters
+  @param {string} action_url - Form action (collection.url or routes.search_url)
+  @param {string} clear_url - URL without filter parameters
+  @param {string} results - Rendered results HTML (grid or empty state)
+  @param {string} results_heading - Visually hidden heading for the results
+  @param {string} count_label - Result count text (HTML-safe)
+  @param {number} count - Number of results (for the drawer button)
+  @param {paginate} paginate - The paginate object
+  @param {boolean} [enable_filtering] - Show filters
+  @param {boolean} [enable_sorting] - Show sorting
+  @param {sort_option[]} [sort_options] - collection.sort_options or search.sort_options
+  @param {string} [sort_by] - Current sort order
+  @param {string} [hidden_filters] - Comma-separated filter.param_name values to hide
+  @param {string} [expand] - all | first | active – expanded groups in the sidebar
+  @param {boolean} [show_counts] - Show counts per filter value
+  @param {string} [terms] - Search terms (search page)
+
+  @example
+  {% render 'facet-layout', section_id: section.id, filters: collection.filters, action_url: collection.url, clear_url: collection.url, results: results, results_heading: heading, count_label: label, count: collection.products_count, paginate: paginate %}
+{% enddoc %}
+
+{%- liquid
+  assign hidden_list = hidden_filters | default: '' | split: ','
+  assign visible_filters = 0
+  assign active_count = 0
+  if enable_filtering
+    for filter in filters
+      if hidden_list contains filter.param_name
+        continue
+      endif
+      assign visible_filters = visible_filters | plus: 1
+    endfor
+  endif
+  for filter in filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != nil or filter.max_value.value != nil
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+
+  assign has_filters = false
+  if visible_filters > 0
+    assign has_filters = true
+  endif
+  assign desktop_form_id = 'FacetsForm-desktop-' | append: section_id
+
+  # The desktop form gets the sort select via form="…"; only keep a hidden sort_by when sorting is off.
+  assign desktop_sort_by = sort_by
+  if enable_sorting and sort_options.size > 0
+    assign desktop_sort_by = ''
+  endif
+-%}
+
+<facet-filters class="facets" data-section-id="{{ section_id }}" data-testid="facets">
+  <div class="facets__layout{% if has_filters %} facets__layout--sidebar{% endif %}">
+    {%- if has_filters -%}
+      <aside class="facets__sidebar" aria-labelledby="FacetsHeading-{{ section_id }}">
+        <h2 class="facets__heading" id="FacetsHeading-{{ section_id }}">{{ 'filters.title' | t }}</h2>
+        <div class="facets__sidebar-body" data-facets-part="sidebar" data-testid="facets-sidebar">
+          {%- render 'filter-sidebar',
+            filters: filters,
+            action_url: action_url,
+            id_prefix: 'desktop',
+            section_id: section_id,
+            hidden_filters: hidden_filters,
+            expand: expand,
+            show_counts: show_counts,
+            sort_by: desktop_sort_by,
+            terms: terms
+          -%}
+        </div>
+      </aside>
+    {%- endif -%}
+
+    <div class="facets__main">
+      <h2 class="visually-hidden" id="ResultsHeading-{{ section_id }}">{{ results_heading }}</h2>
+
+      <div class="facets__toolbar">
+        {%- if has_filters -%}
+          <button
+            type="button"
+            class="facets__open"
+            data-dialog-open="FilterDrawer-{{ section_id }}"
+            aria-haspopup="dialog"
+            aria-controls="FilterDrawer-{{ section_id }}"
+            data-testid="facets-open"
+          >
+            {%- render 'icon', name: 'filter' -%}
+            <span>{{ 'filters.title' | t }}</span>
+            <span class="facets__open-count" data-facets-part="active-count">
+              {%- if active_count > 0 -%}
+                <span class="facets__open-badge">
+                  <span aria-hidden="true">{{ active_count }}</span>
+                  <span class="visually-hidden">{{ 'filters.selected_count' | t: count: active_count }}</span>
+                </span>
+              {%- endif -%}
+            </span>
+          </button>
+        {%- endif -%}
+
+        <p
+          class="facets__count"
+          id="ResultsCount-{{ section_id }}"
+          tabindex="-1"
+          data-facets-part="count"
+          data-facets-focus
+          data-testid="facets-count"
+        >
+          {{- count_label -}}
+        </p>
+
+        {%- if enable_sorting and sort_options.size > 0 -%}
+          {%- assign current_sort = sort_by -%}
+          <div class="facets__sort" data-facets-part="sort">
+            {%- capture sort_field -%}
+              <label class="facets__sort-label" for="SortBy-{{ section_id }}">{{ 'filters.sort_by' | t }}</label>
+              <span class="select facets__select">
+                <select
+                  class="select__select"
+                  id="SortBy-{{ section_id }}"
+                  name="sort_by"
+                  {% if has_filters %}
+                    form="{{ desktop_form_id }}"
+                  {% endif %}
+                  data-facets-sort
+                  data-testid="facets-sort"
+                >
+                  {%- for option in sort_options -%}
+                    <option
+                      value="{{ option.value | escape }}"
+                      {% if option.value == current_sort %}
+                        selected
+                      {% endif %}
+                    >
+                      {{- option.name | escape -}}
+                    </option>
+                  {%- endfor -%}
+                </select>
+                {%- render 'icon', name: 'chevron-down' -%}
+              </span>
+            {%- endcapture -%}
+
+            {%- if has_filters -%}
+              {{ sort_field }}
+              <button type="submit" form="{{ desktop_form_id }}" class="button button--small facets-form__submit">
+                {{- 'filters.sort_submit' | t -}}
+              </button>
+            {%- else -%}
+              <form class="facets__sort-form" action="{{ action_url }}" method="get" data-facets-form>
+                {%- if terms != blank -%}
+                  <input type="hidden" name="q" value="{{ terms | escape }}">
+                  <input type="hidden" name="options[prefix]" value="last">
+                {%- endif -%}
+                {{ sort_field }}
+                <button type="submit" class="button button--small facets-form__submit">{{ 'filters.sort_submit' | t }}</button>
+              </form>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="facets__chips" data-facets-part="chips" data-testid="facets-chips">
+        {%- render 'filter-chips', filters: filters, clear_url: clear_url -%}
+      </div>
+
+      <div class="facets__results" id="FacetsResults-{{ section_id }}" data-facets-part="results" data-testid="facets-results">
+        {{ results }}
+      </div>
+
+      <div class="facets__pagination" data-facets-part="pagination">
+        {%- render 'pagination', paginate: paginate -%}
+      </div>
+    </div>
+  </div>
+
+  {%- if has_filters -%}
+    <dialog
+      class="drawer drawer--left facets-drawer"
+      id="FilterDrawer-{{ section_id }}"
+      aria-labelledby="FilterDrawerTitle-{{ section_id }}"
+      data-backdrop-close
+      data-testid="facets-drawer"
+    >
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="FilterDrawerTitle-{{ section_id }}">{{ 'filters.title' | t }}</h2>
+        <button type="button" class="icon-button" data-dialog-close aria-label="{{ 'accessibility.close' | t }}">
+          {%- render 'icon', name: 'close' -%}
+        </button>
+      </div>
+      <div class="drawer__body facets-drawer__body" data-facets-part="drawer">
+        {%- render 'filter-sidebar',
+          filters: filters,
+          action_url: action_url,
+          id_prefix: 'drawer',
+          section_id: section_id,
+          hidden_filters: hidden_filters,
+          expand: 'active',
+          show_counts: show_counts,
+          sort_by: sort_by,
+          terms: terms
+        -%}
+      </div>
+      <div class="drawer__footer facets-drawer__footer">
+        <a
+          class="button button--secondary facets-drawer__reset"
+          id="FacetsReset-{{ section_id }}"
+          href="{{ clear_url }}"
+          data-facets-link
+          data-testid="facets-drawer-reset"
+        >
+          {{- 'filters.reset' | t -}}
+        </a>
+        <button type="button" class="button facets-drawer__apply" data-dialog-close data-testid="facets-drawer-apply">
+          <span data-facets-part="drawer-count">{{ 'filters.show_results' | t: count: count }}</span>
+        </button>
+      </div>
+    </dialog>
+  {%- endif -%}
+</facet-filters>

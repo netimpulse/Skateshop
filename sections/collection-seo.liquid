@@ -1,0 +1,130 @@
+{%- comment -%}
+  Long SEO text below the product grid: collection.metafields.custom.seo_text (rich text) or the section's
+  fallback text. Collapsed with a "read more" disclosure (<details>); renders nothing without content.
+{%- endcomment -%}
+
+{%- liquid
+  assign seo_text = ''
+  if collection.metafields.custom.seo_text != blank
+    assign seo_text = collection.metafields.custom.seo_text | metafield_tag
+  elsif section.settings.text != blank
+    assign seo_text = section.settings.text
+  endif
+
+  if section.settings.heading != blank
+    assign heading = section.settings.heading
+  else
+    assign heading = 'collections.seo.heading' | t: title: collection.title
+  endif
+-%}
+
+{%- if seo_text != blank -%}
+  {{ 'section-collection.css' | asset_url | stylesheet_tag }}
+
+  {% render 'section-style',
+    section_id: section.id,
+    padding_top: section.settings.padding_top,
+    padding_bottom: section.settings.padding_bottom
+  %}
+
+  <section
+    class="section collection-seo scheme color-{{ section.settings.color_scheme }}"
+    data-section-id="{{ section.id }}"
+    aria-labelledby="SeoHeading-{{ section.id }}"
+    data-testid="collection-seo"
+  >
+    <div class="page-width">
+      <div class="collection-seo__inner">
+        <h2 class="collection-seo__heading h4" id="SeoHeading-{{ section.id }}">{{ heading }}</h2>
+
+        {%- if section.settings.collapsed -%}
+          {%- assign teaser = seo_text | strip_html | truncatewords: section.settings.teaser_words -%}
+          <p class="collection-seo__teaser" aria-hidden="true">{{ teaser }}</p>
+          <details class="collection-seo__details">
+            <summary class="collection-seo__toggle">
+              <span class="collection-seo__more">{{ 'collections.seo.read_more' | t }}</span>
+              <span class="collection-seo__less">{{ 'collections.seo.read_less' | t }}</span>
+              {%- render 'icon', name: 'chevron-down', class: 'collection-seo__icon' -%}
+            </summary>
+            <div class="collection-seo__text rte">{{ seo_text }}</div>
+          </details>
+        {%- else -%}
+          <div class="collection-seo__text rte">{{ seo_text }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Kategorie-SEO-Text",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Zeigt das Collection-Metafeld custom.seo_text (Rich Text). Ist es leer, wird der Ersatztext unten genutzt; ohne Text bleibt die Section unsichtbar."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "info": "Leer lassen für „Mehr über <Kategorie>“."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Ersatztext"
+    },
+    {
+      "type": "checkbox",
+      "id": "collapsed",
+      "label": "Eingeklappt mit „Mehr lesen“",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "teaser_words",
+      "label": "Wörter im Anriss",
+      "min": 15,
+      "max": 80,
+      "step": 5,
+      "default": 35,
+      "visible_if": "{{ section.settings.collapsed }}"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Kategorie-SEO-Text"
+    }
+  ]
+}
+{% endschema %}

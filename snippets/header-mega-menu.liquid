@@ -1,0 +1,155 @@
+{% doc %}
+  Mega menu panel for a top-level menu item with children. Disclosure panel: hidden until
+  <disclosure-nav> (theme.js) sets aria-expanded on the trigger button and removes `hidden`.
+  Children without own children are grouped into one column; children with children become titled
+  columns (A, B, C …). A `mega_promo` block whose "Menüpunkt" equals the item title adds a feature tile.
+
+  @param {object} link - Top-level menu link (with link.links)
+  @param {string} panel_id - Unique panel id (the trigger's aria-controls target)
+  @param {number} index - Position of the item in the main menu (mono index)
+  @param {number} total - Number of top-level items in the main menu
+  @param {object} blocks - section.blocks of the header (mega_promo blocks)
+
+  @example
+  {% render 'header-mega-menu', link: link, panel_id: panel_id, index: forloop.index, total: forloop.length, blocks: section.blocks %}
+{% enddoc %}
+
+{%- liquid
+  assign title_key = link.title | strip | downcase
+  assign promo = nil
+  for block in blocks
+    if block.type == 'mega_promo'
+      assign promo_key = block.settings.menu_item | strip | downcase
+      if promo_key == title_key
+        assign promo = block
+        break
+      endif
+    endif
+  endfor
+
+  assign letters = 'A,B,C,D,E,F,G,H,I,J,K,L' | split: ','
+  assign leaf_count = 0
+  for child in link.links
+    if child.links.size == 0
+      assign leaf_count = leaf_count | plus: 1
+    endif
+  endfor
+
+  assign index_padded = index | prepend: '0' | slice: -2, 2
+  assign total_padded = total | prepend: '0' | slice: -2, 2
+  assign view_all_label = 'header.mega.view_all' | t: title: link.title
+  assign categories_label = 'header.mega.categories' | t
+  assign letter_index = 0
+-%}
+
+<div id="{{ panel_id }}" class="mega-menu" hidden data-testid="mega-panel">
+  <div class="page-width mega-menu__inner{% if promo %} mega-menu__inner--promo{% endif %}">
+    <div class="mega-menu__intro">
+      <p class="mega-menu__index label-mono" aria-hidden="true">
+        <span class="mega-menu__index-number">{{ index_padded }}</span>
+        <span>/</span>
+        <span>{{ total_padded }}</span>
+      </p>
+      <p class="mega-menu__title h3">{{ link.title | escape }}</p>
+      {%- liquid
+        assign label_words = view_all_label | split: ' '
+        assign label_last = label_words | last
+        assign label_head_size = label_words.size | minus: 1
+      -%}
+      <a href="{{ link.url }}" class="mega-menu__all link-mono">
+        {%- for word in label_words limit: label_head_size -%}{{ word }} {% endfor -%}
+        <span class="mega-menu__nowrap">
+          {{- label_last -}}
+          {%- render 'icon', name: 'arrow-right' -%}
+        </span>
+      </a>
+    </div>
+
+    <div class="mega-menu__columns">
+      {%- if leaf_count > 0 -%}
+        <div class="mega-menu__col{% if leaf_count > 4 %} mega-menu__col--split{% endif %}">
+          <p class="mega-menu__heading">
+            <span class="mega-menu__letter" aria-hidden="true">{{ letters[letter_index] }}</span>
+            <span>{{ categories_label }}</span>
+          </p>
+          <ul class="mega-menu__list" role="list">
+            {%- for child in link.links -%}
+              {%- if child.links.size == 0 -%}
+                <li>
+                  <a
+                    href="{{ child.url }}"
+                    class="mega-menu__link"
+                    {% if child.current %}
+                      aria-current="page"
+                    {% endif %}
+                  >
+                    {{- child.title | escape -}}
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+        {%- assign letter_index = letter_index | plus: 1 -%}
+      {%- endif -%}
+
+      {%- for child in link.links -%}
+        {%- if child.links.size > 0 -%}
+          <div class="mega-menu__col">
+            <p class="mega-menu__heading">
+              <span class="mega-menu__letter" aria-hidden="true">{{ letters[letter_index] }}</span>
+              <a href="{{ child.url }}" class="mega-menu__heading-link">{{ child.title | escape }}</a>
+            </p>
+            <ul class="mega-menu__list" role="list">
+              {%- for grandchild in child.links -%}
+                <li>
+                  <a
+                    href="{{ grandchild.url }}"
+                    class="mega-menu__link"
+                    {% if grandchild.current %}
+                      aria-current="page"
+                    {% endif %}
+                  >
+                    {{- grandchild.title | escape -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+          {%- assign letter_index = letter_index | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if promo -%}
+      <div class="mega-menu__promo" {{ promo.shopify_attributes }}>
+        {%- render 'image',
+          image: promo.settings.image,
+          ratio: '4 / 5',
+          sizes: '(min-width: 1200px) 200px, 16vw',
+          widths: '200, 300, 400, 500',
+          max_width: 500,
+          class: 'mega-menu__promo-media',
+          placeholder: 'deck'
+        -%}
+        <div class="mega-menu__promo-body">
+          {%- if promo.settings.eyebrow != blank -%}
+            <p class="label-mono mega-menu__promo-eyebrow">{{ promo.settings.eyebrow | escape }}</p>
+          {%- endif -%}
+          {%- if promo.settings.heading != blank -%}
+            <p class="h4 mega-menu__promo-heading">{{ promo.settings.heading | escape }}</p>
+          {%- endif -%}
+          {%- if promo.settings.text != blank -%}
+            <p class="mega-menu__promo-text">{{ promo.settings.text | escape }}</p>
+          {%- endif -%}
+          {%- if promo.settings.link != blank and promo.settings.link_label != blank -%}
+            <a href="{{ promo.settings.link }}" class="link-mono mega-menu__promo-link">
+              <span>{{ promo.settings.link_label | escape }}</span>
+              {%- render 'icon', name: 'arrow-right' -%}
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>

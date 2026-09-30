@@ -9,13 +9,13 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests",
-  testIgnore: ["**/global-setup.ts", "**/fixtures.ts"],
+  testIgnore: ["**/global-setup.ts", "**/fixtures.ts", "**/unit/**"],
   timeout: 30_000,
   retries: 1,
   reporter: [["list"], ["html", { open: "never" }]],
   globalSetup: "./tests/global-setup.ts",
   use: {
-    baseURL: "https://__STORE_DOMAIN__.myshopify.com",
+    baseURL: "https://dev-store-4ogqgshg.myshopify.com",
     storageState: "playwright/.auth/storefront.json",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -23,6 +23,6 @@ export default defineConfig({
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
-    { name: "mobile",  use: { ...devices["iPhone 13"] } },
+    { name: "mobile",  use: { ...devices["iPhone 13"], browserName: "chromium" } },
   ],
 });

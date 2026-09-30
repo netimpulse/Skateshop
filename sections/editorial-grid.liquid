@@ -1,0 +1,293 @@
+{%- comment -%}
+  Editorial / skate culture: magazine layout of "story" blocks in a hairline grid
+  (desktop: large stories on the left, small stories stacked on the right).
+{%- endcomment -%}
+{{ 'section-editorial-grid.css' | asset_url | stylesheet_tag }}
+{% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
+
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'Heading-' | append: section.id
+  assign large_count = 0
+  for block in section.blocks
+    if block.settings.size == 'large'
+      assign large_count = large_count | plus: 1
+    endif
+  endfor
+  assign layout_class = 'editorial-grid__grid--magazine'
+  if large_count == 0 or large_count == section.blocks.size
+    assign layout_class = 'editorial-grid__grid--even'
+  endif
+-%}
+
+{%- capture focal_styles -%}
+  {%- for block in section.blocks -%}
+    {%- if block.settings.image.presentation.focal_point != blank -%}
+      #shopify-section-{{ section.id }} [data-story="{{ block.id }}"] .editorial-grid__image { object-position: {{ block.settings.image.presentation.focal_point }}; }
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- if focal_styles != blank -%}
+  {% style %}{{ focal_styles }}{% endstyle %}
+{%- endif -%}
+
+<section
+  class="section editorial-grid scheme color-{{ s.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-testid="home-editorial-grid"
+  {% if s.heading != blank %}
+    aria-labelledby="{{ heading_id }}"
+  {% endif %}
+>
+  <div class="page-width">
+    {% render 'section-heading',
+      eyebrow: s.eyebrow,
+      index: s.index,
+      heading: s.heading,
+      heading_id: heading_id,
+      text: s.text,
+      link_label: s.link_label,
+      link_url: s.link_url
+    %}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="editorial-grid__grid {{ layout_class }}">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign story = block.settings
+            if story.size == 'large'
+              assign sizes = '(min-width: 990px) 58vw, 100vw'
+            else
+              assign sizes = '(min-width: 990px) 21vw, (min-width: 750px) 50vw, 40vw'
+            endif
+          -%}
+          <article
+            class="editorial-grid__story editorial-grid__story--{{ story.size }} reveal"
+            data-story="{{ block.id }}"
+            data-reveal-index="{{ forloop.index0 | modulo: 3 }}"
+            {{ block.shopify_attributes }}
+          >
+            <div class="editorial-grid__media media">
+              {%- if story.image != blank -%}
+                {{
+                  story.image
+                  | image_url: width: 1800
+                  | image_tag:
+                    widths: '320, 480, 640, 800, 1000, 1200, 1500, 1800',
+                    sizes: sizes,
+                    loading: 'lazy',
+                    class: 'editorial-grid__image',
+                    alt: story.image.alt
+                }}
+              {%- else -%}
+                {% render 'placeholder-skate', kind: 'generic', class: 'editorial-grid__placeholder' %}
+              {%- endif -%}
+            </div>
+
+            <div class="editorial-grid__body">
+              {%- if story.eyebrow != blank or story.meta != blank -%}
+                <p class="editorial-grid__meta label-mono">
+                  {%- if story.eyebrow != blank -%}
+                    <span class="editorial-grid__eyebrow">{{ story.eyebrow | escape }}</span>
+                  {%- endif -%}
+                  {%- if story.meta != blank -%}
+                    <span>{{ story.meta | escape }}</span>
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+
+              {%- if story.heading != blank -%}
+                <h3 class="editorial-grid__title">
+                  {%- if story.link_url != blank -%}
+                    <a class="editorial-grid__link" href="{{ story.link_url }}">{{ story.heading | escape }}</a>
+                  {%- else -%}
+                    {{ story.heading | escape }}
+                  {%- endif -%}
+                </h3>
+              {%- endif -%}
+
+              {%- if story.text != blank -%}
+                <p class="editorial-grid__text">{{ story.text | escape }}</p>
+              {%- endif -%}
+
+              {%- if story.link_url != blank and story.link_label != blank -%}
+                <p class="editorial-grid__more label-mono" aria-hidden="true">
+                  <span>{{ story.link_label | escape }}</span>
+                  {%- render 'icon', name: 'arrow-right' -%}
+                </p>
+              {%- endif -%}
+            </div>
+          </article>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Editorial",
+  "class": "section-editorial-grid",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "index",
+      "label": "Rubrik-Nummer",
+      "default": "05"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Rubrik",
+      "default": "Journal"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Skate Culture"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link-Text",
+      "default": "Zum Journal"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "story",
+      "name": "Story",
+      "settings": [
+        {
+          "type": "select",
+          "id": "size",
+          "label": "Größe",
+          "options": [
+            { "value": "large", "label": "Groß" },
+            { "value": "small", "label": "Klein" }
+          ],
+          "default": "small"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Bild"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Rubrik",
+          "default": "Reportage"
+        },
+        {
+          "type": "text",
+          "id": "meta",
+          "label": "Zusatz",
+          "info": "Z. B. Lesezeit.",
+          "default": "5 Min."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Überschrift",
+          "default": "Titel der Story"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Kurztext"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link-Text",
+          "default": "Weiterlesen"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Editorial",
+      "blocks": [
+        {
+          "type": "story",
+          "settings": {
+            "size": "large",
+            "eyebrow": "Reportage",
+            "meta": "8 Min.",
+            "heading": "Concrete Diaries: Ein Sommer zwischen den DIY-Spots",
+            "text": "Sechs Crews, zwei Tonnen Zement und eine Quarterpipe, die dreimal abgerissen wurde."
+          }
+        },
+        {
+          "type": "story",
+          "settings": {
+            "size": "small",
+            "eyebrow": "Guide",
+            "meta": "5 Min.",
+            "heading": "Welche Deckbreite passt zu dir?",
+            "text": "Schuhgröße, Terrain, Style – der Größenratgeber in drei Fragen."
+          }
+        },
+        {
+          "type": "story",
+          "settings": {
+            "size": "small",
+            "eyebrow": "Interview",
+            "meta": "12 Min.",
+            "heading": "Zwei Jahrzehnte Urethan",
+            "text": "Zu Besuch in einer kleinen Rollen-Gießerei."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -9,14 +9,87 @@
  */
 {
   "type": "header",
-  "name": "t:general.header",
+  "name": "Header",
   "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "announcement-builder": {
+          "type": "announcement",
+          "settings": {
+            "text": "Board-Builder: <strong>dein Setup in 6 Schritten</strong>",
+            "link": "shopify://pages/skateboard-builder"
+          }
+        },
+        "announcement-shipping": {
+          "type": "announcement",
+          "settings": {
+            "text": "Bestellt bis 14 Uhr – <strong>heute unterwegs</strong>",
+            "link": ""
+          }
+        },
+        "announcement-returns": {
+          "type": "announcement",
+          "settings": {
+            "text": "30 Tage Rückgabe · Kompatibilitäts-Check inklusive",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "announcement-builder",
+        "announcement-shipping",
+        "announcement-returns"
+      ],
+      "settings": {
+        "color_scheme": "scheme-3",
+        "mobile_layout": "scroll"
+      }
+    },
     "header": {
       "type": "header",
-      "settings": {}
+      "blocks": {
+        "mega-promo-decks": {
+          "type": "mega_promo",
+          "settings": {
+            "menu_item": "Decks",
+            "eyebrow": "Neu im Shop",
+            "heading": "Sechs Motive, ein Shape",
+            "text": "7-lagiger Ahorn, Medium Concave – direkt im Builder kombinierbar.",
+            "link_label": "Decks entdecken",
+            "link": "shopify://collections/decks"
+          }
+        },
+        "mega-promo-skateboards": {
+          "type": "mega_promo",
+          "settings": {
+            "menu_item": "Skateboards",
+            "eyebrow": "Board-Builder",
+            "heading": "Dein Board. Deine Regeln.",
+            "text": "Deck, Achsen, Rollen, Kugellager – Schritt für Schritt mit Kompatibilitäts-Check.",
+            "link_label": "Jetzt bauen",
+            "link": "shopify://pages/skateboard-builder"
+          }
+        }
+      },
+      "block_order": [
+        "mega-promo-decks",
+        "mega-promo-skateboards"
+      ],
+      "settings": {
+        "menu": "skate-main-menu",
+        "highlight_item": "Konfigurator",
+        "sticky": true,
+        "color_scheme": "scheme-1",
+        "show_account": true,
+        "cta_label": "Board bauen",
+        "cta_link": "shopify://pages/skateboard-builder",
+        "popular_searches": "Decks, Trucks, Wheels, Griptape"
+      }
     }
   },
   "order": [
+    "announcement-bar",
     "header"
-  ],
+  ]
 }

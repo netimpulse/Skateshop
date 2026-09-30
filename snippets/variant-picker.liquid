@@ -1,0 +1,137 @@
+{% doc %}
+  Variant picker for the product page. Color options (farbe/color/colour) render as swatches, all other options
+  (Breite 8.0"/8.25"/8.5", Durchmesser, Länge …) as square pills. Values stay selectable when sold out or not
+  combinable – they are struck through and carry a screen-reader hint.
+  The variant JSON (id, title, options, availability, prices, featured media, SKU, stock hint, quantity rule,
+  specs per variant)
+  lets product.js (<variant-picker>) switch variants without a fetch. Renders nothing for default-only products.
+
+  @param {product} product - The product
+  @param {string} section_id - Section id (scopes ids and events)
+  @param {string} [spec_keys] - Comma-separated spec keys to resolve per variant (see product-kind)
+  @param {number} [threshold] - Low-stock threshold for the stock hint
+  @param {string} [size_guide_url] - Optional link to a size guide
+  @param {string} [size_guide_label] - Link text for the size guide (already escaped)
+  @param {string} [class] - Extra class
+
+  @example
+  {% render 'variant-picker', product: product, section_id: section.id, spec_keys: 'deck_width,deck_length', threshold: 5 %}
+{% enddoc %}
+
+{%- unless product.has_only_default_variant -%}
+  {%- liquid
+    assign key_list = spec_keys | default: '' | split: ','
+    assign text_sold_out = 'products.product.value_sold_out' | t
+    assign text_unavailable = 'products.product.value_unavailable' | t
+  -%}
+
+  <variant-picker
+    class="product-picker {{ class }}"
+    data-section-id="{{ section_id }}"
+    data-text-sold-out="{{ text_sold_out }}"
+    data-text-unavailable="{{ text_unavailable }}"
+    data-testid="variant-picker"
+  >
+    {%- for option in product.options_with_values -%}
+      {%- liquid
+        assign option_index = forloop.index0
+        assign option_name = option.name | downcase | strip
+        assign is_color = false
+        if option_name == 'farbe' or option_name == 'color' or option_name == 'colour'
+          assign is_color = true
+        endif
+      -%}
+      <fieldset
+        class="product-picker__option{% if is_color %} product-picker__option--color{% endif %}"
+        data-option-index="{{ option_index }}"
+      >
+        <legend class="product-picker__legend label-mono">
+          <span class="product-picker__name">{{ option.name | escape }}</span>
+          <span class="product-picker__selected" data-selected-value>{{ option.selected_value | escape }}</span>
+        </legend>
+        <div class="product-picker__values">
+          {%- for value in option.values -%}
+            {%- assign input_id = 'Option-' | append: section_id | append: '-' | append: option_index | append: '-' | append: forloop.index0 -%}
+            <input
+              type="radio"
+              class="product-picker__input visually-hidden"
+              id="{{ input_id }}"
+              name="Option-{{ section_id }}-{{ option_index }}"
+              value="{{ value | escape }}"
+              {% if value.selected %}
+                checked
+              {% endif %}
+            >
+            <label
+              for="{{ input_id }}"
+              class="product-picker__value{% if is_color %} product-picker__value--swatch{% endif %}{% unless value.available %} is-unavailable{% endunless %}"
+            >
+              {%- if is_color -%}
+                {%- render 'swatch', value: value, class: 'product-picker__swatch' -%}
+              {%- else -%}
+                <span class="product-picker__text">{{ value | escape }}</span>
+              {%- endif -%}
+              <span class="visually-hidden" data-value-hint>
+                {%- unless value.available %}, {{ text_sold_out }}{% endunless -%}
+              </span>
+            </label>
+          {%- endfor -%}
+        </div>
+      </fieldset>
+    {%- endfor -%}
+
+    {%- if size_guide_url != blank -%}
+      <a class="product-picker__guide link-mono" href="{{ size_guide_url }}">
+        {{- size_guide_label -}}
+        {%- render 'icon', name: 'arrow-up-right' -%}
+      </a>
+    {%- endif -%}
+
+    <script type="application/json" data-variant-json>
+      [
+        {%- for variant in product.variants -%}
+          {%- capture stock -%}{%- render 'product-stock-state', variant: variant, threshold: threshold -%}{%- endcapture -%}
+          {%- liquid
+            assign stock_parts = stock | strip | split: ':'
+            assign stock_count = nil
+            if stock_parts.size > 1
+              assign stock_count = stock_parts[1] | plus: 0
+            endif
+            assign unit_text = ''
+            if variant.unit_price
+              assign unit_text = variant.unit_price | money | strip_html | append: '/'
+              if variant.unit_price_measurement.reference_value != 1
+                assign unit_text = unit_text | append: variant.unit_price_measurement.reference_value
+              endif
+              assign unit_text = unit_text | append: variant.unit_price_measurement.reference_unit
+            endif
+          -%}
+          {
+            "id": {{ variant.id | json }},
+            "title": {{ variant.title | json }},
+            "options": {{ variant.options | json }},
+            "available": {{ variant.available | json }},
+            "price": {{ variant.price | json }},
+            "compare_at_price": {{ variant.compare_at_price | json }},
+            "unit_price": {{ unit_text | json }},
+            "featured_media": {{ variant.featured_media.id | json }},
+            "sku": {{ variant.sku | json }},
+            "stock": {{ stock_parts[0] | json }},
+            "stock_count": {{ stock_count | json }},
+            "quantity_rule": {
+              "min": {{ variant.quantity_rule.min | default: 1 | json }},
+              "increment": {{ variant.quantity_rule.increment | default: 1 | json }},
+              "max": {{ variant.quantity_rule.max | json }}
+            },
+            "specs": {
+              {%- for key in key_list -%}
+                {%- capture spec_value -%}{%- render 'product-spec-value', product: product, variant: variant, key: key, raw: true -%}{%- endcapture -%}
+                {{ key | json }}: {{ spec_value | strip | json }}{% unless forloop.last %},{% endunless %}
+              {%- endfor -%}
+            }
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    </script>
+  </variant-picker>
+{%- endunless -%}

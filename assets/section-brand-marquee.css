@@ -1,0 +1,238 @@
+/* Brand marquee (sections/brand-marquee.liquid). Motion via CSS, pause state via <marquee-strip> (theme.js). */
+.brand-marquee {
+  --marquee-rule: var(--border-width) solid var(--color-border);
+  border-block: var(--marquee-rule);
+}
+
+.brand-marquee__strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label toggle'
+    'view view';
+  align-items: center;
+}
+
+/* ---------------------------------------------------------------- Label & toggle */
+.brand-marquee__label {
+  grid-area: label;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-s);
+  padding: var(--space-s) var(--page-margin);
+  border-block-end: var(--marquee-rule);
+}
+
+.brand-marquee__heading {
+  display: flex;
+  gap: var(--space-xs);
+  font-family: var(--font-mono-family);
+  font-weight: var(--font-mono-weight);
+  font-size: var(--text-mono);
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-marquee__count {
+  color: var(--color-text-muted);
+}
+
+.brand-marquee__toggle {
+  grid-area: toggle;
+  align-self: stretch;
+  min-width: 3rem;
+  border-inline-start: var(--marquee-rule);
+  border-block-end: var(--marquee-rule);
+}
+
+.brand-marquee__toggle .icon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.brand-marquee__toggle:hover {
+  background-color: var(--color-text);
+  color: var(--color-background);
+}
+
+.brand-marquee__toggle:focus-visible {
+  outline-offset: -3px;
+}
+
+.brand-marquee__icon-play,
+.is-paused .brand-marquee__icon-pause {
+  display: none;
+}
+
+.is-paused .brand-marquee__icon-play {
+  display: block;
+}
+
+/* ---------------------------------------------------------------- Track */
+.brand-marquee__viewport {
+  grid-area: view;
+  min-width: 0;
+  overflow: hidden;
+  padding-block: var(--space-m);
+}
+
+.brand-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: brand-marquee var(--marquee-duration, 45s) linear infinite;
+}
+
+.brand-marquee--right .brand-marquee__track {
+  animation-direction: reverse;
+}
+
+/* Paused by the toggle, while the pointer rests on the names, or while a brand link has keyboard focus. */
+.is-paused .brand-marquee__track,
+.brand-marquee__viewport:hover .brand-marquee__track,
+.brand-marquee__viewport:has(:focus-visible) .brand-marquee__track {
+  animation-play-state: paused;
+}
+
+.brand-marquee__list {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.brand-marquee__item {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.brand-marquee__item::after {
+  content: '';
+  flex: none;
+  margin-inline: clamp(1.25rem, 0.8rem + 1.6vw, 2.25rem);
+}
+
+.brand-marquee__name {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: clamp(1.625rem, 1.15rem + 2vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--duration-short);
+}
+
+a.brand-marquee__name:hover {
+  color: var(--color-link);
+}
+
+a.brand-marquee__name:focus-visible {
+  outline-offset: 4px;
+}
+
+.brand-marquee__logo {
+  width: auto;
+  height: clamp(1.75rem, 1.4rem + 1.4vw, 2.75rem);
+  filter: grayscale(1);
+}
+
+/* Separators */
+.brand-marquee--sep-diamond .brand-marquee__item::after {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1.5px solid var(--color-button);
+  transform: rotate(45deg);
+}
+
+.brand-marquee--sep-dot .brand-marquee__item::after {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-button);
+}
+
+.brand-marquee--sep-slash .brand-marquee__item::after {
+  content: '/';
+  font-family: var(--font-mono-family);
+  font-size: 1.5rem;
+  color: var(--color-button);
+}
+
+.brand-marquee__empty {
+  padding-inline: var(--page-margin);
+}
+
+@keyframes brand-marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ---------------------------------------------------------------- Desktop: one row */
+@media (min-width: 750px) {
+  .brand-marquee__strip {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'label view toggle';
+  }
+
+  .brand-marquee__label {
+    flex-direction: column;
+    align-self: stretch;
+    justify-content: center;
+    gap: 0.15rem;
+    padding-block: var(--space-m);
+    border-block-end: 0;
+    border-inline-end: var(--marquee-rule);
+  }
+
+  .brand-marquee__toggle {
+    min-width: 3.5rem;
+    border-block-end: 0;
+  }
+
+  .brand-marquee__viewport {
+    padding-block: var(--space-l);
+  }
+}
+
+/* ---------------------------------------------------------------- Reduced motion: static, wrapping list */
+@media (prefers-reduced-motion: reduce) {
+  .brand-marquee__track {
+    width: auto;
+    animation: none;
+  }
+
+  .brand-marquee__list {
+    flex-wrap: wrap;
+    row-gap: var(--space-s);
+    padding-inline: var(--page-margin);
+  }
+
+  .brand-marquee__list--clone,
+  .brand-marquee__item--repeat,
+  .brand-marquee__toggle {
+    display: none;
+  }
+
+  .brand-marquee__strip {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'label'
+      'view';
+  }
+
+  .brand-marquee__name {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 750px) {
+  .brand-marquee__strip {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'label view';
+  }
+}

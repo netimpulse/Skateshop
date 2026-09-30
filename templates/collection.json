@@ -9,12 +9,51 @@
  */
 {
   "sections": {
+    "header": {
+      "type": "collection-header",
+      "settings": {
+        "layout": "compact",
+        "title_size": "h1",
+        "eyebrow": "Kategorie",
+        "show_breadcrumbs": true,
+        "show_description": true,
+        "show_count": true,
+        "show_banner": true,
+        "banner_ratio": "21 / 9",
+        "color_scheme": "scheme-1",
+        "padding_top": 32,
+        "padding_bottom": 24
+      }
+    },
     "main": {
       "type": "collection",
-      "settings": {}
+      "settings": {
+        "products_per_page": 24,
+        "columns_desktop": "3",
+        "columns_mobile": "2",
+        "enable_filtering": true,
+        "filters_expanded": "first",
+        "show_filter_counts": true,
+        "enable_sorting": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 16,
+        "padding_bottom": 64
+      }
+    },
+    "seo": {
+      "type": "collection-seo",
+      "settings": {
+        "collapsed": true,
+        "teaser_words": 35,
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 80
+      }
     }
   },
   "order": [
-    "main"
+    "header",
+    "main",
+    "seo"
   ]
 }

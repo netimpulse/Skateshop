@@ -1,47 +1,224 @@
-{% comment %}
-  This section is used in the collection template to render collection page
-  listing all products within a collection.
+{%- comment -%}
+  Collection main area: storefront filters (desktop sidebar / mobile drawer), sorting, active-filter chips,
+  product grid and numbered pagination. AJAX updates via <facet-filters> (assets/facets.js, Section Rendering
+  with this section's id); without JS the filters work as a plain GET form.
+  Filters whose param_name is listed in collection.metafields.custom.hidden_filters are hidden.
+{%- endcomment -%}
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
-{% endcomment %}
+{{ 'section-collection.css' | asset_url | stylesheet_tag }}
+{{ 'component-facets.css' | asset_url | stylesheet_tag }}
+<script type="module" src="{{ 'facets.js' | asset_url }}"></script>
 
-<h1>{{ collection.title }}</h1>
+{% render 'section-style',
+  section_id: section.id,
+  padding_top: section.settings.padding_top,
+  padding_bottom: section.settings.padding_bottom
+%}
 
-<div class="collection-products">
-  {% paginate collection.products by 20 %}
-    {% for product in collection.products %}
-      <div class="collection-product">
-        {% if product.featured_image %}
-          {% render 'image',
-            class: 'collection-product__image',
-            image: product.featured_image,
-            url: product.url,
-            width: 400,
-            height: 400,
-            crop: 'center'
-          %}
-        {% endif %}
-        <div class="collection-product__content">
-          <p>{{ product.title | escape | link_to: product.url }}</p>
-          <p>{{ product.price | money }}</p>
-        </div>
-      </div>
-    {% endfor %}
+{%- liquid
+  assign hidden_filters = collection.metafields.custom.hidden_filters.value | join: ','
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
 
-    {{ paginate | default_pagination }}
-  {% endpaginate %}
-</div>
+  assign clear_url = collection.url
+  if collection.sort_by != blank
+    assign sort_param = collection.sort_by | url_encode
+    assign clear_url = collection.url | append: '?sort_by=' | append: sort_param
+  endif
 
-{% stylesheet %}
-  .collection-products {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-  }
-{% endstylesheet %}
+  assign columns_desktop = section.settings.columns_desktop | plus: 0
+  assign columns_mobile = section.settings.columns_mobile | plus: 0
+  if columns_desktop == 4
+    assign card_sizes = '(min-width: 1200px) 260px, (min-width: 990px) 28vw, '
+  else
+    assign card_sizes = '(min-width: 1200px) 340px, (min-width: 990px) 28vw, '
+  endif
+  if columns_mobile == 1
+    assign card_sizes = card_sizes | append: '(min-width: 750px) 50vw, 100vw'
+  else
+    assign card_sizes = card_sizes | append: '(min-width: 750px) 33vw, 50vw'
+  endif
+
+  assign results_heading = 'collections.products_heading' | t
+-%}
+
+<section
+  class="section collection-main scheme color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  aria-labelledby="ResultsHeading-{{ section.id }}"
+>
+  <div class="page-width">
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      {%- liquid
+        assign count_label = 'collections.product_count' | t: count: collection.products_count
+        assign has_active_filters = false
+        for filter in collection.filters
+          if filter.active_values.size > 0 or filter.min_value.value != nil or filter.max_value.value != nil
+            assign has_active_filters = true
+            break
+          endif
+        endfor
+      -%}
+
+      {%- capture results -%}
+        {%- if collection.products_count > 0 -%}
+          <ul
+            class="grid collection-grid collection-grid--desktop-{{ columns_desktop }} collection-grid--mobile-{{ columns_mobile }}"
+            role="list"
+            data-testid="product-grid"
+          >
+            {%- for product in collection.products -%}
+              <li class="collection-grid__item">
+                {%- render 'product-card', product: product, sizes: card_sizes, index: forloop.index -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- else -%}
+          <div class="collection-empty" data-testid="collection-empty">
+            {%- if has_active_filters -%}
+              <h3 class="collection-empty__title">{{ 'collections.empty_filtered' | t }}</h3>
+              <p class="collection-empty__text">{{ 'collections.empty_filtered_hint' | t }}</p>
+              <a class="button button--secondary" href="{{ clear_url }}" data-facets-link>{{ 'filters.reset_all' | t }}</a>
+            {%- else -%}
+              <h3 class="collection-empty__title">{{ 'collections.empty' | t }}</h3>
+              <p class="collection-empty__text">{{ 'collections.empty_hint' | t }}</p>
+              <a class="button button--secondary" href="{{ routes.collections_url }}">{{ 'collections.view_all' | t }}</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- render 'facet-layout',
+        section_id: section.id,
+        filters: collection.filters,
+        action_url: collection.url,
+        clear_url: clear_url,
+        results: results,
+        results_heading: results_heading,
+        count_label: count_label,
+        count: collection.products_count,
+        paginate: paginate,
+        enable_filtering: section.settings.enable_filtering,
+        enable_sorting: section.settings.enable_sorting,
+        sort_options: collection.sort_options,
+        sort_by: sort_by,
+        hidden_filters: hidden_filters,
+        expand: section.settings.filters_expanded,
+        show_counts: section.settings.show_filter_counts
+      -%}
+    {%- endpaginate -%}
+  </div>
+</section>
 
 {% schema %}
 {
-  "name": "t:general.collection",
-  "settings": []
+  "name": "Produktraster & Filter",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Produkte"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Produkte pro Seite",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Spalten Desktop",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Spalten Mobil",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "header",
+      "content": "Filter & Sortierung"
+    },
+    {
+      "type": "paragraph",
+      "content": "Filter legst du in der App „Search & Discovery“ an. Einzelne Filter blendest du pro Kategorie über das Collection-Metafeld custom.hidden_filters aus (Liste mit param_name, z. B. filter.p.m.custom.concave)."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "Filter anzeigen",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "filters_expanded",
+      "label": "Aufgeklappte Filtergruppen (Desktop)",
+      "info": "Gruppen mit aktiver Auswahl sind immer offen. Im mobilen Drawer sind nur aktive Gruppen offen.",
+      "options": [
+        { "value": "all", "label": "Alle" },
+        { "value": "first", "label": "Die ersten drei" },
+        { "value": "active", "label": "Nur aktive" }
+      ],
+      "default": "first",
+      "visible_if": "{{ section.settings.enable_filtering }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter_counts",
+      "label": "Anzahl je Filterwert zeigen",
+      "default": true,
+      "visible_if": "{{ section.settings.enable_filtering }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "Sortierung anzeigen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ]
 }
 {% endschema %}

@@ -1,0 +1,84 @@
+{% doc %}
+  Prints the formatted, escaped value of one technical spec (e.g. 8.25", 54 mm, Medium) – or nothing when unknown.
+  Resolution order: variant metafield custom.<key> → numeric option value (e.g. option "Breite" = 8.25")
+  → product metafield custom.<key>. Implausible option numbers are ignored (same ranges as the board builder).
+
+  @param {product} product - The product
+  @param {variant} [variant] - The variant whose value wins over the product value
+  @param {string} key - deck_width | deck_length | wheelbase | concave | deck_shape | truck_width | truck_height |
+    wheel_size | wheel_hardness | bearing_rating | grip_style | hardware_length | riser_height
+  @param {boolean} [raw] - Print unescaped text (only for `| json` output)
+
+  @example
+  {% render 'product-spec-value', product: product, variant: product.selected_or_first_available_variant, key: 'deck_width' %}
+{% enddoc %}
+
+{%- liquid
+  assign spec_raw = blank
+  if variant
+    assign spec_raw = variant.metafields.custom[key].value
+  endif
+
+  if spec_raw == blank and variant
+    assign aliases = ''
+    assign min = 0
+    assign max = 0
+    case key
+      when 'deck_width'
+        assign aliases = 'breite,width,größe,groesse,size,deckbreite'
+        assign min = 6
+        assign max = 11
+      when 'truck_width'
+        assign aliases = 'breite,width,achsbreite,axle,größe,groesse,size'
+        assign min = 6
+        assign max = 11
+      when 'deck_length'
+        assign aliases = 'länge,laenge,length'
+        assign min = 20
+        assign max = 45
+      when 'hardware_length'
+        assign aliases = 'länge,laenge,length'
+        assign min = 0.5
+        assign max = 2
+      when 'wheel_size'
+        assign aliases = 'durchmesser,diameter,größe,groesse,size'
+        assign min = 40
+        assign max = 70
+    endcase
+
+    if aliases != ''
+      assign alias_list = aliases | split: ','
+      for option in product.options_with_values
+        assign option_name = option.name | downcase | strip
+        if alias_list contains option_name
+          assign option_index = forloop.index0
+          assign cleaned = variant.options[option_index] | downcase | remove: '"' | remove: '″' | remove: 'mm' | remove: 'zoll' | replace: ',', '.' | strip
+          assign number = cleaned | plus: 0
+          if number >= min and number <= max
+            assign spec_raw = number
+          endif
+          break
+        endif
+      endfor
+    endif
+  endif
+
+  if spec_raw == blank
+    assign spec_raw = product.metafields.custom[key].value
+  endif
+
+  if spec_raw != blank
+    assign text = spec_raw | append: '' | strip
+    case key
+      when 'deck_width', 'deck_length', 'wheelbase', 'truck_width', 'hardware_length', 'riser_height'
+        assign text = text | remove: '"' | remove: '″' | strip | append: '"'
+      when 'wheel_size'
+        assign text = text | remove: 'mm' | strip | append: ' mm'
+    endcase
+    if raw
+      echo text
+    else
+      echo text | escape
+    endif
+  endif
+-%}

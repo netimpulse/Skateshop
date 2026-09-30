@@ -40,7 +40,7 @@ const discovered: Discovered = (() => {
 
 export const QA = {
   /** Test-Theme-ID (UNPUBLISHED). Pro Shop einmalig setzen. */
-  themeId: process.env.SHOPIFY_TEST_THEME_ID || "__THEME_ID__",
+  themeId: process.env.SHOPIFY_TEST_THEME_ID || "164173611123",
 
   /** Erstes Produkt aus dem Shop, automatisch ermittelt. */
   product: {
@@ -73,3 +73,47 @@ export function withTheme(p: string): string {
   const sep = p.includes("?") ? "&" : "?";
   return `${p}${sep}preview_theme_id=${QA.themeId}`;
 }
+
+/**
+ * Konsolen-/Netzwerkmeldungen der Shopify-Plattform (Preview-Bar, shop.app, Analytics, Login-with-Shop),
+ * die nicht vom Theme stammen und in Tests ignoriert werden.
+ */
+const PLATFORM_NOISE = [
+  /shop\.app/i,
+  /login_with_shop/i,
+  /\/api\/collect/i,
+  /monorail/i,
+  /web-pixels/i,
+  /ShopifySans/i,
+  /frame-ancestors/i,
+  /status of 403/i,
+  /status of 404 \(Not Found\)$/i,
+  /preview_bar|previewBar|admin-bar/i,
+  /Failed to load resource: net::ERR_/i,
+  // Store throttling (Cloudflare/Shopify rate limit) – the theme handles it (e.g. builder retry button), not a theme error.
+  /status of 429 \(Too Many Requests\)/i,
+];
+
+export function isPlatformNoise(message: string): boolean {
+  return PLATFORM_NOISE.some((pattern) => pattern.test(message));
+}
+
+/** Sammelt Konsolenfehler und Page-Errors, die vom Theme stammen. */
+export function collectThemeErrors(page: import("@playwright/test").Page): string[] {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error" && !isPlatformNoise(message.text())) errors.push(`console: ${message.text()}`);
+  });
+  page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+  return errors;
+}
+
+/** Demo-Daten aus scripts/demo-data (Tag skate-demo) – Handles für gezielte Tests. */
+export const DEMO = {
+  builderPath: "/pages/skateboard-builder",
+  deckWithThreeWidths: "nine-ply-co-sunset-stripe-deck",
+  wheelWith58mm: "rolltype-cruiser-soft-wheels",
+  soldOutVariant: { handle: "nine-ply-co-checker-classic-deck", title: '7.75"' },
+  lowStockHandle: "gritfield-curb-wax",
+  collections: ["decks", "trucks", "wheels", "bearings", "griptape", "hardware", "risers", "completes", "accessories"],
+};

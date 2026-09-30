@@ -1,0 +1,61 @@
+{% doc %}
+  Editorial section heading: numbered mono eyebrow with hairline, heading, optional text and link.
+
+  @param {string} [heading] - Heading (inline richtext allowed)
+  @param {string} [heading_id] - id for aria-labelledby
+  @param {string} [tag] - Heading tag, default h2
+  @param {string} [heading_class] - Size class, default h2
+  @param {string} [eyebrow] - Mono label above the heading
+  @param {string} [index] - Number shown before the eyebrow, e.g. "01"
+  @param {string} [text] - Rich text below the heading
+  @param {string} [link_label] - Link text
+  @param {string} [link_url] - Link target
+  @param {string} [align] - left | center
+
+  @example
+  {% render 'section-heading', eyebrow: section.settings.eyebrow, index: '01', heading: section.settings.heading %}
+{% enddoc %}
+
+{%- liquid
+  assign tag = tag | default: 'h2'
+  # url settings may only default to /collections or /collections/all – map both to the locale-aware routes.
+  assign heading_link = link_url
+  if link_url == '/collections'
+    assign heading_link = routes.collections_url
+  elsif link_url == '/collections/all'
+    assign heading_link = routes.all_products_collection_url
+  endif
+-%}
+
+<div class="section-heading{% if align == 'center' %} section-heading--center{% endif %}">
+  {%- if eyebrow != blank or index != blank -%}
+    <p class="eyebrow eyebrow--rule">
+      {%- if index != blank -%}
+        <span class="eyebrow__index">{{ index | escape }}</span>
+      {%- endif -%}
+      {%- if eyebrow != blank -%}
+        <span>{{ eyebrow | escape }}</span>
+      {%- endif -%}
+    </p>
+  {%- endif -%}
+  {%- if heading != blank or link_url != blank -%}
+    <div class="section-heading__row">
+      {%- if heading != blank -%}
+        <{{ tag }}
+          {% if heading_id != blank %}
+            id="{{ heading_id }}"
+          {% endif %}
+          class="section-heading__title {{ heading_class | default: 'h2' }}"
+        >
+          {{- heading -}}
+        </{{ tag }}>
+      {%- endif -%}
+      {%- if link_url != blank and link_label != blank -%}
+        <a class="link-mono" href="{{ heading_link }}">{{ link_label | escape }}</a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+  {%- if text != blank -%}
+    <div class="section-heading__text rte">{{ text }}</div>
+  {%- endif -%}
+</div>

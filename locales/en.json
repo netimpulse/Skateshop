@@ -1,0 +1,571 @@
+{
+  "404": {
+    "back_to_shopping": "Back to shopping",
+    "heading": "This page doesn't exist.",
+    "links_heading": "Jump straight to",
+    "not_found": "Page not found.",
+    "search_label": "Search the shop",
+    "text": "It may have moved, or the link is out of date. Search for what you need – or start building a new board.",
+    "title": "404"
+  },
+  "accessibility": {
+    "breadcrumbs": "Breadcrumbs",
+    "close": "Close",
+    "close_menu": "Close menu",
+    "loading": "Loading …",
+    "next_slide": "Next",
+    "open_menu": "Open menu",
+    "pagination": "Pagination",
+    "pause_animation": "Pause marquee",
+    "play_animation": "Play marquee",
+    "previous_slide": "Previous",
+    "skip_to_content": "Skip to content",
+    "social_links": "Social media",
+    "star_rating": "{{ rating }} out of {{ max }} stars",
+    "vendor": "Vendor:"
+  },
+  "blog": {
+    "all_posts": "All",
+    "article_comments": "Comments",
+    "article_metadata_html": "{{ date }} by {{ author }}",
+    "article_navigation": "Article navigation",
+    "articles_count": {
+      "one": "{{ count }} post",
+      "other": "{{ count }} posts"
+    },
+    "author": "Words: {{ author }}",
+    "back_to_blog": "Back to the blog",
+    "comment_form_body": "Comment",
+    "comment_form_email": "Email",
+    "comment_form_name": "Name",
+    "comment_form_submit": "Post",
+    "comment_form_title": "Add a comment",
+    "comment_success": "Thanks! Your comment is live.",
+    "comment_success_moderated": "Thanks! Your comment will appear once we've reviewed it.",
+    "comments_count": {
+      "one": "{{ count }} comment",
+      "other": "{{ count }} comments"
+    },
+    "comments_empty": "No comments yet – be the first.",
+    "comments_moderated_note": "Comments are reviewed before they are published.",
+    "empty": "The first posts are coming soon.",
+    "featured_label": "Cover story",
+    "filter_label": "Filter posts by topic",
+    "newer_article": "Newer post",
+    "older_article": "Older post",
+    "reading_time": {
+      "one": "{{ count }} min read",
+      "other": "{{ count }} min read"
+    },
+    "tags": "Topics"
+  },
+  "brands": {
+    "all_heading": "All brands A–Z",
+    "back_to_index": "Back to index",
+    "count": {
+      "one": "{{ count }} brand",
+      "other": "{{ count }} brands"
+    },
+    "empty": "No brands in the shop yet.",
+    "featured_heading": "Featured brands",
+    "index_label": "Brands by first letter",
+    "other_label": "Numbers and special characters",
+    "placeholder_name": "Brand name",
+    "view_brand": "View brand"
+  },
+  "builder": {
+    "back": "Back",
+    "change": "Change",
+    "chosen": "[part] selected: [title]",
+    "clear_filters": "Clear filters",
+    "continue": "Continue",
+    "continue_to": "Continue: [step]",
+    "details": "Details",
+    "editor": {
+      "no_steps": "Add steps to the board builder and choose a collection for each step (e.g. builder-decks)."
+    },
+    "empty_step": "There are no products for this step yet.",
+    "facets": {
+      "available": "Availability",
+      "available_only": "In stock only",
+      "bearing_rating": "Rating",
+      "color": "Color",
+      "concave": "Concave",
+      "deck_length": "Length",
+      "deck_width": "Width",
+      "grip_style": "Style",
+      "hardware_length": "Length",
+      "price": "Price",
+      "price_from": "from [min]",
+      "price_range": "[min] – [max]",
+      "price_up_to": "up to [max]",
+      "truck_height": "Height",
+      "truck_width": "Axle width",
+      "vendor": "Brand",
+      "wheel_hardness": "Hardness",
+      "wheel_size": "Diameter"
+    },
+    "load_error": "The products could not be loaded.",
+    "loading": "Loading products …",
+    "no_results": "No products match these filters.",
+    "noscript": "The board builder needs JavaScript. You can still buy every part in the categories.",
+    "not_selected": "not selected",
+    "only_fit": "Show matching only",
+    "optional": "optional",
+    "part_unavailable": "[part] is no longer available and was removed from your build.",
+    "parts": {
+      "bearings": "Bearings",
+      "deck": "Deck",
+      "griptape": "Griptape",
+      "hardware": "Hardware",
+      "riser": "Riser pads",
+      "summary": "Summary",
+      "trucks": "Trucks",
+      "wheels": "Wheels"
+    },
+    "preview": {
+      "aside": "Preview and parts list",
+      "bottom": "Bottom",
+      "empty": "Preview of your board – no parts selected yet",
+      "figure": "Fig. 01 — Live preview",
+      "summary": "Preview of your board: [parts]",
+      "top": "Top",
+      "view": "View"
+    },
+    "remove": "Remove",
+    "reset": "Reset",
+    "reset_confirm": "Do you really want to reset your build?",
+    "results": "[count] products",
+    "retry": "Try again",
+    "riser": {
+      "add": "Add riser pads",
+      "choose": "Choose riser pads",
+      "remove": "Remove risers"
+    },
+    "rules": {
+      "deck_needs_other_trucks": "Doesn't fit [truck] trucks",
+      "deck_truck_mismatch": "Your [truck] trucks are not ideal for a [deck] deck.",
+      "fits": "Fits",
+      "hardware_riser": "With riser pads you need hardware of at least [length].",
+      "hardware_riser_badge": "With risers from [length]",
+      "low_truck_wheel": "Low trucks with [size] wheels: wheelbite possible – up to [max] is ideal, otherwise add riser pads.",
+      "low_truck_wheel_badge": "For low trucks > [max]",
+      "riser_badge": "Risers recommended",
+      "riser_hint": "For this wheel size ([size]) riser pads can help to avoid wheelbite.",
+      "truck_too_narrow": "Too narrow for [deck]",
+      "truck_too_wide": "Too wide for [deck]",
+      "truck_width_hint": "For a [deck] deck we recommend trucks between [min] and [max]."
+    },
+    "select": "Select",
+    "selected": "Selected",
+    "sold_out": "Sold out",
+    "sort": "Sort",
+    "sort_featured": "Featured",
+    "sort_price_asc": "Price, low to high",
+    "sort_price_desc": "Price, high to low",
+    "sort_title": "Name",
+    "step_current": "current",
+    "step_done": "selected",
+    "step_of": "Step [current] / [total]",
+    "step_open": "open",
+    "steps_label": "Board builder steps",
+    "summary": {
+      "add": "Add complete build to cart",
+      "added": "Your build is in the cart.",
+      "compat_ok": "All parts fit together.",
+      "compat_title": "Compatibility",
+      "edit": "Edit build",
+      "error": "The build could not be added to the cart. Please try again.",
+      "missing": "Still open: [parts]",
+      "new_build": "Start a new build",
+      "not_loaded": "Saved – could not be loaded right now.",
+      "part": "Part",
+      "price": "Price",
+      "product": "Product",
+      "title": "Build summary",
+      "unavailable": "No longer available: [parts]. Please choose an alternative.",
+      "view_cart": "View cart"
+    },
+    "to_summary": "To summary",
+    "total": "Total"
+  },
+  "cart": {
+    "added": "Added to cart",
+    "build": {
+      "edit": "Edit build",
+      "hint": "Can only be changed as a complete board",
+      "label": "CUSTOM BOARD BUILD",
+      "parts": {
+        "one": "{{ count }} part",
+        "other": "{{ count }} parts"
+      },
+      "remove": "Remove build",
+      "removed": "Build removed",
+      "total": "Build total"
+    },
+    "checkout": "Checkout",
+    "count": {
+      "one": "{{ count }} item",
+      "other": "{{ count }} items"
+    },
+    "empty": {
+      "cta_build": "Build a board",
+      "cta_decks": "Shop decks",
+      "text": "Put your board together part by part or browse our decks.",
+      "title": "Your cart is empty"
+    },
+    "error_generic": "Something went wrong. Please try again.",
+    "line": {
+      "decrease": "Decrease quantity",
+      "discounted_price": "Discounted price",
+      "each_html": "{{ price }} each",
+      "increase": "Increase quantity",
+      "original_price": "Original price",
+      "quantity": "Quantity",
+      "removed": "Item removed",
+      "updated": "Cart updated"
+    },
+    "parts": {
+      "bearings": "Bearings",
+      "deck": "Deck",
+      "griptape": "Griptape",
+      "hardware": "Hardware",
+      "part": "Part",
+      "riser": "Riser Pads",
+      "trucks": "Trucks",
+      "wheels": "Wheels"
+    },
+    "remove": "Remove",
+    "shipping": {
+      "progress": "Progress towards free shipping",
+      "reached": "Free shipping unlocked.",
+      "remaining_html": "Spend {{ amount }} more for free shipping."
+    },
+    "summary": {
+      "heading": "Order summary",
+      "items": "Items",
+      "note": "Order note",
+      "note_placeholder": "Notes about your order",
+      "subtotal": "Subtotal",
+      "taxes_excluded": "Taxes excluded. Shipping and discount codes in the next step.",
+      "taxes_included": "Taxes included. Shipping and discount codes in the next step.",
+      "view_cart": "View cart"
+    },
+    "table": {
+      "product": "Product",
+      "quantity": "Quantity",
+      "total": "Total"
+    },
+    "title": "Cart",
+    "update": "Update"
+  },
+  "collections": {
+    "empty": "This category is still empty.",
+    "empty_filtered": "No products match these filters.",
+    "empty_filtered_hint": "Remove a filter or reset all of them.",
+    "empty_hint": "Check back soon – or browse the other categories.",
+    "list_empty": "No categories yet.",
+    "product_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "products_heading": "Products",
+    "seo": {
+      "heading": "More about {{ title }}",
+      "read_less": "Show less",
+      "read_more": "Read more"
+    },
+    "title": "Categories",
+    "view_all": "View all categories"
+  },
+  "contact": {
+    "form": {
+      "email": "Email",
+      "message": "Message",
+      "name": "Name",
+      "phone": "Phone",
+      "submit": "Send message",
+      "success": "Thanks for your message! We'll get back to you as soon as we can."
+    },
+    "heading": "Write to us",
+    "info_heading": "How to reach us"
+  },
+  "filters": {
+    "active": "Active filters",
+    "apply": "Apply filters",
+    "clear_all": "Clear all",
+    "pagination": {
+      "next": "Next page",
+      "previous": "Previous page"
+    },
+    "price_chip_from": "from {{ price }}",
+    "price_chip_to": "up to {{ price }}",
+    "price_from": "From",
+    "price_max": "Highest price: {{ price }}",
+    "price_to": "To",
+    "remove": "Remove filter",
+    "reset": "Reset",
+    "reset_all": "Reset all filters",
+    "selected_count": {
+      "one": "{{ count }} filter active",
+      "other": "{{ count }} filters active"
+    },
+    "show_less": "Show less",
+    "show_more": {
+      "one": "+ {{ count }} more",
+      "other": "+ {{ count }} more"
+    },
+    "show_results": "Show ({{ count }})",
+    "sort_by": "Sort",
+    "sort_submit": "Sort",
+    "title": "Filter"
+  },
+  "footer": {
+    "editor_menu_hint": "Choose a menu for this link list (e.g. skate-footer-shop).",
+    "editor_social_hint": "Add profile links under Theme settings → Social media.",
+    "label": "Footer",
+    "localization": {
+      "country": "Country/region",
+      "label": "Choose country and language",
+      "language": "Language",
+      "submit": "Apply"
+    },
+    "payment_methods": "Payment methods",
+    "policies": "Legal"
+  },
+  "general": {
+    "account": "Account",
+    "continue_shopping": "Continue shopping",
+    "home": "Home",
+    "log_in": "Log in",
+    "meta": {
+      "page": "Page {{ page }}",
+      "tagged": "Tagged \"{{ tags }}\""
+    },
+    "read_more": "Read more",
+    "search": "Search"
+  },
+  "gift_card": {
+    "add_to_apple_wallet": "Add to Apple Wallet",
+    "card": "Gift card",
+    "expired": "This gift card has expired",
+    "expires_on": "Expires on {{ expires_on }}",
+    "use_at_checkout": "Use this gift card at checkout"
+  },
+  "header": {
+    "announcement": {
+      "label": "Announcements"
+    },
+    "drawer": {
+      "title": "Menu"
+    },
+    "home_label": "{{ shop }} – Home",
+    "mega": {
+      "categories": "Categories",
+      "view_all": "View all {{ title }}"
+    },
+    "nav_label": "Main navigation",
+    "search_open": "Open search"
+  },
+  "pages": {
+    "form": {
+      "error_heading": "Please check your details:",
+      "optional": "optional",
+      "required_note": "Fields marked * are required."
+    },
+    "pagination": {
+      "next": "Next page",
+      "page": "Page {{ page }}",
+      "previous": "Previous page"
+    }
+  },
+  "password": {
+    "enter": "Enter",
+    "error": "That password isn't right. Please try again.",
+    "heading": "We're rolling out soon.",
+    "newsletter": {
+      "heading": "Let me know when it starts",
+      "label": "Email address",
+      "submit": "Notify me",
+      "success": "Thanks! We'll let you know when we launch."
+    },
+    "owner_summary": "Enter with password",
+    "password": "Password",
+    "title": "This shop is private"
+  },
+  "products": {
+    "badges": {
+      "bestseller": "Bestseller",
+      "limited": "Limited",
+      "new": "New",
+      "sale": "Sale",
+      "sold_out": "Sold out"
+    },
+    "card": {
+      "add_to_cart": "Add to cart",
+      "choose_options": "Choose options",
+      "colors": "Available colors",
+      "more_colors": {
+        "one": "+{{ count }} color",
+        "other": "+{{ count }} colors"
+      },
+      "quick_add": "Quick add",
+      "select_variant": "Select variant"
+    },
+    "delivery": {
+      "backorder": "On backorder – ships in 5–10 business days",
+      "in_stock": "In stock – ships in 1–2 business days",
+      "low_stock": "Only [count] left",
+      "sold_out": "Sold out",
+      "unavailable": "This combination is unavailable"
+    },
+    "details": {
+      "description": "Description",
+      "eyebrow": "Details",
+      "features": "Features",
+      "heading": "Product details",
+      "read_more": "View full page",
+      "shipping": "Shipping & returns",
+      "size_guide": "Size guide"
+    },
+    "placeholder": {
+      "bearings": "Bearings – image coming soon",
+      "deck": "Deck – image coming soon",
+      "generic": "Image coming soon",
+      "griptape": "Griptape – image coming soon",
+      "hardware": "Hardware – image coming soon",
+      "trucks": "Trucks – image coming soon",
+      "wheels": "Wheels – image coming soon"
+    },
+    "price": {
+      "compare_at": "Was",
+      "from_html": "from {{ price }}",
+      "regular": "Regular price",
+      "sale": "Sale price",
+      "unit": "Unit price"
+    },
+    "product": {
+      "add_to_cart": "Add to cart",
+      "builder_heading": "Board builder",
+      "builder_link": "Open the board builder",
+      "builder_text": "This part fits your build: put together your complete board step by step.",
+      "gallery": "Product images",
+      "gallery_show": "Show image {{ index }} of {{ total }}",
+      "gallery_zoom": "Open image in full view",
+      "quantity": "Quantity",
+      "quantity_decrease": "Decrease quantity",
+      "quantity_increase": "Increase quantity",
+      "reviews_count": {
+        "one": "{{ count }} review",
+        "other": "{{ count }} reviews"
+      },
+      "shipping_html": "<a href=\"{{ link }}\">shipping</a> calculated at checkout",
+      "size_guide": "Size guide",
+      "sold_out": "Sold out",
+      "tax_excluded": "Excl. tax",
+      "tax_included": "Incl. tax",
+      "unavailable": "Unavailable",
+      "value_sold_out": "sold out",
+      "value_unavailable": "unavailable",
+      "variant": "Variant"
+    },
+    "recently_viewed": {
+      "editor_note": "Products the visitor viewed recently appear here. Without a history the section stays hidden in the store.",
+      "eyebrow": "History",
+      "heading": "Recently viewed"
+    },
+    "related": {
+      "eyebrow": "More like this",
+      "heading": "Goes well with"
+    },
+    "specs": {
+      "bearing_rating": "Rating",
+      "concave": "Concave",
+      "deck_length": "Length",
+      "deck_shape": "Shape",
+      "deck_width": "Width",
+      "grip_style": "Style",
+      "hardware_length": "Bolt length",
+      "heading": "Tech specs",
+      "riser_height": "Height",
+      "sku": "SKU",
+      "truck_height": "Height",
+      "truck_width": "Axle width",
+      "wheel_hardness": "Hardness",
+      "wheel_size": "Diameter",
+      "wheelbase": "Wheelbase"
+    }
+  },
+  "search": {
+    "empty_hint": "Check the spelling, try a broader term or browse our categories.",
+    "intro": "What are you looking for?",
+    "label": "Search term",
+    "no_results_html": "No results for \"{{ terms }}\"",
+    "placeholder": "Search decks, trucks, brands …",
+    "predictive": {
+      "clear": "Clear search",
+      "collections": "Categories",
+      "error_rate_limited": "Too many searches in a short time. Please try again in a moment or use the search page.",
+      "error_unavailable": "Quick search is currently unavailable.",
+      "keyboard_hint": "↑ ↓ Navigate · Enter Search · Esc Close",
+      "label": "Search products, brands and categories",
+      "loading": "Searching …",
+      "no_results": "No results for “{{ terms }}”.",
+      "pages": "Pages",
+      "popular": "Popular searches",
+      "products": "Products",
+      "search_page": "Go to search page",
+      "status_none": "No results found.",
+      "status_one": "1 result found.",
+      "status_other": "[count] results found.",
+      "suggestions": "Suggestions",
+      "view_all": "All results for “{{ terms }}”"
+    },
+    "results": {
+      "count": {
+        "one": "{{ count }} result",
+        "other": "{{ count }} results"
+      },
+      "for_html": "for “{{ terms }}”",
+      "heading": "Search results",
+      "pages": "Pages & articles",
+      "type_article": "Article",
+      "type_page": "Page"
+    },
+    "submit": "Search",
+    "suggestions": "Popular categories",
+    "title": "Search"
+  },
+  "sections": {
+    "category_grid": {
+      "fallback_title": "Category",
+      "products_count": {
+        "one": "{{ count }} item",
+        "other": "{{ count }} items"
+      }
+    },
+    "community": {
+      "tile_label": "View community post {{ number }}"
+    },
+    "featured": {
+      "editor_empty": "Visible in the editor only: choose a collection with products. In the storefront this section stays hidden while the collection is empty.",
+      "placeholder_title": "Product name",
+      "placeholder_vendor": "Brand"
+    },
+    "marquee": {
+      "count": {
+        "one": "{{ count }} brand",
+        "other": "{{ count }} brands"
+      },
+      "editor_empty": "No brands found. Add products with a vendor or choose “Custom brand blocks”."
+    },
+    "newsletter": {
+      "email_label": "Email address",
+      "email_placeholder": "name@example.com",
+      "error": "Please check your email address and try again.",
+      "privacy_link": "Privacy policy",
+      "submit": "Sign up",
+      "success": "Thanks! You're on the list."
+    }
+  }
+}

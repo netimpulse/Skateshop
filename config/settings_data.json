@@ -8,5 +8,87 @@
  * ------------------------------------------------------------
  */
 {
-  "current": {}
+  "current": {
+    "color_schemes": {
+      "scheme-1": {
+        "settings": {
+          "background": "#FFFFFF",
+          "surface": "#F4F2EE",
+          "text": "#1C1D1B",
+          "text_muted": "#5B5A55",
+          "border": "#E4E1DA",
+          "button": "#C8401F",
+          "button_label": "#FFFFFF",
+          "secondary_button_label": "#1C1D1B",
+          "link": "#C8401F"
+        }
+      },
+      "scheme-2": {
+        "settings": {
+          "background": "#F4F2EE",
+          "surface": "#FFFFFF",
+          "text": "#1C1D1B",
+          "text_muted": "#55534E",
+          "border": "#DDD9D0",
+          "button": "#1C1D1B",
+          "button_label": "#FFFFFF",
+          "secondary_button_label": "#1C1D1B",
+          "link": "#B8391B"
+        }
+      },
+      "scheme-3": {
+        "settings": {
+          "background": "#1C1D1B",
+          "surface": "#2A2B28",
+          "text": "#F4F2EE",
+          "text_muted": "#C9C5BB",
+          "border": "#3B3C38",
+          "button": "#C8401F",
+          "button_label": "#FFFFFF",
+          "secondary_button_label": "#F4F2EE",
+          "link": "#F6C945"
+        }
+      },
+      "scheme-4": {
+        "settings": {
+          "background": "#C8401F",
+          "surface": "#B23819",
+          "text": "#FFFFFF",
+          "text_muted": "#FFFFFF",
+          "border": "#DD6B4F",
+          "button": "#1C1D1B",
+          "button_label": "#FFFFFF",
+          "secondary_button_label": "#FFFFFF",
+          "link": "#FFFFFF"
+        }
+      },
+      "scheme-5": {
+        "settings": {
+          "background": "#2B4BD8",
+          "surface": "#2542C2",
+          "text": "#FFFFFF",
+          "text_muted": "#DCE2FA",
+          "border": "#5470E0",
+          "button": "#C9E43A",
+          "button_label": "#1C1D1B",
+          "secondary_button_label": "#FFFFFF",
+          "link": "#C9E43A"
+        }
+      },
+      "scheme-6": {
+        "settings": {
+          "background": "#C9E43A",
+          "surface": "#BBD62C",
+          "text": "#1C1D1B",
+          "text_muted": "#3A3B36",
+          "border": "#A9C224",
+          "button": "#1C1D1B",
+          "button_label": "#FFFFFF",
+          "secondary_button_label": "#1C1D1B",
+          "link": "#1C1D1B"
+        }
+      }
+    }
+  },
+  "presets": {}
 }

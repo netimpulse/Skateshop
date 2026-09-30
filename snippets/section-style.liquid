@@ -1,0 +1,29 @@
+{% doc %}
+  Outputs scoped spacing variables for a section. Desktop values as set, mobile scaled to 70 %.
+  Keeps settings-driven values out of inline style attributes.
+
+  @param {string} section_id - The section's id (section.id)
+  @param {number} padding_top - Top padding in px (desktop)
+  @param {number} padding_bottom - Bottom padding in px (desktop)
+
+  @example
+  {% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
+{% enddoc %}
+
+{%- liquid
+  assign pt_mobile = padding_top | times: 0.7 | round
+  assign pb_mobile = padding_bottom | times: 0.7 | round
+-%}
+
+{% style %}
+  #shopify-section-{{ section_id }} {
+    --section-pt: {{ pt_mobile }}px;
+    --section-pb: {{ pb_mobile }}px;
+  }
+  @media (min-width: 750px) {
+    #shopify-section-{{ section_id }} {
+      --section-pt: {{ padding_top }}px;
+      --section-pb: {{ padding_bottom }}px;
+    }
+  }
+{% endstyle %}

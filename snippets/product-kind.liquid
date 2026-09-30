@@ -1,0 +1,67 @@
+{% doc %}
+  Normalises a product's category (metafield custom.builder_category, fallback product.type) and prints either
+  the kind (deck, trucks, wheels, bearings, griptape, hardware, riser, complete, accessory, generic) or the
+  comma-separated technical spec keys that belong to that kind. Output is plain text without whitespace.
+
+  @param {product} product - The product
+  @param {string} [output] - kind (default) | spec_keys | builder (prints "true" when the kind is a builder part)
+
+  @example
+  {%- capture kind -%}{% render 'product-kind', product: product %}{%- endcapture -%}
+  {%- capture spec_keys -%}{% render 'product-kind', product: product, output: 'spec_keys' %}{%- endcapture -%}
+{% enddoc %}
+
+{%- liquid
+  assign source = product.metafields.custom.builder_category.value | default: product.type | handleize
+  case source
+    when 'deck', 'decks', 'skateboard-deck', 'skateboard-decks'
+      assign kind = 'deck'
+    when 'truck', 'trucks', 'achse', 'achsen'
+      assign kind = 'trucks'
+    when 'wheel', 'wheels', 'rolle', 'rollen'
+      assign kind = 'wheels'
+    when 'bearing', 'bearings', 'kugellager'
+      assign kind = 'bearings'
+    when 'griptape', 'grip', 'grip-tape'
+      assign kind = 'griptape'
+    when 'hardware', 'schrauben', 'bolts'
+      assign kind = 'hardware'
+    when 'riser', 'risers', 'riser-pads', 'riser-pad'
+      assign kind = 'riser'
+    when 'complete', 'completes', 'complete-skateboard', 'complete-skateboards', 'komplettboard', 'komplettboards'
+      assign kind = 'complete'
+    when 'accessory', 'accessories', 'zubehoer', 'zubehor'
+      assign kind = 'accessory'
+    else
+      assign kind = 'generic'
+  endcase
+
+  case output
+    when 'spec_keys'
+      case kind
+        when 'deck'
+          echo 'deck_width,deck_length,wheelbase,concave,deck_shape'
+        when 'complete'
+          echo 'deck_width,deck_length,wheelbase,concave,truck_width,wheel_size,wheel_hardness,bearing_rating'
+        when 'trucks'
+          echo 'truck_width,truck_height'
+        when 'wheels'
+          echo 'wheel_size,wheel_hardness'
+        when 'bearings'
+          echo 'bearing_rating'
+        when 'griptape'
+          echo 'grip_style'
+        when 'hardware'
+          echo 'hardware_length'
+        when 'riser'
+          echo 'riser_height'
+      endcase
+    when 'builder'
+      case kind
+        when 'deck', 'trucks', 'wheels', 'bearings', 'griptape', 'hardware', 'riser'
+          echo 'true'
+      endcase
+    else
+      echo kind
+  endcase
+-%}
