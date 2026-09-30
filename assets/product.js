@@ -369,7 +369,7 @@ class ProductRecommendations extends HTMLElement {
 
   async load() {
     this.loaded = true;
-    const section = this.closest('[data-section-id]');
+    const section = this.parentElement?.closest('section[data-section-id]');
     const sectionId = this.dataset.sectionId || sectionIdOf(this);
     if (!routes.productRecommendations || !sectionId) return;
     const params = new URLSearchParams({

@@ -47,7 +47,7 @@ function trackCurrentProduct() {
 class RecentlyViewed extends HTMLElement {
   connectedCallback() {
     this.list = this.querySelector('[data-recently-viewed-list]');
-    this.section = this.closest('[data-section-id]');
+    this.section = this.parentElement?.closest('section[data-section-id]');
     if (!this.list || this.loaded) return;
     this.loaded = true;
     this.load();
