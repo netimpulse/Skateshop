@@ -145,6 +145,12 @@
   align-self: start;
 }
 
+/* snippets/image renders a linked media box as <a class="media"> – make it a block so aspect-ratio applies. */
+.cart-item__media .media,
+.cart-build__media .media {
+  display: block;
+}
+
 .cart-item__details {
   grid-area: details;
   display: grid;
@@ -206,6 +212,12 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-s) var(--space-m);
+}
+
+.cart-item__quantity,
+.cart-summary__note-input {
+  border-color: var(--color-border);
+  border-color: color-mix(in srgb, var(--color-text) 35%, transparent);
 }
 
 .cart-item__quantity {

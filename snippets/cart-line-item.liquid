@@ -53,7 +53,7 @@
       <p class="cart-item__vendor label-mono">{{ item.vendor | escape }}</p>
     {%- endif -%}
     <p class="cart-item__title">
-      <a href="{{ item.url }}" class="cart-item__link">{{ title }}</a>
+      <a href="{{ item.url }}" class="cart-item__link" data-focus-id="title">{{ title }}</a>
     </p>
     {%- render 'cart-variant', item: item, class: 'cart-item__variant' -%}
 

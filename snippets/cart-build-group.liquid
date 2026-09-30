@@ -33,7 +33,7 @@
   endif
 -%}
 
-<li class="cart-build" data-cart-build data-build-id="{{ build_id }}" data-testid="cart-build">
+<li class="cart-build" data-cart-build data-testid="cart-build">
   <div class="cart-build__head">
     <p class="cart-build__sticker badge badge--sticker badge--custom" data-testid="cart-build-label">
       {{- 'cart.build.label' | t -}}
@@ -68,7 +68,7 @@
     </p>
     <p class="cart-build__hint">{{ 'cart.build.hint' | t }}</p>
     <div class="cart-build__actions">
-      <a href="{{ edit_url }}" class="cart-build__action link-mono" data-testid="cart-build-edit">
+      <a href="{{ edit_url }}" class="cart-build__action link-mono" data-focus-id="build-edit" data-testid="cart-build-edit">
         {%- render 'icon', name: 'wrench' -%}
         {{- 'cart.build.edit' | t -}}
       </a>

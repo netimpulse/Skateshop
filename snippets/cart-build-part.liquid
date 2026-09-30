@@ -57,7 +57,7 @@
       <span data-testid="cart-build-part-label">{{ part_label }}</span>
     </p>
     <p class="cart-build__title">
-      <a href="{{ item.url }}" class="cart-item__link">{{ item.product.title | escape }}</a>
+      <a href="{{ item.url }}" class="cart-item__link" data-focus-id="title">{{ item.product.title | escape }}</a>
     </p>
     {%- render 'cart-variant', item: item, class: 'cart-build__variant' -%}
   </div>

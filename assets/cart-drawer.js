@@ -252,9 +252,11 @@ class CartItems extends HTMLElement {
   }
 
   describeControl(element) {
+    // A build group is identified by the line key of its first part (the build id itself is never rendered).
+    const group = element.closest('[data-cart-build]');
     return {
       key: element.closest('[data-line-key]')?.dataset.lineKey || null,
-      build: element.closest('[data-build-id]')?.dataset.buildId || null,
+      build: group?.querySelector('[data-line-key]')?.dataset.lineKey || null,
       focusId: element.dataset.focusId || null,
     };
   }
@@ -281,7 +283,9 @@ class CartItems extends HTMLElement {
     if (state.focusId) {
       let scope = this;
       if (state.key) scope = this.querySelector(`[data-line-key="${CSS.escape(state.key)}"]`);
-      else if (state.build) scope = this.querySelector(`[data-build-id="${CSS.escape(state.build)}"]`);
+      else if (state.build) {
+        scope = this.querySelector(`[data-line-key="${CSS.escape(state.build)}"]`)?.closest('[data-cart-build]');
+      }
       target = scope?.querySelector(`[data-focus-id="${CSS.escape(state.focusId)}"]`) || null;
     }
     if (!target && this.dataset.focusFallback) target = document.getElementById(this.dataset.focusFallback);
