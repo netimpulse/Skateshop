@@ -24,7 +24,7 @@
 
 .builder-promo__title {
   font-size: var(--text-h1);
-  font-size: calc(clamp(2.75rem, 15cqi, 7.5rem) * var(--font-heading-scale));
+  font-size: calc(clamp(2.75rem, 15cqi, 6.25rem) * var(--font-heading-scale));
   line-height: 0.86;
   letter-spacing: -0.045em;
 }
