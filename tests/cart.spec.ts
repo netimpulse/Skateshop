@@ -1,4 +1,4 @@
-import { test, expect, webkit, type Page } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 import { withTheme } from "./fixtures";
@@ -14,9 +14,9 @@ import { withTheme } from "./fixtures";
  * read from #theme-config. Variant lookup is cached per worker to keep the request count low.
  */
 
-// The "mobile" project uses the iPhone 13 descriptor (WebKit). Without an installed WebKit build the same
-// viewport/touch emulation runs in Chromium instead of failing to launch.
-if (!fs.existsSync(webkit.executablePath())) test.use({ browserName: "chromium" });
+// The "mobile" project uses the iPhone 13 descriptor (WebKit by default); only Chromium is installed, so the
+// same viewport/touch emulation runs in Chromium.
+test.use({ browserName: "chromium" });
 
 const SHOTS = "qa-screenshots";
 const COLLECTION_CANDIDATES = ["builder-decks", "decks", "all"];
@@ -71,9 +71,23 @@ async function clearCart(page: Page) {
   if (response && !response.ok) console.warn(`cart/clear.js: HTTP ${response.status}`);
 }
 
+/** Logs in through the storefront password page when the global setup could not store a session. */
+async function unlockStorefront(page: Page) {
+  if (!new URL(page.url()).pathname.endsWith("/password")) return false;
+  const password = process.env.SHOPIFY_STOREFRONT_PASSWORD;
+  test.skip(!password, "Storefront ist passwortgeschützt und SHOPIFY_STOREFRONT_PASSWORD fehlt");
+  await page.locator('input[type="password"]').first().fill(password as string);
+  await Promise.all([
+    page.waitForURL((url) => !url.pathname.endsWith("/password")),
+    page.locator('form [type="submit"]').first().click(),
+  ]);
+  return true;
+}
+
 /** Navigates to a storefront path (preview theme) and empties the cart before the test starts. */
 async function openStore(page: Page, pathname: string) {
-  const response = await page.goto(withTheme(pathname));
+  let response = await page.goto(withTheme(pathname));
+  if (await unlockStorefront(page)) response = await page.goto(withTheme(pathname));
   expect(response?.ok(), `GET ${pathname}: HTTP ${response?.status()}`).toBe(true);
   await clearCart(page);
   return response;
