@@ -96,7 +96,7 @@
   data-testid="product-gallery"
 >
   <div class="product-gallery__viewport">
-    <ul class="product-gallery__track" role="list" aria-label="{{ label_gallery | escape }}" data-gallery-track>
+    <ul class="product-gallery__track" role="list" aria-label="{{ label_gallery }}" data-gallery-track>
       {%- if media_count == 0 -%}
         <li class="product-gallery__slide" data-gallery-slide>
           <div class="product-gallery__media media">
@@ -254,7 +254,7 @@
     <dialog
       id="{{ lightbox_id }}"
       class="product-lightbox scheme color-scheme-1"
-      aria-label="{{ label_gallery | escape }}"
+      aria-label="{{ label_gallery }}"
       data-lightbox
     >
       <div class="product-lightbox__bar">

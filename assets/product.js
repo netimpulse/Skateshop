@@ -130,7 +130,7 @@ class VariantPicker extends HTMLElement {
       const current = document.createElement('span');
       current.className = 'price__current';
       current.textContent = formatMoney(variant.price);
-      price.append(status, current);
+      price.append(status, ' ', current);
 
       if (onSale) {
         const compareLabel = document.createElement('span');
@@ -139,7 +139,7 @@ class VariantPicker extends HTMLElement {
         const compare = document.createElement('s');
         compare.className = 'price__compare';
         compare.textContent = formatMoney(variant.compare_at_price);
-        price.append(compareLabel, compare);
+        price.append(' ', compareLabel, ' ', compare);
       }
 
       if (variant.unit_price) {
@@ -149,7 +149,7 @@ class VariantPicker extends HTMLElement {
         unitLabel.className = 'visually-hidden';
         unitLabel.textContent = wrapper.dataset.labelUnit || '';
         unit.append(unitLabel, ` ${variant.unit_price}`);
-        price.append(unit);
+        price.append(' ', unit);
       }
 
       wrapper.replaceChildren(price);

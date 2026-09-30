@@ -10,7 +10,7 @@
   @param {string} [spec_keys] - Comma-separated spec keys to resolve per variant (see product-kind)
   @param {number} [threshold] - Low-stock threshold for the stock hint
   @param {string} [size_guide_url] - Optional link to a size guide
-  @param {string} [size_guide_label] - Link text for the size guide
+  @param {string} [size_guide_label] - Link text for the size guide (already escaped)
   @param {string} [class] - Extra class
 
   @example
@@ -27,8 +27,8 @@
   <variant-picker
     class="product-picker {{ class }}"
     data-section-id="{{ section_id }}"
-    data-text-sold-out="{{ text_sold_out | escape }}"
-    data-text-unavailable="{{ text_unavailable | escape }}"
+    data-text-sold-out="{{ text_sold_out }}"
+    data-text-unavailable="{{ text_unavailable }}"
     data-testid="variant-picker"
   >
     {%- for option in product.options_with_values -%}
@@ -81,7 +81,7 @@
 
     {%- if size_guide_url != blank -%}
       <a class="product-picker__guide link-mono" href="{{ size_guide_url }}">
-        {{- size_guide_label | escape -}}
+        {{- size_guide_label -}}
         {%- render 'icon', name: 'arrow-up-right' -%}
       </a>
     {%- endif -%}

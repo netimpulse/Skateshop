@@ -40,7 +40,7 @@
     <div class="product-details__list" data-testid="product-details">
       {%- for block in section.blocks -%}
         {%- liquid
-          assign title = block.settings.heading
+          assign title = block.settings.heading | escape
           assign content = ''
           assign page_link = blank
 
@@ -129,7 +129,7 @@
                 {%- if panel_index < 10 -%}0{%- endif -%}
                 {{- panel_index -}}
               </span>
-              <h3 class="product-details__title">{{ title | escape }}</h3>
+              <h3 class="product-details__title">{{ title }}</h3>
               <span class="product-details__icon" aria-hidden="true">{% render 'icon', name: 'plus' %}</span>
             </summary>
             <div class="product-details__content rte">

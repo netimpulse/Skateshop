@@ -112,10 +112,10 @@
                 class="product-main__price"
                 data-product-price
                 data-testid="product-price"
-                data-label-sale="{{ label_sale | escape }}"
-                data-label-regular="{{ label_regular | escape }}"
-                data-label-compare="{{ label_compare | escape }}"
-                data-label-unit="{{ label_unit | escape }}"
+                data-label-sale="{{ label_sale }}"
+                data-label-regular="{{ label_regular }}"
+                data-label-compare="{{ label_compare }}"
+                data-label-unit="{{ label_unit }}"
               >
                 {% render 'price', variant: current_variant %}
               </div>
@@ -147,7 +147,7 @@
                 assign rating_label = 'accessibility.star_rating' | t: rating: rating_value, max: rating_max
               -%}
               <div class="product-main__block product-main__block--rating product-rating" {{ block.shopify_attributes }}>
-                <span class="product-rating__stars" role="img" aria-label="{{ rating_label | escape }}">
+                <span class="product-rating__stars" role="img" aria-label="{{ rating_label }}">
                   {%- for star in (1..rating_max) -%}
                     {%- if star <= rating_rounded -%}
                       {%- render 'icon', name: 'star', class: 'product-rating__star product-rating__star--filled' -%}
@@ -168,7 +168,7 @@
               {%- liquid
                 assign size_guide_url = block.settings.size_guide_page.url
                 assign default_guide_label = 'products.product.size_guide' | t
-                assign size_guide_label = block.settings.size_guide_label | default: default_guide_label
+                assign size_guide_label = block.settings.size_guide_label | escape | default: default_guide_label
               -%}
               <div class="product-main__block product-main__block--variant_picker" {{ block.shopify_attributes }}>
                 {% render 'variant-picker',
@@ -230,7 +230,7 @@
           {%- when 'buy_buttons' -%}
             {%- liquid
               assign default_add = 'products.product.add_to_cart' | t
-              assign label_add = block.settings.add_label | default: default_add
+              assign label_add = block.settings.add_label | escape | default: default_add
               assign label_sold_out = 'products.product.sold_out' | t
               assign label_unavailable = 'products.product.unavailable' | t
             -%}
@@ -244,18 +244,18 @@
                     class="button button--full product-main__add"
                     data-add-button
                     data-testid="product-add"
-                    data-label-add="{{ label_add | escape }}"
-                    data-label-sold-out="{{ label_sold_out | escape }}"
-                    data-label-unavailable="{{ label_unavailable | escape }}"
+                    data-label-add="{{ label_add }}"
+                    data-label-sold-out="{{ label_sold_out }}"
+                    data-label-unavailable="{{ label_unavailable }}"
                     {% unless current_variant.available %}
                       disabled
                     {% endunless %}
                   >
                     <span data-add-label>
                       {%- if current_variant.available -%}
-                        {{ label_add | escape }}
+                        {{ label_add }}
                       {%- else -%}
-                        {{ label_sold_out | escape }}
+                        {{ label_sold_out }}
                       {%- endif -%}
                     </span>
                   </button>
@@ -286,7 +286,8 @@
             {%- if product.description != blank -%}
               <div class="product-main__block product-main__block--description rte" {{ block.shopify_attributes }}>
                 {%- if block.settings.excerpt_words > 0 -%}
-                  <p>{{ product.description | strip_html | truncatewords: block.settings.excerpt_words }}</p>
+                  {%- assign first_paragraph = product.description | split: '</p>' | first | strip_html | strip -%}
+                  <p>{{ first_paragraph | truncatewords: block.settings.excerpt_words }}</p>
                 {%- else -%}
                   {{ product.description }}
                 {%- endif -%}
@@ -296,8 +297,9 @@
           {%- when 'specs' -%}
             {%- liquid
               assign specs_heading_id = 'ProductSpecs-' | append: section.id
+              assign specs_heading = block.settings.heading | escape
               capture specs
-                render 'product-specs', product: product, variant: current_variant, heading: block.settings.heading, heading_id: specs_heading_id, show_sku: block.settings.show_sku
+                render 'product-specs', product: product, variant: current_variant, heading: specs_heading, heading_id: specs_heading_id, show_sku: block.settings.show_sku
               endcapture
             -%}
             {%- if specs != blank -%}
@@ -313,22 +315,22 @@
               assign default_builder_heading = 'products.product.builder_heading' | t
               assign default_builder_text = 'products.product.builder_text' | t
               assign default_builder_link = 'products.product.builder_link' | t
-              assign builder_heading = block.settings.heading | default: default_builder_heading
-              assign builder_link = block.settings.link_label | default: default_builder_link
+              assign builder_heading = block.settings.heading | escape | default: default_builder_heading
+              assign builder_link = block.settings.link_label | escape | default: default_builder_link
             -%}
             {%- if builder_part == 'true' and builder_url != blank -%}
               <div class="product-main__block product-main__block--builder_cta product-builder-cta" {{ block.shopify_attributes }}>
                 <span class="tri-stripe product-builder-cta__stripe" aria-hidden="true"><span></span></span>
-                <p class="product-builder-cta__heading label-mono">{{ builder_heading | escape }}</p>
+                <p class="product-builder-cta__heading label-mono">{{ builder_heading }}</p>
                 <div class="product-builder-cta__text">
                   {%- if block.settings.text != blank -%}
                     {{ block.settings.text }}
                   {%- else -%}
-                    {{ default_builder_text | escape }}
+                    {{ default_builder_text }}
                   {%- endif -%}
                 </div>
                 <a class="button button--secondary button--small product-builder-cta__link" href="{{ builder_url }}">
-                  {{- builder_link | escape -}}
+                  {{- builder_link -}}
                   {%- render 'icon', name: 'arrow-right' -%}
                 </a>
               </div>

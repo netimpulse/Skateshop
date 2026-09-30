@@ -8,7 +8,7 @@
 
   @param {product} product - The product
   @param {variant} [variant] - Selected variant (default: selected or first available)
-  @param {string} [heading] - Heading text (default: products.specs.heading)
+  @param {string} [heading] - Heading text, already escaped (default: products.specs.heading)
   @param {string} [heading_id] - id for the heading (aria-labelledby of the table)
   @param {boolean} [show_sku] - Adds an SKU row
   @param {string} [class] - Extra class
@@ -89,7 +89,7 @@
 
 {%- if row_count > 0 -%}
   <div class="product-specs {{ class }}" data-product-specs data-testid="product-specs">
-    <h2 class="product-specs__heading eyebrow eyebrow--rule" id="{{ heading_id }}">{{ heading | escape }}</h2>
+    <h2 class="product-specs__heading eyebrow eyebrow--rule" id="{{ heading_id }}">{{ heading }}</h2>
     <table class="product-specs__table" aria-labelledby="{{ heading_id }}">
       <tbody>
         {{ rows }}

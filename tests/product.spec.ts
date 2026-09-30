@@ -13,17 +13,31 @@ const LOCALE = "/de";
 const SCREENSHOTS = "qa-screenshots";
 const IGNORED_CONSOLE = /(web-pixels|monorail|shopify-perf|trekkie|Content Security Policy|favicon|preview_bar|analytics|captcha|cloudflare)/i;
 
-test.describe.configure({ mode: "serial" });
 
 let cachedUrls: string[] | null = null;
 
 type VariantData = { id: number; options: string[]; available: boolean; price: number };
 
-async function gotoOk(page: Page, url: string) {
-  const response = await page.goto(withTheme(url), { waitUntil: "load" });
+/** Opens a storefront URL; logs in through the storefront password page if needed, skips on rate-limit challenges. */
+async function open(page: Page, url: string, waitUntil: "load" | "domcontentloaded" = "load") {
+  let response = await page.goto(withTheme(url), { waitUntil });
+  if (new URL(page.url()).pathname.endsWith("/password") && process.env.SHOPIFY_STOREFRONT_PASSWORD) {
+    const field = page.locator('input[type="password"]').first();
+    if (await field.count()) {
+      await field.fill(process.env.SHOPIFY_STOREFRONT_PASSWORD);
+      await Promise.all([page.waitForLoadState("domcontentloaded"), page.locator('form button[type="submit"]').first().click()]);
+      response = await page.goto(withTheme(url), { waitUntil });
+    }
+  }
   const status = response?.status() ?? 0;
-  test.skip(status === 429, "Store drosselt gerade (429 / Challenge) – später erneut ausführen");
-  expect(response?.ok(), `HTTP ${status} für ${url}`).toBe(true);
+  const challenged = status === 429 || /just a moment/i.test(await page.title());
+  test.skip(challenged, "Store drosselt gerade (429 / Challenge) – später erneut ausführen");
+  return response;
+}
+
+async function gotoOk(page: Page, url: string) {
+  const response = await open(page, url);
+  expect(response?.ok(), `HTTP ${response?.status()} für ${url}`).toBe(true);
   return response;
 }
 
@@ -31,8 +45,7 @@ async function gotoOk(page: Page, url: string) {
 async function findProductUrls(page: Page, limit = 2): Promise<string[]> {
   if (cachedUrls) return cachedUrls.slice(0, limit);
   for (const handle of ["decks", "all"]) {
-    const response = await page.goto(withTheme(`${LOCALE}/collections/${handle}`), { waitUntil: "domcontentloaded" });
-    test.skip(response?.status() === 429, "Store drosselt gerade (429 / Challenge)");
+    const response = await open(page, `${LOCALE}/collections/${handle}`, "domcontentloaded");
     if (!response?.ok()) continue;
     const hrefs = await page
       .locator("main [data-product-card] a[href*='/products/'], main a[href*='/products/']")
@@ -129,7 +142,9 @@ test.describe("Produktdetailseite", () => {
     const target = others.find((variant) => variant.available && variant.price !== current.price) ?? others.find((variant) => variant.available) ?? others[0];
     test.skip(!target, "Nur eine Variante");
 
-    const priceBefore = (await page.getByTestId("product-price").innerText()).trim();
+    const currentPrice = async () =>
+      ((await page.getByTestId("product-price").locator(".price__current").textContent()) || "").replace(/\s+/g, " ").trim();
+    const priceBefore = await currentPrice();
 
     // Select every option value of the target variant by clicking its label.
     for (const [index, value] of target.options.entries()) {
@@ -147,10 +162,12 @@ test.describe("Produktdetailseite", () => {
     await expect(page.locator("[data-variant-id]").first()).toHaveValue(String(target.id));
     await expect.poll(() => new URL(page.url()).searchParams.get("variant")).toBe(String(target.id));
     if (target.price !== current.price) {
-      await expect(page.getByTestId("product-price")).not.toHaveText(priceBefore);
+      await expect.poll(currentPrice).not.toBe(priceBefore);
     } else {
-      await expect(page.getByTestId("product-price")).toHaveText(priceBefore);
+      await expect.poll(currentPrice).toBe(priceBefore);
     }
+    // Both amounts contain the same digits as the variant price in cents (format independent).
+    await expect.poll(async () => (await currentPrice()).replace(/\D/g, "")).toBe(String(target.price));
     const addButton = page.getByTestId("product-add");
     if (target.available) await expect(addButton).toBeEnabled();
     else await expect(addButton).toBeDisabled();

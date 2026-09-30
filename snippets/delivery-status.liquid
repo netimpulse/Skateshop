@@ -1,6 +1,7 @@
 {% doc %}
   Delivery status for the selected variant: in stock, only X left, backorder, sold out or unavailable.
   All texts are stored as data attributes so product.js can switch the state on variant change without a fetch.
+  Text parameters are merchant input (escaped here); translations from `t` are already escaped.
   Empty text parameters fall back to the translations in products.delivery.*; "[count]" is replaced by the stock.
 
   @param {variant} [variant] - Selected variant
@@ -22,10 +23,10 @@
   assign default_sold_out = 'products.delivery.sold_out' | t
   assign text_unavailable = 'products.delivery.unavailable' | t
 
-  assign text_in_stock = in_stock_text | default: default_in_stock
-  assign text_low_stock = low_stock_text | default: default_low_stock
-  assign text_backorder = backorder_text | default: default_backorder
-  assign text_sold_out = sold_out_text | default: default_sold_out
+  assign text_in_stock = in_stock_text | escape | default: default_in_stock
+  assign text_low_stock = low_stock_text | escape | default: default_low_stock
+  assign text_backorder = backorder_text | escape | default: default_backorder
+  assign text_sold_out = sold_out_text | escape | default: default_sold_out
 
   capture stock
     render 'product-stock-state', variant: variant, threshold: threshold
@@ -53,12 +54,12 @@
   data-product-delivery
   data-state="{{ state }}"
   data-testid="product-delivery"
-  data-text-in-stock="{{ text_in_stock | escape }}"
-  data-text-low="{{ text_low_stock | escape }}"
-  data-text-backorder="{{ text_backorder | escape }}"
-  data-text-sold-out="{{ text_sold_out | escape }}"
-  data-text-unavailable="{{ text_unavailable | escape }}"
+  data-text-in-stock="{{ text_in_stock }}"
+  data-text-low="{{ text_low_stock }}"
+  data-text-backorder="{{ text_backorder }}"
+  data-text-sold-out="{{ text_sold_out }}"
+  data-text-unavailable="{{ text_unavailable }}"
 >
   <span class="product-delivery__led" aria-hidden="true"></span>
-  <p class="product-delivery__text" data-delivery-text aria-live="polite">{{ text | escape }}</p>
+  <p class="product-delivery__text" data-delivery-text aria-live="polite">{{ text }}</p>
 </div>
