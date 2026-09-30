@@ -142,6 +142,8 @@ class BoardBuilder extends HTMLElement {
 
     this.persist();
     this.refresh();
+    const current = this.steps.find((step) => step.part === this.state.step);
+    if (current && this.selection.has(current.part)) this.list.render(current);
     if (removed.length) {
       announce(removed.map((part) => interpolate(this.strings.partUnavailable, { part: this.partLabel(part) })).join(' '));
     }
