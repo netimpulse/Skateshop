@@ -206,10 +206,9 @@ test.describe("Homepage", () => {
 });
 
 test.describe("Homepage – reduzierte Bewegung", () => {
-  test.use({ reducedMotion: "reduce" });
-
   test("Marquee steht still und bricht um, keine Endlos-Animationen", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "Einmal pro Lauf genügt");
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await openHome(page);
 
     const strip = page.getByTestId("brand-marquee");
