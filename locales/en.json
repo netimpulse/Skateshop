@@ -1,7 +1,11 @@
 {
   "404": {
     "back_to_shopping": "Back to shopping",
+    "heading": "This page doesn't exist.",
+    "links_heading": "Jump straight to",
     "not_found": "Page not found.",
+    "search_label": "Search the shop",
+    "text": "It may have moved, or the link is out of date. Search for what you need – or start building a new board.",
     "title": "404"
   },
   "accessibility": {
@@ -24,13 +28,53 @@
     "vendor": "Vendor:"
   },
   "blog": {
+    "all_posts": "All",
     "article_comments": "Comments",
     "article_metadata_html": "{{ date }} by {{ author }}",
+    "article_navigation": "Article navigation",
+    "articles_count": {
+      "one": "{{ count }} post",
+      "other": "{{ count }} posts"
+    },
+    "author": "Words: {{ author }}",
+    "back_to_blog": "Back to the blog",
     "comment_form_body": "Comment",
     "comment_form_email": "Email",
     "comment_form_name": "Name",
     "comment_form_submit": "Post",
-    "comment_form_title": "Add a comment"
+    "comment_form_title": "Add a comment",
+    "comment_success": "Thanks! Your comment is live.",
+    "comment_success_moderated": "Thanks! Your comment will appear once we've reviewed it.",
+    "comments_count": {
+      "one": "{{ count }} comment",
+      "other": "{{ count }} comments"
+    },
+    "comments_empty": "No comments yet – be the first.",
+    "comments_moderated_note": "Comments are reviewed before they are published.",
+    "empty": "The first posts are coming soon.",
+    "featured_label": "Cover story",
+    "filter_label": "Filter posts by topic",
+    "newer_article": "Newer post",
+    "older_article": "Older post",
+    "reading_time": {
+      "one": "{{ count }} min read",
+      "other": "{{ count }} min read"
+    },
+    "tags": "Topics"
+  },
+  "brands": {
+    "all_heading": "All brands A–Z",
+    "back_to_index": "Back to index",
+    "count": {
+      "one": "{{ count }} brand",
+      "other": "{{ count }} brands"
+    },
+    "empty": "No brands in the shop yet.",
+    "featured_heading": "Featured brands",
+    "index_label": "Brands by first letter",
+    "other_label": "Numbers and special characters",
+    "placeholder_name": "Brand name",
+    "view_brand": "View brand"
   },
   "builder": {
     "back": "Back",
@@ -149,18 +193,88 @@
   },
   "cart": {
     "added": "Added to cart",
+    "build": {
+      "edit": "Edit build",
+      "hint": "Can only be changed as a complete board",
+      "label": "CUSTOM BOARD BUILD",
+      "parts": {
+        "one": "{{ count }} part",
+        "other": "{{ count }} parts"
+      },
+      "remove": "Remove build",
+      "removed": "Build removed",
+      "total": "Build total"
+    },
     "checkout": "Checkout",
     "count": {
       "one": "{{ count }} item",
       "other": "{{ count }} items"
     },
+    "empty": {
+      "cta_build": "Build a board",
+      "cta_decks": "Shop decks",
+      "text": "Put your board together part by part or browse our decks.",
+      "title": "Your cart is empty"
+    },
     "error_generic": "Something went wrong. Please try again.",
+    "line": {
+      "decrease": "Decrease quantity",
+      "discounted_price": "Discounted price",
+      "each_html": "{{ price }} each",
+      "increase": "Increase quantity",
+      "original_price": "Original price",
+      "quantity": "Quantity",
+      "removed": "Item removed",
+      "updated": "Cart updated"
+    },
+    "parts": {
+      "bearings": "Bearings",
+      "deck": "Deck",
+      "griptape": "Griptape",
+      "hardware": "Hardware",
+      "part": "Part",
+      "riser": "Riser Pads",
+      "trucks": "Trucks",
+      "wheels": "Wheels"
+    },
     "remove": "Remove",
+    "shipping": {
+      "progress": "Progress towards free shipping",
+      "reached": "Free shipping unlocked.",
+      "remaining_html": "Spend {{ amount }} more for free shipping."
+    },
+    "summary": {
+      "heading": "Order summary",
+      "items": "Items",
+      "note": "Order note",
+      "note_placeholder": "Notes about your order",
+      "subtotal": "Subtotal",
+      "taxes_excluded": "Taxes excluded. Shipping and discount codes in the next step.",
+      "taxes_included": "Taxes included. Shipping and discount codes in the next step.",
+      "view_cart": "View cart"
+    },
+    "table": {
+      "product": "Product",
+      "quantity": "Quantity",
+      "total": "Total"
+    },
     "title": "Cart",
     "update": "Update"
   },
   "collections": {
     "title": "Categories"
+  },
+  "contact": {
+    "form": {
+      "email": "Email",
+      "message": "Message",
+      "name": "Name",
+      "phone": "Phone",
+      "submit": "Send message",
+      "success": "Thanks for your message! We'll get back to you as soon as we can."
+    },
+    "heading": "Write to us",
+    "info_heading": "How to reach us"
   },
   "customers": {
     "login": {
@@ -190,8 +304,29 @@
     "expires_on": "Expires on {{ expires_on }}",
     "use_at_checkout": "Use this gift card at checkout"
   },
+  "pages": {
+    "form": {
+      "error_heading": "Please check your details:",
+      "optional": "optional",
+      "required_note": "Fields marked * are required."
+    },
+    "pagination": {
+      "next": "Next page",
+      "page": "Page {{ page }}",
+      "previous": "Previous page"
+    }
+  },
   "password": {
     "enter": "Enter",
+    "error": "That password isn't right. Please try again.",
+    "heading": "We're rolling out soon.",
+    "newsletter": {
+      "heading": "Let me know when it starts",
+      "label": "Email address",
+      "submit": "Notify me",
+      "success": "Thanks! We'll let you know when we launch."
+    },
+    "owner_summary": "Enter with password",
     "password": "Password",
     "title": "This shop is private"
   },

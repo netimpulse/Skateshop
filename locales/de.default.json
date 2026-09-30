@@ -1,7 +1,11 @@
 {
   "404": {
     "back_to_shopping": "Weiter einkaufen",
+    "heading": "Diese Seite gibt es nicht.",
+    "links_heading": "Direkt weiter zu",
     "not_found": "Seite nicht gefunden.",
+    "search_label": "Shop durchsuchen",
+    "text": "Vielleicht wurde sie verschoben oder der Link ist veraltet. Such einfach, was du brauchst – oder starte mit einem neuen Board.",
     "title": "404"
   },
   "accessibility": {
@@ -24,13 +28,53 @@
     "vendor": "Hersteller:"
   },
   "blog": {
+    "all_posts": "Alle",
     "article_comments": "Kommentare",
     "article_metadata_html": "{{ date }} von {{ author }}",
+    "article_navigation": "Beitragsnavigation",
+    "articles_count": {
+      "one": "{{ count }} Beitrag",
+      "other": "{{ count }} Beiträge"
+    },
+    "author": "Text: {{ author }}",
+    "back_to_blog": "Zurück zum Blog",
     "comment_form_body": "Kommentar",
     "comment_form_email": "E-Mail",
     "comment_form_name": "Name",
     "comment_form_submit": "Absenden",
-    "comment_form_title": "Kommentar schreiben"
+    "comment_form_title": "Kommentar schreiben",
+    "comment_success": "Danke! Dein Kommentar ist online.",
+    "comment_success_moderated": "Danke! Dein Kommentar erscheint, sobald wir ihn geprüft haben.",
+    "comments_count": {
+      "one": "{{ count }} Kommentar",
+      "other": "{{ count }} Kommentare"
+    },
+    "comments_empty": "Noch keine Kommentare – schreib den ersten.",
+    "comments_moderated_note": "Kommentare werden vor der Veröffentlichung geprüft.",
+    "empty": "Hier erscheinen bald die ersten Beiträge.",
+    "featured_label": "Titelstory",
+    "filter_label": "Beiträge nach Thema filtern",
+    "newer_article": "Neuerer Beitrag",
+    "older_article": "Älterer Beitrag",
+    "reading_time": {
+      "one": "{{ count }} Min. Lesezeit",
+      "other": "{{ count }} Min. Lesezeit"
+    },
+    "tags": "Themen"
+  },
+  "brands": {
+    "all_heading": "Alle Marken von A–Z",
+    "back_to_index": "Zum Register",
+    "count": {
+      "one": "{{ count }} Marke",
+      "other": "{{ count }} Marken"
+    },
+    "empty": "Noch keine Marken im Sortiment.",
+    "featured_heading": "Featured Brands",
+    "index_label": "Marken nach Anfangsbuchstaben",
+    "other_label": "Zahlen und Sonderzeichen",
+    "placeholder_name": "Markenname",
+    "view_brand": "Zur Marke"
   },
   "builder": {
     "back": "Zurück",
@@ -149,18 +193,88 @@
   },
   "cart": {
     "added": "Zum Warenkorb hinzugefügt",
+    "build": {
+      "edit": "Build bearbeiten",
+      "hint": "Nur als komplettes Board änderbar",
+      "label": "CUSTOM BOARD BUILD",
+      "parts": {
+        "one": "{{ count }} Teil",
+        "other": "{{ count }} Teile"
+      },
+      "remove": "Build entfernen",
+      "removed": "Build entfernt",
+      "total": "Build-Summe"
+    },
     "checkout": "Zur Kasse",
     "count": {
       "one": "{{ count }} Artikel",
       "other": "{{ count }} Artikel"
     },
+    "empty": {
+      "cta_build": "Board bauen",
+      "cta_decks": "Decks ansehen",
+      "text": "Stell dir dein Board Teil für Teil zusammen oder stöbere durch unsere Decks.",
+      "title": "Dein Warenkorb ist leer"
+    },
     "error_generic": "Das hat nicht geklappt. Bitte versuche es erneut.",
+    "line": {
+      "decrease": "Menge verringern",
+      "discounted_price": "Reduzierter Preis",
+      "each_html": "je {{ price }}",
+      "increase": "Menge erhöhen",
+      "original_price": "Ursprünglicher Preis",
+      "quantity": "Menge",
+      "removed": "Artikel entfernt",
+      "updated": "Warenkorb aktualisiert"
+    },
+    "parts": {
+      "bearings": "Bearings",
+      "deck": "Deck",
+      "griptape": "Griptape",
+      "hardware": "Hardware",
+      "part": "Teil",
+      "riser": "Riser Pads",
+      "trucks": "Trucks",
+      "wheels": "Wheels"
+    },
     "remove": "Entfernen",
+    "shipping": {
+      "progress": "Fortschritt bis zum kostenlosen Versand",
+      "reached": "Kostenloser Versand freigeschaltet.",
+      "remaining_html": "Noch {{ amount }} bis zum kostenlosen Versand."
+    },
+    "summary": {
+      "heading": "Bestellübersicht",
+      "items": "Warenwert",
+      "note": "Bestellnotiz",
+      "note_placeholder": "Hinweise zu deiner Bestellung",
+      "subtotal": "Zwischensumme",
+      "taxes_excluded": "Zzgl. Steuern. Versandkosten und Rabattcodes im nächsten Schritt.",
+      "taxes_included": "Inkl. MwSt. Versandkosten und Rabattcodes im nächsten Schritt.",
+      "view_cart": "Warenkorb ansehen"
+    },
+    "table": {
+      "product": "Produkt",
+      "quantity": "Menge",
+      "total": "Summe"
+    },
     "title": "Warenkorb",
     "update": "Aktualisieren"
   },
   "collections": {
     "title": "Kategorien"
+  },
+  "contact": {
+    "form": {
+      "email": "E-Mail",
+      "message": "Nachricht",
+      "name": "Name",
+      "phone": "Telefon",
+      "submit": "Nachricht senden",
+      "success": "Danke für deine Nachricht! Wir melden uns so schnell wie möglich."
+    },
+    "heading": "Schreib uns",
+    "info_heading": "So erreichst du uns"
   },
   "customers": {
     "login": {
@@ -190,8 +304,29 @@
     "expires_on": "Gültig bis {{ expires_on }}",
     "use_at_checkout": "Löse diese Geschenkkarte an der Kasse ein"
   },
+  "pages": {
+    "form": {
+      "error_heading": "Bitte prüfe deine Angaben:",
+      "optional": "optional",
+      "required_note": "Mit * markierte Felder sind Pflichtfelder."
+    },
+    "pagination": {
+      "next": "Nächste Seite",
+      "page": "Seite {{ page }}",
+      "previous": "Vorherige Seite"
+    }
+  },
   "password": {
     "enter": "Betreten",
+    "error": "Das Passwort stimmt nicht. Bitte versuche es erneut.",
+    "heading": "Wir rollen bald los.",
+    "newsletter": {
+      "heading": "Sag mir Bescheid, wenn es losgeht",
+      "label": "E-Mail-Adresse",
+      "submit": "Benachrichtigen",
+      "success": "Danke! Wir melden uns zum Start."
+    },
+    "owner_summary": "Mit Passwort betreten",
     "password": "Passwort",
     "title": "Dieser Shop ist privat"
   },

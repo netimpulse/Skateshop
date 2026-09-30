@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 // Merges locale fragments (.werkbank-tmp/locales/<area>.{de,en}.json or given paths) into
 // locales/de.default.json and locales/en.json. Fails on conflicting values or diverging key sets.
-// Usage: node scripts/merge-locales.mjs [fragment-dir]
+// Usage: node scripts/merge-locales.mjs [fragment-dir] [--base <dir with de.default.json + en.json>]
+// With --base the result is rebuilt from the base files + fragments (fragments may change between runs).
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const fragmentDir = process.argv[2] || join(ROOT, '.werkbank-tmp/locales');
+const argv = process.argv.slice(2);
+const baseIndex = argv.indexOf('--base');
+const baseDir = baseIndex > -1 ? argv[baseIndex + 1] : null;
+const positional = argv.filter((arg, index) => !arg.startsWith('--') && (baseIndex === -1 || index !== baseIndex + 1));
+const fragmentDir = positional[0] || join(ROOT, '.werkbank-tmp/locales');
 const TARGETS = { de: 'locales/de.default.json', en: 'locales/en.json' };
 
 const problems = [];
@@ -47,7 +52,8 @@ function keys(object, prefix = '') {
 
 const result = {};
 for (const [lang, file] of Object.entries(TARGETS)) {
-  result[lang] = existsSync(join(ROOT, file)) ? await readJson(join(ROOT, file)) : {};
+  const source = baseDir ? join(baseDir, file.replace('locales/', '')) : join(ROOT, file);
+  result[lang] = existsSync(source) ? await readJson(source) : {};
 }
 
 const fragments = existsSync(fragmentDir) ? (await readdir(fragmentDir)).filter((name) => /\.(de|en)\.json$/.test(name)).sort() : [];
