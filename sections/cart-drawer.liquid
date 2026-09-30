@@ -1,36 +1,78 @@
 {% comment %}
-  Cart drawer (static section rendered in layout/theme.liquid, id "cart-drawer").
-  Base version – full UI with build grouping follows in step 10.
+  Cart drawer – static section rendered in layout/theme.liquid ({% section 'cart-drawer' %}, id "cart-drawer").
+  Contract: after every cart mutation cart-drawer.js replaces [data-cart-drawer-content] (and the count in the
+  header) with the markup from sections['cart-drawer'] of the Ajax response.
 {% endcomment %}
 
-<cart-drawer data-section-id="{{ section.id }}">
-  <dialog id="CartDrawer" class="drawer cart-drawer scheme color-scheme-1" aria-labelledby="CartDrawerTitle" data-backdrop-close>
-    <div class="drawer__header">
-      <h2 id="CartDrawerTitle" class="drawer__title">{{ 'cart.title' | t }}</h2>
+{{ 'component-cart.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign form_id = 'CartForm-' | append: section.id
+  assign msg_updated = 'cart.line.updated' | t
+  assign msg_removed = 'cart.line.removed' | t
+  assign msg_build_removed = 'cart.build.removed' | t
+-%}
+
+<cart-drawer class="cart-drawer" data-section-id="{{ section.id }}">
+  <dialog
+    id="CartDrawer"
+    class="drawer cart-drawer__dialog scheme color-{{ section.settings.color_scheme }}"
+    aria-labelledby="CartDrawerTitle"
+    data-backdrop-close
+    data-testid="cart-drawer"
+  >
+    <div class="drawer__header cart-drawer__header">
+      <h2 id="CartDrawerTitle" class="cart-drawer__title" tabindex="-1">
+        {{- 'cart.title' | t }}
+        <span class="cart-drawer__count" data-cart-drawer-count data-testid="cart-drawer-count">
+          {{- 'cart.count' | t: count: cart.item_count -}}
+        </span>
+      </h2>
       <button type="button" class="icon-button" data-dialog-close aria-label="{{ 'accessibility.close' | t }}">
         {%- render 'icon', name: 'close' -%}
       </button>
     </div>
-    <div class="cart-drawer__content" data-cart-drawer-content>
-      <div class="drawer__body">
+
+    <cart-items
+      class="cart-drawer__items"
+      data-source="cart-drawer"
+      data-focus-fallback="CartDrawerTitle"
+      data-msg-updated="{{ msg_updated | escape }}"
+      data-msg-removed="{{ msg_removed | escape }}"
+      data-msg-build-removed="{{ msg_build_removed | escape }}"
+    >
+      <div class="cart-items__error" role="alert" data-cart-error></div>
+
+      <div class="cart-drawer__content" data-cart-content data-cart-drawer-content>
         {%- if cart.item_count == 0 -%}
-          <p>{{ 'general.continue_shopping' | t }}</p>
+          <div class="drawer__body cart-drawer__body cart-drawer__body--empty">
+            {%- render 'cart-empty',
+              context: 'drawer',
+              cta_1_label: section.settings.empty_cta_1_label,
+              cta_1_url: section.settings.empty_cta_1_url,
+              cta_2_label: section.settings.empty_cta_2_label,
+              cta_2_url: section.settings.empty_cta_2_url
+            -%}
+          </div>
         {%- else -%}
-          <ul role="list" class="stack">
-            {%- for item in cart.items -%}
-              <li>{{ item.product.title | escape }} × {{ item.quantity }} – {{ item.final_line_price | money }}</li>
-            {%- endfor -%}
-          </ul>
+          {%- if section.settings.show_shipping_progress -%}
+            {%- render 'cart-shipping' -%}
+          {%- endif -%}
+          <div class="drawer__body cart-drawer__body" data-cart-scroll>
+            {%- render 'cart-items',
+              id_prefix: section.id,
+              form_id: form_id,
+              builder_url: section.settings.builder_url,
+              context: 'drawer'
+            -%}
+          </div>
+          <div class="drawer__footer cart-drawer__footer">
+            {%- render 'cart-summary', id_prefix: section.id, form_id: form_id, show_view_cart: true -%}
+          </div>
+          <form id="{{ form_id }}" action="{{ routes.cart_url }}" method="post" class="cart-form" novalidate></form>
         {%- endif -%}
       </div>
-      {%- if cart.item_count > 0 -%}
-        <div class="drawer__footer">
-          <form action="{{ routes.cart_url }}" method="post">
-            <button type="submit" name="checkout" class="button button--full">{{ 'cart.checkout' | t }}</button>
-          </form>
-        </div>
-      {%- endif -%}
-    </div>
+    </cart-items>
   </dialog>
 </cart-drawer>
 
@@ -39,6 +81,58 @@
 {% schema %}
 {
   "name": "Warenkorb-Drawer",
-  "settings": []
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shipping_progress",
+      "label": "Fortschritt „Versandkostenfrei“ anzeigen",
+      "info": "Die Schwelle legst du unter Theme-Einstellungen › Warenkorb fest (0 = aus).",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Custom Board Build"
+    },
+    {
+      "type": "url",
+      "id": "builder_url",
+      "label": "Link „Build bearbeiten“",
+      "info": "Leer = /pages/skateboard-builder"
+    },
+    {
+      "type": "header",
+      "content": "Leerer Warenkorb"
+    },
+    {
+      "type": "text",
+      "id": "empty_cta_1_label",
+      "label": "Button 1 – Text",
+      "info": "Leer = „Board bauen“ (übersetzt)"
+    },
+    {
+      "type": "url",
+      "id": "empty_cta_1_url",
+      "label": "Button 1 – Link",
+      "info": "Leer = /pages/skateboard-builder"
+    },
+    {
+      "type": "text",
+      "id": "empty_cta_2_label",
+      "label": "Button 2 – Text",
+      "info": "Leer = „Decks ansehen“ (übersetzt)"
+    },
+    {
+      "type": "url",
+      "id": "empty_cta_2_url",
+      "label": "Button 2 – Link",
+      "info": "Leer = /collections/decks"
+    }
+  ]
 }
 {% endschema %}

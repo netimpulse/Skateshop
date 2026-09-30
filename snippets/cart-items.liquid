@@ -1,0 +1,49 @@
+{% doc %}
+  The cart line list shared by the drawer and the cart page.
+  Lines carrying a valid `_build_id` (^b-[a-z0-9]{6,24}$) are collected per build in order of first appearance
+  and rendered once as a group (cart-build-group); every other line is rendered with cart-line-item.
+
+  @param {string} id_prefix - Unique id prefix (section id)
+  @param {string} form_id - Id of the cart form (quantity inputs use form="…")
+  @param {string} [builder_url] - Builder page for "Build bearbeiten"
+  @param {string} [context] - drawer | page
+
+  @example
+  {% render 'cart-items', id_prefix: section.id, form_id: form_id, builder_url: section.settings.builder_url, context: 'drawer' %}
+{% enddoc %}
+
+{%- assign rendered_builds = '|' -%}
+
+<ul role="list" class="cart-items cart-items--{{ context | default: 'drawer' }}" data-testid="cart-items">
+  {%- for item in cart.items -%}
+    {%- liquid
+      assign build_id = item.properties['_build_id'] | default: ''
+      assign is_build = false
+      if build_id != blank
+        assign build_handle = build_id | handleize
+        assign build_prefix = build_id | slice: 0, 2
+        assign build_rest = build_id | slice: 2, 40
+        if build_handle == build_id and build_prefix == 'b-' and build_rest.size >= 6 and build_rest.size <= 24
+          unless build_rest contains '-'
+            assign is_build = true
+          endunless
+        endif
+      endif
+    -%}
+    {%- if is_build -%}
+      {%- assign build_token = '|' | append: build_id | append: '|' -%}
+      {%- unless rendered_builds contains build_token -%}
+        {%- assign rendered_builds = rendered_builds | append: build_id | append: '|' -%}
+        {%- render 'cart-build-group', build_id: build_id, builder_url: builder_url, context: context -%}
+      {%- endunless -%}
+    {%- else -%}
+      {%- render 'cart-line-item',
+        item: item,
+        line: forloop.index,
+        id_prefix: id_prefix,
+        form_id: form_id,
+        context: context
+      -%}
+    {%- endif -%}
+  {%- endfor -%}
+</ul>

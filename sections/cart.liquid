@@ -1,37 +1,192 @@
 {% comment %}
-  This section is used in the cart template to render /cart page with an
-  overview of the items in customer's cart.
-
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/cart
+  Cart page (/cart). Shares the line markup with the drawer (cart-items, cart-build-group, cart-summary).
+  [data-cart-section][data-section-id] makes cart.js request this section with every cart mutation;
+  cart-drawer.js (<cart-items data-source="main-cart">) then swaps [data-cart-content].
+  Without JS the page still works: quantity inputs post updates[key] to /cart, "remove" links use
+  item.url_to_remove and builds are removed through their own update form.
 {% endcomment %}
 
-<h1>{{ 'cart.title' | t }}</h1>
+{{ 'component-cart.css' | asset_url | stylesheet_tag }}
+{% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
 
-<form action="{{ routes.cart_url }}" method="post">
-  <table>
-    {% for item in cart.items %}
-      <tr>
-        <td>
-          {% render 'image', image: item.image, url: item.url %}
-        </td>
-        <td>
-          <p>{{ item.product.title }}</p>
-          {{ 'cart.remove' | t | link_to: item.url_to_remove }}
-        </td>
-        <td>
-          <input type="text" name="updates[]" value="{{ item.quantity }}">
-          <input type="submit" value="{{ 'cart.update' | t }}">
-        </td>
-      </tr>
-    {% endfor %}
-  </table>
+{%- liquid
+  assign form_id = 'CartForm-' | append: section.id
+  assign title_id = 'CartTitle-' | append: section.id
+  assign msg_updated = 'cart.line.updated' | t
+  assign msg_removed = 'cart.line.removed' | t
+  assign msg_build_removed = 'cart.build.removed' | t
+-%}
 
-  <input type="submit" name="checkout" value="{{ 'cart.checkout' | t }}">
-</form>
+<section
+  class="section cart-page scheme color-{{ section.settings.color_scheme }}"
+  data-cart-section
+  data-section-id="{{ section.id }}"
+  aria-labelledby="{{ title_id }}"
+>
+  <div class="page-width">
+    <cart-items
+      class="cart-page__items"
+      data-source="main-cart"
+      data-focus-fallback="{{ title_id }}"
+      data-msg-updated="{{ msg_updated | escape }}"
+      data-msg-removed="{{ msg_removed | escape }}"
+      data-msg-build-removed="{{ msg_build_removed | escape }}"
+    >
+      <div class="cart-items__error cart-page__error" role="alert" data-cart-error></div>
+
+      <div class="cart-page__content" data-cart-content>
+        <header class="cart-page__header">
+          <h1 id="{{ title_id }}" class="h1 cart-page__title" tabindex="-1">{{ 'cart.title' | t }}</h1>
+          <p class="cart-page__meta">
+            {%- if cart.item_count > 0 -%}
+              <span class="cart-page__count label-mono" data-testid="cart-page-count">
+                {{- 'cart.count' | t: count: cart.item_count -}}
+              </span>
+            {%- endif -%}
+            <a href="{{ routes.all_products_collection_url }}" class="link-mono">{{ 'general.continue_shopping' | t }}</a>
+          </p>
+        </header>
+
+        {%- if cart.item_count == 0 -%}
+          {%- render 'cart-empty',
+            context: 'page',
+            cta_1_label: section.settings.empty_cta_1_label,
+            cta_1_url: section.settings.empty_cta_1_url,
+            cta_2_label: section.settings.empty_cta_2_label,
+            cta_2_url: section.settings.empty_cta_2_url
+          -%}
+        {%- else -%}
+          <div class="cart-page__layout">
+            <div class="cart-page__main">
+              {%- if section.settings.show_shipping_progress -%}
+                {%- render 'cart-shipping' -%}
+              {%- endif -%}
+              <div class="cart-page__columns label-mono" aria-hidden="true">
+                <span>{{ 'cart.table.product' | t }}</span>
+                <span>{{ 'cart.table.quantity' | t }}</span>
+                <span>{{ 'cart.table.total' | t }}</span>
+              </div>
+              {%- render 'cart-items',
+                id_prefix: section.id,
+                form_id: form_id,
+                builder_url: section.settings.builder_url,
+                context: 'page'
+              -%}
+              <div class="cart-page__update">
+                <button type="submit" name="update" form="{{ form_id }}" class="button button--secondary button--small">
+                  {{- 'cart.update' | t -}}
+                </button>
+              </div>
+            </div>
+
+            <aside class="cart-page__aside{% if section.settings.sticky_summary %} cart-page__aside--sticky{% endif %}" aria-labelledby="CartSummaryTitle-{{ section.id }}">
+              <div class="cart-page__summary">
+                <h2 id="CartSummaryTitle-{{ section.id }}" class="cart-page__summary-title h4">{{ 'cart.summary.heading' | t }}</h2>
+                {%- render 'cart-summary', id_prefix: section.id, form_id: form_id, show_view_cart: false -%}
+                {%- if section.settings.show_additional_checkout_buttons and additional_checkout_buttons -%}
+                  <div class="cart-page__additional">{{ content_for_additional_checkout_buttons }}</div>
+                {%- endif -%}
+              </div>
+            </aside>
+          </div>
+          <form id="{{ form_id }}" action="{{ routes.cart_url }}" method="post" class="cart-form" novalidate></form>
+        {%- endif -%}
+      </div>
+    </cart-items>
+  </div>
+</section>
+
+<script type="module" src="{{ 'cart-drawer.js' | asset_url }}"></script>
 
 {% schema %}
 {
-  "name": "t:general.cart",
-  "settings": []
+  "name": "Warenkorb",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_summary",
+      "label": "Bestellübersicht beim Scrollen fixieren (Desktop)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shipping_progress",
+      "label": "Fortschritt „Versandkostenfrei“ anzeigen",
+      "info": "Die Schwelle legst du unter Theme-Einstellungen › Warenkorb fest (0 = aus).",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_additional_checkout_buttons",
+      "label": "Express-Checkout-Buttons anzeigen",
+      "info": "Zum Beispiel Shop Pay oder PayPal, sofern im Checkout aktiviert.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Custom Board Build"
+    },
+    {
+      "type": "url",
+      "id": "builder_url",
+      "label": "Link „Build bearbeiten“",
+      "info": "Leer = /pages/skateboard-builder"
+    },
+    {
+      "type": "header",
+      "content": "Leerer Warenkorb"
+    },
+    {
+      "type": "text",
+      "id": "empty_cta_1_label",
+      "label": "Button 1 – Text",
+      "info": "Leer = „Board bauen“ (übersetzt)"
+    },
+    {
+      "type": "url",
+      "id": "empty_cta_1_url",
+      "label": "Button 1 – Link",
+      "info": "Leer = /pages/skateboard-builder"
+    },
+    {
+      "type": "text",
+      "id": "empty_cta_2_label",
+      "label": "Button 2 – Text",
+      "info": "Leer = „Decks ansehen“ (übersetzt)"
+    },
+    {
+      "type": "url",
+      "id": "empty_cta_2_url",
+      "label": "Button 2 – Link",
+      "info": "Leer = /collections/decks"
+    }
+  ]
 }
 {% endschema %}

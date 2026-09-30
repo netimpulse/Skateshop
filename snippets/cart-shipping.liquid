@@ -1,0 +1,32 @@
+{% doc %}
+  Free-shipping progress (drawer and cart page). Renders nothing when the global threshold
+  (settings.cart_free_shipping_threshold, whole amounts in shop currency) is 0 or the cart is empty.
+  Uses a native <progress> element, so no inline width styles are needed.
+
+  @example
+  {% render 'cart-shipping' %}
+{% enddoc %}
+
+{%- liquid
+  assign threshold = settings.cart_free_shipping_threshold | default: 0 | times: 100 | round
+-%}
+
+{%- if threshold > 0 and cart.item_count > 0 -%}
+  {%- liquid
+    assign remaining = threshold | minus: cart.total_price
+    assign progress = cart.total_price | at_most: threshold | at_least: 0
+    assign progress_label = 'cart.shipping.progress' | t
+  -%}
+  <div class="cart-shipping{% if remaining <= 0 %} cart-shipping--reached{% endif %}" data-testid="cart-shipping">
+    <p class="cart-shipping__text">
+      {%- if remaining > 0 -%}
+        {%- capture remaining_formatted -%}{%- render 'cart-money', amount: remaining -%}{%- endcapture -%}
+        {{- 'cart.shipping.remaining_html' | t: amount: remaining_formatted -}}
+      {%- else -%}
+        {%- render 'icon', name: 'truck' -%}
+        {{- 'cart.shipping.reached' | t -}}
+      {%- endif -%}
+    </p>
+    <progress class="cart-shipping__bar" max="{{ threshold }}" value="{{ progress }}" aria-label="{{ progress_label | escape }}"></progress>
+  </div>
+{%- endif -%}

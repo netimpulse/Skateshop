@@ -11,7 +11,14 @@
   "sections": {
     "main": {
       "type": "cart",
-      "settings": {}
+      "settings": {
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 80,
+        "sticky_summary": true,
+        "show_shipping_progress": true,
+        "show_additional_checkout_buttons": false
+      }
     }
   },
   "order": [
