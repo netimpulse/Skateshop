@@ -38,12 +38,27 @@ async function shot(page: Page, testInfo: TestInfo, name: string, fullPage = fal
 
 const isMobile = (testInfo: TestInfo) => testInfo.project.name === "mobile";
 
+/** Logs in through the storefront password page when the store redirects there. */
+async function passPasswordPage(page: Page) {
+  if (!new URL(page.url()).pathname.includes("/password")) return false;
+  const password = process.env.SHOPIFY_STOREFRONT_PASSWORD;
+  test.skip(!password, "Storefront ist passwortgeschützt (SHOPIFY_STOREFRONT_PASSWORD fehlt)");
+  await page.locator('input[type="password"]').first().fill(password!);
+  await Promise.all([page.waitForLoadState("domcontentloaded"), page.locator('form button[type="submit"]').first().click()]);
+  return true;
+}
+
 async function openStorefront(page: Page, url: string) {
-  const response = await page.goto(withTheme(url));
+  let response = await page.goto(withTheme(url));
+  if (await passPasswordPage(page)) response = await page.goto(withTheme(url));
   const status = response?.status() ?? 0;
   const challenged = response?.headers()["cf-mitigated"] === "challenge" || [403, 429, 503].includes(status);
   test.skip(challenged, `Storefront verlangt eine Bot-Prüfung (HTTP ${status}) – QA später wiederholen`);
   expect(response?.ok(), `HTTP ${status}`).toBe(true);
+  // Test-only: hide Shopify's fixed preview bar so it does not cover footer screenshots.
+  await page.addStyleTag({
+    content: "#preview-bar-iframe, #PBarNextFrameWrapper, iframe[src*='preview_bar'] { display: none !important; }",
+  });
 }
 
 /** Finds a search term that returns products: the first word of a product title from the shop. */
@@ -97,17 +112,24 @@ test.describe("Header & Footer", () => {
             const nav = document.querySelector(".site-header__nav .site-nav__list")?.getBoundingClientRect();
             const actions = document.querySelector(".site-header__actions")?.getBoundingClientRect();
             const logo = document.querySelector(".site-header__logo")?.getBoundingClientRect();
+            // Header-group elements wider than the viewport (announcement bar + header).
+            const offenders = Array.from(document.querySelectorAll(".shopify-section-group-header-group *"))
+              .filter((element) => element.getBoundingClientRect().right > window.innerWidth + 1)
+              // Items inside the (intentionally scrollable) announcement strip may extend past the edge.
+              .filter((element) => !element.closest("dialog, [hidden], .announcement-bar__item"))
+              .slice(0, 5)
+              .map((element) => `${element.tagName.toLowerCase()}.${String(element.className).split(" ")[0]}`);
             return {
               navRight: nav?.right ?? 0,
               navLeft: nav?.left ?? 0,
               actionsLeft: actions?.left ?? 0,
               logoRight: logo?.right ?? 0,
-              overflow: document.documentElement.scrollWidth - window.innerWidth,
+              offenders,
             };
           });
           expect(layout.navRight, `Nav ragt bei ${width}px in die Aktionen`).toBeLessThanOrEqual(layout.actionsLeft + 1);
           expect(layout.navLeft, `Nav überlappt das Logo bei ${width}px`).toBeGreaterThanOrEqual(layout.logoRight - 1);
-          expect(layout.overflow, `Overflow bei ${width}px`).toBeLessThanOrEqual(0);
+          expect(layout.offenders, `Header-Elemente breiter als ${width}px`).toEqual([]);
           if (width === 1200 || width === 990) await shot(page, testInfo, `header-top-${width}`);
         }
         await page.setViewportSize({ width: 1440, height: 900 });

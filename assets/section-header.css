@@ -64,8 +64,8 @@
   outline-offset: -2px;
 }
 
-/* Mobile/tablet: first message only … */
-@media (max-width: 989px) {
+/* Mobile/tablet/small laptop: first message only … */
+@media (max-width: 1199px) {
   .announcement-bar__list[data-mobile='first'] {
     justify-content: center;
   }
@@ -105,9 +105,16 @@
   }
 }
 
-@media (min-width: 990px) {
+/* Side by side from 1200 px; the list scrolls instead of widening the page if texts get long. */
+@media (min-width: 1200px) {
   .announcement-bar__list {
     justify-content: space-between;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .announcement-bar__list::-webkit-scrollbar {
+    display: none;
   }
 
   .announcement-bar__list--1 {
@@ -452,12 +459,17 @@
 }
 
 .mega-menu__all {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: inline-block;
   margin-block-start: auto;
   padding-block: var(--space-xs);
   color: inherit;
+}
+
+/* The arrow follows the last word when the label wraps. */
+.mega-menu__all .icon {
+  display: inline-block;
+  margin-inline-start: 0.375rem;
+  vertical-align: -0.15em;
 }
 
 .mega-menu__all .icon,

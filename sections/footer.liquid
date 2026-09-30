@@ -37,7 +37,8 @@
   if wordmark_chars < 4
     assign wordmark_chars = 4
   endif
-  assign wordmark_vw = 88.0 | divided_by: wordmark_chars | divided_by: 0.68
+  # Archivo 800 caps average ≈ 0.61 em per character (measured); 0.62 keeps a small safety margin.
+  assign wordmark_vw = 92.0 | divided_by: wordmark_chars | divided_by: 0.62
   if wordmark_vw > 20
     assign wordmark_vw = 20
   endif

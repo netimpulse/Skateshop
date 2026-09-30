@@ -317,10 +317,21 @@ predictive-search,
 
 .predictive-search__meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.5rem;
+  gap: 0.5rem;
+  min-width: 0;
   color: var(--color-text-muted);
   font-size: 0.6875rem;
+}
+
+.predictive-search__meta > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.predictive-search__type {
+  flex: none;
+  max-width: 60%;
 }
 
 .predictive-search__meta > span + span::before {
