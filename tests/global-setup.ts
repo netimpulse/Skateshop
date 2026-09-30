@@ -29,11 +29,12 @@ export default async function globalSetup(_config: FullConfig) {
   // 1) Storefront-Passwort-Login (falls Passwort gesetzt UND aktiv)
   if (password) {
     try {
-      await page.goto(`${STORE_BASE}/password`, { waitUntil: "networkidle" });
+      await page.goto(`${STORE_BASE}/password`, { waitUntil: "domcontentloaded" });
       const hasPasswordForm = await page.locator('input[type="password"]').count() > 0;
       if (hasPasswordForm) {
-        await page.locator('input[type="password"]').first().fill(password);
-        await page.locator('form button[type="submit"]').first().click();
+        const form = page.locator('form:has(input[type="password"])').first();
+        await form.locator('input[type="password"]').fill(password);
+        await form.locator('[type="submit"]').first().click();
         await page.waitForURL((url) => !url.pathname.startsWith("/password"), { timeout: 15_000 });
       }
     } catch (e) {
