@@ -260,6 +260,30 @@
   }
 }
 
+/* Laptop: narrower copy column – tighter vertical rhythm so the stats stay in the first viewport. */
+@media (min-width: 990px) and (max-width: 1199px) {
+  .skate-hero__copy {
+    padding-block: var(--space-xl) var(--space-l);
+  }
+
+  .skate-hero__eyebrow,
+  .skate-hero__title {
+    margin-block-end: var(--space-m);
+  }
+
+  .skate-hero__actions {
+    margin-block-start: var(--space-l);
+  }
+
+  .skate-hero__button {
+    padding-inline: 1.1rem;
+  }
+
+  .skate-hero__stats {
+    margin-block-start: var(--space-l);
+  }
+}
+
 @media (min-width: 1200px) {
   .skate-hero__copy {
     padding-inline-end: var(--space-3xl);
