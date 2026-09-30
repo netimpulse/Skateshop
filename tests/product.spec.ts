@@ -33,8 +33,8 @@ async function open(page: Page, url: string, waitUntil: "load" | "domcontentload
     }
   }
   const status = response?.status() ?? 0;
-  const challenged = status === 429 || /just a moment/i.test(await page.title());
-  test.skip(challenged, "Store drosselt gerade (429 / Challenge) – später erneut ausführen");
+  const challenged = status === 429 || status === 503 || /just a moment/i.test(await page.title());
+  test.skip(challenged, `Store drosselt gerade / nicht erreichbar (HTTP ${status}) – später erneut ausführen`);
   return response;
 }
 
