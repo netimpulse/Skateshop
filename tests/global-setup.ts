@@ -32,6 +32,8 @@ export default async function globalSetup(_config: FullConfig) {
       await page.goto(`${STORE_BASE}/password`, { waitUntil: "domcontentloaded" });
       const hasPasswordForm = await page.locator('input[type="password"]').count() > 0;
       if (hasPasswordForm) {
+        const toggle = page.locator('details:has(input[type="password"]):not([open]) > summary').first();
+        if (await toggle.count()) await toggle.click();
         const form = page.locator('form:has(input[type="password"])').first();
         await form.locator('input[type="password"]').fill(password);
         await form.locator('[type="submit"]').first().click();

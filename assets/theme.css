@@ -805,6 +805,7 @@ h3,
 /* ---------------------------------------------------------------- Media */
 .media {
   position: relative;
+  display: block;
   overflow: hidden;
   border-radius: var(--radius-media);
   background-color: var(--color-surface);
