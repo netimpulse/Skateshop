@@ -1,0 +1,62 @@
+{% doc %}
+  Numbered pagination (prev / page numbers / next) for a {% paginate %} block.
+  Page URLs come from paginate.parts and keep active filters, sort order and search terms.
+  Renders nothing when there is only one page.
+
+  @param {paginate} paginate - The paginate object
+  @param {string} [class] - Extra class on the nav element
+
+  @example
+  {% render 'pagination', paginate: paginate %}
+{% enddoc %}
+
+{%- if paginate.pages > 1 -%}
+  {%- assign current_page = paginate.current_page | append: '' -%}
+  <nav class="pagination {{ class }}" aria-label="{{ 'accessibility.pagination' | t }}" data-testid="pagination">
+    <ul class="pagination__list" role="list">
+      <li>
+        {%- if paginate.previous.is_link -%}
+          <a class="pagination__item pagination__item--arrow" href="{{ paginate.previous.url }}" rel="prev">
+            {%- render 'icon', name: 'arrow-left' -%}
+            <span class="visually-hidden">{{ 'filters.pagination.previous' | t }}</span>
+          </a>
+        {%- else -%}
+          <span class="pagination__item pagination__item--arrow is-disabled" aria-hidden="true">
+            {%- render 'icon', name: 'arrow-left' -%}
+          </span>
+        {%- endif -%}
+      </li>
+
+      {%- for part in paginate.parts -%}
+        {%- assign part_title = part.title | append: '' -%}
+        <li>
+          {%- if part.is_link -%}
+            {%- assign page_label = 'general.meta.page' | t: page: part.title -%}
+            <a class="pagination__item" href="{{ part.url }}" aria-label="{{ page_label | escape }}">{{ part.title }}</a>
+          {%- elsif part_title == current_page -%}
+            {%- assign page_label = 'general.meta.page' | t: page: part.title -%}
+            <span class="pagination__item is-current" aria-current="page">
+              <span class="visually-hidden">{{ page_label | escape }}</span>
+              <span aria-hidden="true">{{ part.title }}</span>
+            </span>
+          {%- else -%}
+            <span class="pagination__item pagination__item--gap" aria-hidden="true">…</span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+
+      <li>
+        {%- if paginate.next.is_link -%}
+          <a class="pagination__item pagination__item--arrow" href="{{ paginate.next.url }}" rel="next">
+            {%- render 'icon', name: 'arrow-right' -%}
+            <span class="visually-hidden">{{ 'filters.pagination.next' | t }}</span>
+          </a>
+        {%- else -%}
+          <span class="pagination__item pagination__item--arrow is-disabled" aria-hidden="true">
+            {%- render 'icon', name: 'arrow-right' -%}
+          </span>
+        {%- endif -%}
+      </li>
+    </ul>
+  </nav>
+{%- endif -%}

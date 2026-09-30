@@ -1,0 +1,209 @@
+{% doc %}
+  Storefront filter form (GET) for collection and search pages. Rendered twice per page: once for the
+  desktop sidebar (id_prefix "desktop") and once inside the mobile filter drawer (id_prefix "drawer").
+  Uses only Shopify's filter data (param_name, value.value, min/max param names) – nothing is built by hand.
+  Works without JavaScript (submit button); with JS, assets/facets.js applies changes instantly.
+
+  @param {filter[]} filters - collection.filters or search.filters
+  @param {string} action_url - Form action (collection.url or routes.search_url)
+  @param {string} id_prefix - Unique prefix per instance, e.g. desktop | drawer
+  @param {string} section_id - The section id (keeps ids unique)
+  @param {string} [hidden_filters] - Comma-separated filter.param_name values to hide (collection.metafields.custom.hidden_filters)
+  @param {string} [expand] - all | first | active – which groups start expanded (active groups are always open)
+  @param {boolean} [show_counts] - Show the product count per value
+  @param {string} [sort_by] - Current sort order (kept for the no-JS submit)
+  @param {string} [terms] - Search terms (search page only, kept as hidden q)
+
+  @example
+  {% render 'filter-sidebar', filters: collection.filters, action_url: collection.url, id_prefix: 'desktop', section_id: section.id %}
+{% enddoc %}
+
+{%- liquid
+  assign hidden_list = hidden_filters | default: '' | split: ','
+  assign expand = expand | default: 'first'
+  assign form_id = 'FacetsForm-' | append: id_prefix | append: '-' | append: section_id
+  assign visible_index = 0
+-%}
+
+<form
+  id="{{ form_id }}"
+  class="facets-form"
+  action="{{ action_url }}"
+  method="get"
+  data-facets-form
+>
+  {%- if terms != blank -%}
+    <input type="hidden" name="q" value="{{ terms | escape }}">
+    <input type="hidden" name="options[prefix]" value="last">
+  {%- endif -%}
+  {%- if sort_by != blank -%}
+    <input type="hidden" name="sort_by" value="{{ sort_by | escape }}">
+  {%- endif -%}
+
+  <div class="facets-form__groups">
+    {%- for filter in filters -%}
+      {%- if hidden_list contains filter.param_name -%}
+        {%- continue -%}
+      {%- endif -%}
+
+      {%- liquid
+        assign visible_index = visible_index | plus: 1
+        assign group_active = 0
+        if filter.type == 'price_range'
+          if filter.min_value.value != nil or filter.max_value.value != nil
+            assign group_active = 1
+          endif
+        else
+          assign group_active = filter.active_values.size
+        endif
+
+        assign group_open = false
+        if expand == 'all'
+          assign group_open = true
+        elsif expand == 'first' and visible_index <= 3
+          assign group_open = true
+        endif
+        if group_active > 0
+          assign group_open = true
+        endif
+
+        assign group_id = id_prefix | append: '-' | append: section_id | append: '-' | append: filter.param_name | handleize
+      -%}
+
+      <details
+        class="facet"
+        id="Facet-{{ group_id }}"
+        data-facets-details="{{ id_prefix }}:{{ filter.param_name | escape }}"
+        {% if group_open %}
+          open
+        {% endif %}
+      >
+        <summary class="facet__summary">
+          <span class="facet__label">{{ filter.label | escape }}</span>
+          {%- if group_active > 0 -%}
+            <span class="facet__badge">
+              <span aria-hidden="true">{{ group_active }}</span>
+              <span class="visually-hidden">{{ 'filters.selected_count' | t: count: group_active }}</span>
+            </span>
+          {%- endif -%}
+          <span class="facet__toggle" aria-hidden="true"></span>
+        </summary>
+
+        {%- case filter.type -%}
+          {%- when 'price_range' -%}
+            {%- liquid
+              assign range_max = filter.range_max | divided_by: 100.0 | ceil
+              assign min_display = ''
+              assign max_display = ''
+              if filter.min_value.value != nil
+                assign min_cents = filter.min_value.value
+                assign remainder = min_cents | modulo: 100
+                if remainder == 0
+                  assign min_display = min_cents | divided_by: 100
+                else
+                  assign min_display = min_cents | divided_by: 100.0 | round: 2
+                endif
+              endif
+              if filter.max_value.value != nil
+                assign max_cents = filter.max_value.value
+                assign remainder = max_cents | modulo: 100
+                if remainder == 0
+                  assign max_display = max_cents | divided_by: 100
+                else
+                  assign max_display = max_cents | divided_by: 100.0 | round: 2
+                endif
+              endif
+            -%}
+            <fieldset class="facet__body facet__price">
+              <legend class="visually-hidden">{{ filter.label | escape }}</legend>
+              <div class="facet__price-field">
+                <label class="facet__price-label" for="Price-min-{{ group_id }}">{{ 'filters.price_from' | t }}</label>
+                <span class="facet__price-input">
+                  <span class="facet__currency" aria-hidden="true">{{ cart.currency.symbol }}</span>
+                  <input
+                    class="field__input"
+                    type="number"
+                    inputmode="decimal"
+                    id="Price-min-{{ group_id }}"
+                    name="{{ filter.min_value.param_name }}"
+                    value="{{ min_display }}"
+                    placeholder="0"
+                    min="0"
+                    max="{{ range_max }}"
+                    step="any"
+                    data-facets-price
+                  >
+                </span>
+              </div>
+              <span class="facet__price-sep" aria-hidden="true">–</span>
+              <div class="facet__price-field">
+                <label class="facet__price-label" for="Price-max-{{ group_id }}">{{ 'filters.price_to' | t }}</label>
+                <span class="facet__price-input">
+                  <span class="facet__currency" aria-hidden="true">{{ cart.currency.symbol }}</span>
+                  <input
+                    class="field__input"
+                    type="number"
+                    inputmode="decimal"
+                    id="Price-max-{{ group_id }}"
+                    name="{{ filter.max_value.param_name }}"
+                    value="{{ max_display }}"
+                    placeholder="{{ range_max }}"
+                    min="0"
+                    max="{{ range_max }}"
+                    step="any"
+                    data-facets-price
+                  >
+                </span>
+              </div>
+              {%- assign range_max_money = filter.range_max | money | strip_html -%}
+              <p class="facet__price-hint">{{ 'filters.price_max' | t: price: range_max_money }}</p>
+            </fieldset>
+
+          {%- else -%}
+            {%- assign more_count = filter.values.size | minus: 8 -%}
+            <fieldset class="facet__body">
+              <legend class="visually-hidden">{{ filter.label | escape }}</legend>
+              {%- capture visible_values -%}
+                {%- for value in filter.values limit: 8 -%}
+                  {%- render 'facet-value',
+                    filter: filter,
+                    value: value,
+                    input_id: group_id,
+                    index: forloop.index,
+                    show_counts: show_counts
+                  -%}
+                {%- endfor -%}
+              {%- endcapture -%}
+              <ul class="facet__list{% if filter.presentation == 'swatch' %} facet__list--swatch{% endif %}" role="list">
+                {{ visible_values }}
+              </ul>
+              {%- if more_count > 0 -%}
+                <details class="facet__more" data-facets-details="{{ id_prefix }}:{{ filter.param_name | escape }}:more">
+                  <summary class="facet__more-toggle">
+                    <span class="facet__more-open">{{ 'filters.show_more' | t: count: more_count }}</span>
+                    <span class="facet__more-close">{{ 'filters.show_less' | t }}</span>
+                  </summary>
+                  <ul class="facet__list{% if filter.presentation == 'swatch' %} facet__list--swatch{% endif %}" role="list">
+                    {%- for value in filter.values offset: 8 -%}
+                      {%- assign value_index = forloop.index | plus: 8 -%}
+                      {%- render 'facet-value',
+                        filter: filter,
+                        value: value,
+                        input_id: group_id,
+                        index: value_index,
+                        show_counts: show_counts
+                      -%}
+                    {%- endfor -%}
+                  </ul>
+                </details>
+              {%- endif -%}
+            </fieldset>
+        {%- endcase -%}
+      </details>
+    {%- endfor -%}
+  </div>
+
+  <button type="submit" class="button button--small button--full facets-form__submit">
+    {{- 'filters.apply' | t -}}
+  </button>
+</form>
