@@ -201,10 +201,12 @@ test.describe("Board Builder", () => {
     await page.reload({ waitUntil: "domcontentloaded" });
     const pending = page.locator(".bb-sum__row.is-pending[data-part='trucks']");
     await expect(pending).toBeVisible({ timeout: 20_000 });
-    await expect(pending.locator("[data-bb-reload-part='trucks']")).toBeVisible();
     await expect
-      .poll(() => page.evaluate(() => (document.querySelector("board-builder") as (HTMLElement & { restoring?: boolean }) | null)?.restoring === false))
+      .poll(() => page.evaluate(() => (document.querySelector("board-builder") as (HTMLElement & { restored?: boolean }) | null)?.restored === true), { timeout: 20_000 })
       .toBe(true);
+    // Only after the restore (incl. its retry pass) failed does the row offer a retry – before that it reads "loading".
+    await expect(pending).not.toHaveClass(/is-loading/);
+    await expect(pending.locator("[data-bb-reload-part='trucks']")).toBeVisible();
     await page.unroute(trucksData);
 
     await pending.locator("[data-bb-reload-part]").click();

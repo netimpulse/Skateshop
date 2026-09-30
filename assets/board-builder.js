@@ -55,6 +55,7 @@ class BoardBuilder extends HTMLElement {
     this.selection = new Map();
     this.removedParts = [];
     this.restoring = false;
+    this.restored = false; // true once the first restore() finished – until then stored parts count as "loading"
     this.storage = safeStorage();
     this.state = load(this.storage, { stepKeys: this.stepKeys }) || emptyState(this.stepKeys[0]);
 
@@ -177,6 +178,7 @@ class BoardBuilder extends HTMLElement {
     }
 
     this.restoring = false;
+    this.restored = true;
     this.flushRehydrated();
     const current = this.steps.find((step) => step.part === this.state.step);
     if (current) this.list.render(current);

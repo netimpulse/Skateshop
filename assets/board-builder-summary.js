@@ -51,15 +51,17 @@ export class BuilderSummary {
     const rows = this.parts().map(({ part, step, entry }) => {
       const label = this.builder.partLabel(part);
       if (!entry && this.builder.state.sel?.[part]) {
-        // Chosen and stored, but its collection could not be loaded (e.g. throttled) – never show it as "not selected".
+        // Chosen and stored, but its data is still loading or could not be loaded (e.g. throttled) –
+        // never show it as "not selected".
+        const loading = !this.builder.restored || this.builder.loading.has(part);
         return h(
           'li',
-          { class: 'bb-sum__row is-missing is-pending', 'data-part': part },
+          { class: `bb-sum__row is-missing is-pending${loading ? ' is-loading' : ''}`, 'data-part': part, 'aria-busy': String(loading) },
           h('span', { class: 'bb-sum__thumb bb-placeholder', 'aria-hidden': 'true' }),
           h('span', { class: 'bb-sum__part label-mono' }, label),
-          h('span', { class: 'bb-sum__name text-muted' }, s.notLoaded),
+          h('span', { class: 'bb-sum__name text-muted' }, loading ? this.strings.loading : s.notLoaded),
           h('span', { class: 'bb-sum__price' }, '–'),
-          h('button', { type: 'button', class: 'link-mono bb-sum__edit', 'data-bb-reload-part': part }, this.strings.retry)
+          loading ? null : h('button', { type: 'button', class: 'link-mono bb-sum__edit', 'data-bb-reload-part': part }, this.strings.retry)
         );
       }
       if (!entry) {
@@ -310,8 +312,12 @@ export class BuilderSummary {
 
   /** Loads a stored part's collection again; on success `rehydrate` restores it and the summary re-renders. */
   async reloadPart(part) {
+    const request = this.builder.ensureData(part);
+    this.render(); // shows the row as loading (ensureData registered the request synchronously)
     try {
-      await this.builder.ensureData(part);
+      await request;
+      // During restore() rehydrate defers its flush – apply this part right away.
+      if (this.builder.restoring) this.builder.flushRehydrated();
     } catch {
       this.fail(this.strings.loadError);
     }
