@@ -1,0 +1,434 @@
+{%- comment -%}
+  Brand index: optional "Featured Brands" tiles (blocks) plus an A–Z register built from shop.vendors.
+  Letters without brands stay visible but disabled (aria-disabled). Digits and special characters
+  are grouped under "#". Every brand links to its automatic vendor collection (url_for_vendor).
+  Product counts per vendor are not available without iterating the whole catalog, so none are shown.
+{%- endcomment -%}
+
+{{ 'section-brands.css' | asset_url | stylesheet_tag }}
+{% render 'section-style',
+  section_id: section.id,
+  padding_top: section.settings.padding_top,
+  padding_bottom: section.settings.padding_bottom
+%}
+
+{%- liquid
+  assign heading_id = 'BrandsHeading-' | append: section.id
+  assign featured_heading_id = 'BrandsFeatured-' | append: section.id
+  assign index_id = 'BrandsIndex-' | append: section.id
+  assign anchor_prefix = 'Brands-' | append: section.id | append: '-'
+
+  assign alphabet = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z' | split: ','
+  assign index_letters = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,#' | split: ','
+
+  # Normalised exclude list: ",name one,name two,"
+  assign exclude_list = section.settings.exclude_vendors | newline_to_br | strip_newlines | replace: '<br />', ',' | downcase
+  assign exclude_list = ',' | append: exclude_list | append: ','
+  assign exclude_list = exclude_list | replace: ', ', ',' | replace: ' ,', ',' | replace: ', ', ','
+
+  # One pass over the vendors: keep names and their register letter in two parallel lists.
+  assign separator = '§§'
+  assign kept_names = ''
+  assign kept_letters = ''
+  assign used_letters = ','
+  assign sorted_vendors = shop.vendors | sort_natural
+
+  for vendor in sorted_vendors
+    assign vendor_name = vendor | strip
+    if vendor_name == blank
+      continue
+    endif
+
+    assign needle = vendor_name | downcase | prepend: ',' | append: ','
+    if exclude_list contains needle
+      continue
+    endif
+
+    assign letter = vendor_name | slice: 0 | upcase
+    case letter
+      when 'Ä', 'À', 'Á', 'Â', 'Å'
+        assign letter = 'A'
+      when 'Ö', 'Ò', 'Ó', 'Ô', 'Ø'
+        assign letter = 'O'
+      when 'Ü', 'Ù', 'Ú', 'Û'
+        assign letter = 'U'
+      when 'É', 'È', 'Ê'
+        assign letter = 'E'
+      when 'Ç'
+        assign letter = 'C'
+      when 'Ñ'
+        assign letter = 'N'
+    endcase
+    unless alphabet contains letter
+      assign letter = '#'
+    endunless
+
+    assign kept_names = kept_names | append: vendor_name | append: separator
+    assign kept_letters = kept_letters | append: letter | append: separator
+    assign letter_needle = ',' | append: letter | append: ','
+    unless used_letters contains letter_needle
+      assign used_letters = used_letters | append: letter | append: ','
+    endunless
+  endfor
+
+  assign brand_names = kept_names | split: separator
+  assign brand_letters = kept_letters | split: separator
+
+  assign register_heading = section.settings.heading
+  if register_heading == blank
+    assign register_heading = 'brands.all_heading' | t
+  endif
+  assign featured_heading = section.settings.featured_heading
+  if featured_heading == blank
+    assign featured_heading = 'brands.featured_heading' | t
+  endif
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --brands-columns: {{ section.settings.columns_desktop }};
+    --brands-featured-columns: {{ section.settings.featured_columns }};
+  }
+{% endstyle %}
+
+<section
+  class="section brands-list brands-list--{{ section.settings.layout }} scheme color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  aria-labelledby="{{ heading_id }}"
+  data-testid="brands-list"
+>
+  <div class="page-width">
+    {%- if section.blocks.size > 0 -%}
+      <div class="brands-featured">
+        <h2 id="{{ featured_heading_id }}" class="brands-featured__heading eyebrow eyebrow--rule">
+          {{- featured_heading | escape -}}
+        </h2>
+        <ul class="brands-featured__grid" role="list">
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign brand_name = block.settings.name | strip
+              if brand_name == blank
+                assign brand_name = 'brands.placeholder_name' | t
+              endif
+              assign brand_url = block.settings.link
+              if brand_url == blank
+                assign brand_url = brand_name | url_for_vendor
+              endif
+
+              assign name_words = brand_name | split: ' '
+              assign monogram = name_words.first | slice: 0
+              if name_words.size > 1
+                assign second_initial = name_words[1] | slice: 0
+                assign monogram = monogram | append: second_initial
+              endif
+              assign monogram = monogram | upcase
+
+              assign tile_index = forloop.index
+              if tile_index < 10
+                assign tile_index = tile_index | prepend: '0'
+              endif
+            -%}
+            <li class="brands-featured__item" {{ block.shopify_attributes }}>
+              <div class="brands-featured__card">
+                <div class="brands-featured__tile{% if block.settings.logo == blank %} brands-featured__tile--monogram{% endif %}">
+                  <span class="brands-featured__index" aria-hidden="true">{{ tile_index }}</span>
+                  {%- if block.settings.logo != blank -%}
+                    {{
+                      block.settings.logo
+                      | image_url: width: 640
+                      | image_tag:
+                        widths: '200, 320, 480, 640',
+                        sizes: '(min-width: 990px) 22vw, 45vw',
+                        loading: 'lazy',
+                        alt: '',
+                        class: 'brands-featured__logo'
+                    }}
+                  {%- else -%}
+                    <span class="brands-featured__monogram" aria-hidden="true">{{ monogram | escape }}</span>
+                  {%- endif -%}
+                </div>
+                <h3 class="brands-featured__name">
+                  <a class="brands-featured__link" href="{{ brand_url }}">{{ brand_name | escape }}</a>
+                </h3>
+                {%- if block.settings.text != blank -%}
+                  <p class="brands-featured__text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+                <span class="brands-featured__cta link-mono" aria-hidden="true">
+                  {{- 'brands.view_brand' | t -}}
+                  {% render 'icon', name: 'arrow-right' %}
+                </span>
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    <div class="brands-register">
+      <div class="brands-register__head">
+        <p class="brands-register__count label-mono">
+          {{- 'brands.count' | t: count: brand_names.size -}}
+        </p>
+        <h2 id="{{ heading_id }}" class="brands-register__title h2">{{ register_heading }}</h2>
+        {%- if section.settings.text != blank -%}
+          <div class="brands-register__text rte">{{ section.settings.text }}</div>
+        {%- endif -%}
+      </div>
+
+      {%- if brand_names.size == 0 -%}
+        <p class="brands-register__empty">{{ 'brands.empty' | t }}</p>
+      {%- else -%}
+        {%- if section.settings.show_index -%}
+          <nav
+            id="{{ index_id }}"
+            class="brands-az"
+            aria-label="{{ 'brands.index_label' | t }}"
+            data-testid="brands-az"
+          >
+            <ol class="brands-az__list" role="list">
+              {%- for letter in index_letters -%}
+                {%- liquid
+                  assign letter_needle = ',' | append: letter | append: ','
+                  if letter == '#'
+                    assign letter_slug = 'other'
+                  else
+                    assign letter_slug = letter | downcase
+                  endif
+                -%}
+                {%- if used_letters contains letter_needle -%}
+                  <li class="brands-az__item">
+                    <a class="brands-az__link" href="#{{ anchor_prefix }}{{ letter_slug }}" data-letter="{{ letter_slug }}">
+                      {{- letter -}}
+                      {%- if letter == '#' -%}
+                        <span class="visually-hidden"> {{ 'brands.other_label' | t }}</span>
+                      {%- endif -%}
+                    </a>
+                  </li>
+                {%- elsif section.settings.show_empty_letters -%}
+                  <li class="brands-az__item">
+                    <a class="brands-az__link" role="link" aria-disabled="true" data-letter="{{ letter_slug }}">
+                      {{- letter -}}
+                      {%- if letter == '#' -%}
+                        <span class="visually-hidden"> {{ 'brands.other_label' | t }}</span>
+                      {%- endif -%}
+                    </a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ol>
+          </nav>
+        {%- endif -%}
+
+        <div class="brands-register__groups">
+          {%- for letter in index_letters -%}
+            {%- assign letter_needle = ',' | append: letter | append: ',' -%}
+            {%- unless used_letters contains letter_needle -%}
+              {%- continue -%}
+            {%- endunless -%}
+            {%- liquid
+              if letter == '#'
+                assign letter_slug = 'other'
+              else
+                assign letter_slug = letter | downcase
+              endif
+              assign group_id = anchor_prefix | append: letter_slug
+              assign group_count = 0
+              for brand_letter in brand_letters
+                if brand_letter == letter
+                  assign group_count = group_count | plus: 1
+                endif
+              endfor
+              if group_count < 10
+                assign group_count = group_count | prepend: '0'
+              endif
+            -%}
+            <div class="brands-group" id="{{ group_id }}" data-testid="brands-group">
+              <div class="brands-group__head">
+                <h3 id="{{ group_id }}-title" class="brands-group__letter">
+                  {{- letter -}}
+                  {%- if letter == '#' -%}
+                    <span class="visually-hidden"> {{ 'brands.other_label' | t }}</span>
+                  {%- endif -%}
+                </h3>
+                <span class="brands-group__count label-mono" aria-hidden="true">{{ group_count }}</span>
+                {%- if section.settings.show_index -%}
+                  <a class="brands-group__top link-mono" href="#{{ index_id }}">
+                    {{- 'brands.back_to_index' | t -}}
+                  </a>
+                {%- endif -%}
+              </div>
+              <ul class="brands-group__list" role="list">
+                {%- for brand_letter in brand_letters -%}
+                  {%- if brand_letter != letter -%}
+                    {%- continue -%}
+                  {%- endif -%}
+                  {%- assign brand_name = brand_names[forloop.index0] -%}
+                  <li class="brands-group__item">
+                    <a class="brands-group__link" href="{{ brand_name | url_for_vendor }}">
+                      <span class="brands-group__name">{{ brand_name | escape }}</span>
+                      {% render 'icon', name: 'arrow-up-right', class: 'brands-group__icon' %}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Markenliste A–Z",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Featured Brands"
+    },
+    {
+      "type": "paragraph",
+      "content": "Hervorgehobene Marken werden als Blöcke „Marke“ hinzugefügt und erscheinen als Kacheln über dem Register."
+    },
+    {
+      "type": "text",
+      "id": "featured_heading",
+      "label": "Überschrift Featured Brands",
+      "info": "Leer lassen für den Standardtext."
+    },
+    {
+      "type": "range",
+      "id": "featured_columns",
+      "label": "Kacheln pro Reihe (Desktop)",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Register A–Z"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "info": "Leer lassen für den Standardtext."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Darstellung",
+      "options": [
+        { "value": "list", "label": "Liste" },
+        { "value": "grid", "label": "Raster" }
+      ],
+      "default": "list"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Spalten (Desktop)",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_index",
+      "label": "A–Z-Sprungnavigation anzeigen",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_empty_letters",
+      "label": "Buchstaben ohne Marken anzeigen (deaktiviert)",
+      "default": true,
+      "visible_if": "{{ section.settings.show_index }}"
+    },
+    {
+      "type": "textarea",
+      "id": "exclude_vendors",
+      "label": "Marken ausblenden",
+      "info": "Hersteller-Namen, durch Komma oder Zeilenumbruch getrennt (z. B. interne Test-Hersteller)."
+    },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Marke",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "info": "Genau wie der Hersteller-Name der Produkte, damit der Link passt."
+        },
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo",
+          "info": "Nur eigene oder lizenzierte Logos verwenden. Ohne Logo erscheint ein Monogramm."
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Kurztext"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Leer lassen, um auf alle Produkte der Marke zu verlinken."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Markenliste A–Z"
+    }
+  ]
+}
+{% endschema %}

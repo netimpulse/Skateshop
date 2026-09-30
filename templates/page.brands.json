@@ -1,0 +1,89 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page",
+      "settings": {
+        "show_breadcrumbs": true,
+        "eyebrow": "Marken",
+        "heading_size": "h-display",
+        "intro": "<p>Von Decks bis Kugellager: alle Marken in unserem Sortiment auf einen Blick. Wähle einen Buchstaben oder stöbere durch unsere Featured Brands.</p>",
+        "show_content": true,
+        "lead_paragraph": false,
+        "width": "wide",
+        "image_ratio": "16-9",
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 24
+      }
+    },
+    "brands": {
+      "type": "brands-list",
+      "blocks": {
+        "brand_nine_ply": {
+          "type": "brand",
+          "settings": {
+            "name": "Nine Ply Co.",
+            "text": "Klassische Popsicle-Decks aus kanadischem Ahorn mit Retro-Grafiken.",
+            "link": ""
+          }
+        },
+        "brand_axlemoor": {
+          "type": "brand",
+          "settings": {
+            "name": "Axlemoor",
+            "text": "Leichte Achsen mit fein abgestimmten Lenkgummis – vom Street-Truck bis zum Cruiser-Setup.",
+            "link": ""
+          }
+        },
+        "brand_rolltype": {
+          "type": "brand",
+          "settings": {
+            "name": "Rolltype",
+            "text": "Rollen in allen Härten: hart für Park und Street, weich für raue Straßen.",
+            "link": ""
+          }
+        },
+        "brand_swiftbore": {
+          "type": "brand",
+          "settings": {
+            "name": "Swiftbore",
+            "text": "Präzise Kugellager von ABEC 7 bis Swiss für schnelle Lines.",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "brand_nine_ply",
+        "brand_axlemoor",
+        "brand_rolltype",
+        "brand_swiftbore"
+      ],
+      "settings": {
+        "featured_heading": "",
+        "featured_columns": 4,
+        "heading": "",
+        "layout": "list",
+        "columns_desktop": 4,
+        "show_index": true,
+        "show_empty_letters": true,
+        "exclude_vendors": "Dev store, NetImpulse, QA Fixtures, Theme Studio",
+        "color_scheme": "scheme-1",
+        "padding_top": 24,
+        "padding_bottom": 96
+      }
+    }
+  },
+  "order": [
+    "main",
+    "brands"
+  ]
+}
