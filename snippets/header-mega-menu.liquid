@@ -7,10 +7,11 @@
   @param {object} link - Top-level menu link (with link.links)
   @param {string} panel_id - Unique panel id (the trigger's aria-controls target)
   @param {number} index - Position of the item in the main menu (mono index)
+  @param {number} total - Number of top-level items in the main menu
   @param {object} blocks - section.blocks of the header (mega_promo blocks)
 
   @example
-  {% render 'header-mega-menu', link: link, panel_id: panel_id, index: forloop.index, blocks: section.blocks %}
+  {% render 'header-mega-menu', link: link, panel_id: panel_id, index: forloop.index, total: forloop.length, blocks: section.blocks %}
 {% enddoc %}
 
 {%- liquid
@@ -35,6 +36,7 @@
   endfor
 
   assign index_padded = index | prepend: '0' | slice: -2, 2
+  assign total_padded = total | prepend: '0' | slice: -2, 2
   assign view_all_label = 'header.mega.view_all' | t: title: link.title
   assign categories_label = 'header.mega.categories' | t
   assign letter_index = 0
@@ -43,12 +45,12 @@
 <div id="{{ panel_id }}" class="mega-menu" hidden data-testid="mega-panel">
   <div class="page-width mega-menu__inner{% if promo %} mega-menu__inner--promo{% endif %}">
     <div class="mega-menu__intro">
-      <p class="mega-menu__index label-mono">
+      <p class="mega-menu__index label-mono" aria-hidden="true">
         <span class="mega-menu__index-number">{{ index_padded }}</span>
-        <span aria-hidden="true">/</span>
-        {{ link.title | escape }}
+        <span>/</span>
+        <span>{{ total_padded }}</span>
       </p>
-      <p class="mega-menu__title h3" aria-hidden="true">{{ link.title | escape }}</p>
+      <p class="mega-menu__title h3">{{ link.title | escape }}</p>
       <a href="{{ link.url }}" class="mega-menu__all link-mono">
         <span>{{ view_all_label }}</span>
         {%- render 'icon', name: 'arrow-right' -%}
@@ -57,7 +59,7 @@
 
     <div class="mega-menu__columns">
       {%- if leaf_count > 0 -%}
-        <div class="mega-menu__col">
+        <div class="mega-menu__col{% if leaf_count > 4 %} mega-menu__col--split{% endif %}">
           <p class="mega-menu__heading">
             <span class="mega-menu__letter" aria-hidden="true">{{ letters[letter_index] }}</span>
             <span>{{ categories_label }}</span>

@@ -386,14 +386,10 @@
   background: var(--color-accent-1);
 }
 
-@media (min-width: 1200px) {
+/* Same breakpoint as the action labels: both only grow where the row has room (tested 990–1440 px). */
+@media (min-width: 1400px) {
   .site-nav__link {
-    padding-inline: 0.625rem;
     font-size: 0.875rem;
-  }
-
-  .site-nav__link::after {
-    inset-inline: 0.625rem;
   }
 }
 
@@ -439,9 +435,10 @@
 }
 
 .mega-menu__title {
-  font-size: var(--text-h3);
+  font-size: clamp(1.375rem, 0.9rem + 0.8vw, 1.75rem);
   line-height: 0.95;
-  overflow-wrap: anywhere;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .mega-menu__all {
@@ -467,8 +464,9 @@
 
 .mega-menu__columns {
   display: grid;
-  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-columns: minmax(0, 15rem);
   grid-auto-flow: column;
+  align-content: start;
   border-inline-start: var(--border-width) solid var(--color-border);
 }
 
@@ -476,6 +474,22 @@
   min-width: 0;
   padding-inline: var(--space-l);
   border-inline-end: var(--border-width) solid var(--color-border);
+}
+
+/* A long list of plain sub-links spans two tracks and flows into two columns. */
+.mega-menu__col--split {
+  grid-column: span 2;
+}
+
+.mega-menu__col--split .mega-menu__list {
+  display: block;
+  columns: 2;
+  column-gap: var(--space-l);
+}
+
+.mega-menu__col--split .mega-menu__list > li {
+  break-inside: avoid;
+  padding-block-end: 0.125rem;
 }
 
 .mega-menu__heading {
