@@ -1,0 +1,22 @@
+{
+  "version": "1.2.2",
+  "dateien": [
+    ".claude/agents/brainstormer.md",
+    ".claude/agents/designer.md",
+    ".claude/agents/gegenpruefer.md",
+    ".claude/agents/planer.md",
+    ".claude/agents/researcher.md",
+    ".claude/agents/reviewer.md",
+    ".claude/hooks/werkbank/secret-guard.js",
+    ".claude/hooks/werkbank/session-start.js",
+    ".claude/skills/werkbank-codex/SKILL.md",
+    ".claude/skills/werkbank-codex/kriterien.md",
+    ".claude/skills/werkbank-codex/prompts/plan.md",
+    ".claude/skills/werkbank-codex/prompts/review.md",
+    ".claude/skills/werkbank-einrichten/SKILL.md",
+    ".claude/skills/werkbank-einrichten/vorlagen/INDEX.md",
+    ".claude/skills/werkbank-einrichten/vorlagen/ideen.md",
+    ".claude/skills/werkbank-einrichten/vorlagen/projekt-regeln.md",
+    ".claude/skills/werkbank-start/SKILL.md"
+  ]
+}

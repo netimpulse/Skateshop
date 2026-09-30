@@ -1,0 +1,32 @@
+# Shopify CLI – Theme-Konfiguration (Template)
+#
+# Diese Datei muss pro Shop angepasst werden. Beim ersten Auftrag in
+# einem neu erzeugten Shop-Repo erkennt der shopify-visual-qa Skill
+# (Schritt 0.5 Repo-Config-Check) die Platzhalter und stoppt den
+# Workflow, bis die Werte gesetzt sind.
+
+[environments.development]
+store = "__STORE_DOMAIN__.myshopify.com"
+theme = "__THEME_ID__"
+
+# Production-Block wird pro Kundenshop ergaenzt:
+# [environments.production]
+# store = "kunde.myshopify.com"
+# theme = "__PROD_THEME_ID__"
+
+ignore = [
+  "tests/**",
+  "playwright.config.ts",
+  "playwright/**",
+  "qa-screenshots/**",
+  "playwright-report/**",
+  "test-results/**",
+  "package.json",
+  "package-lock.json",
+  "node_modules/**",
+  ".env*",
+  ".gitignore",
+  ".claude/**",
+  ".mcp.json",
+  "CLAUDE.md"
+]

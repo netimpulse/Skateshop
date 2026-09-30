@@ -1,0 +1,19 @@
+{
+  "name": "shopify-theme-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Template fuer neue Shopify-Theme-Repos mit integriertem Visual-QA-Workflow (Shopify CLI + Playwright).",
+  "scripts": {
+    "theme:check": "shopify theme check",
+    "theme:push:dev": "shopify theme push -e development --unpublished",
+    "theme:push:prod": "shopify theme push -e production",
+    "qa:visual": "playwright test",
+    "qa:full": "npm run theme:check && npm run qa:visual",
+    "playwright:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@shopify/cli": "^3.66.0",
+    "@shopify/theme": "^3.66.0"
+  }
+}

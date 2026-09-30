@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "shopify": {
+      "command": "npx",
+      "args": ["-y", "@shopify/dev-mcp@latest"],
+      "env": {
+        "SHOPIFY_STORE_URL": "${SHOPIFY_STORE_URL}",
+        "SHOPIFY_ADMIN_TOKEN": "${SHOPIFY_ADMIN_TOKEN}"
+      }
+    }
+  }
+}
