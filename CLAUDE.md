@@ -484,7 +484,10 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   `custom.preview_layer`); die Vorschau nimmt zuerst den Varianten-Layer, dann den Produkt-Layer.
   Wiederherstellung aus `localStorage`: `rehydrate()` läuft nach JEDEM erfolgreichen Laden einer Collection (`ensureData`),
   auch nach „Erneut versuchen“ oder Schrittwechsel; Teile werden nur bei eindeutigem Ergebnis (Produkt/Variante weg oder
-  ausverkauft) entfernt und nie, wenn im aktuellen Besuch schon neu gewählt wurde. Bei Ladefehlern bleibt die Auswahl. Vor dem Hinzufügen prüft die Summary sequenziell die Verfügbarkeit
+  ausverkauft) entfernt und nie, wenn im aktuellen Besuch schon neu gewählt wurde. Bei Ladefehlern bleibt die Auswahl;
+  `restore()` versucht fehlgeschlagene Collections nach `RESTORE_RETRY_MS` (1,5 s) ein zweites Mal. Gespeicherte, aber nicht
+  geladene Teile zeigt die Summary als `.bb-sum__row.is-pending` mit Text `builder.summary.not_loaded` und Button
+  `[data-bb-reload-part]` (→ `ensureData` → `rehydrate`), nie als „nicht gewählt“. Vor dem Hinzufügen prüft die Summary sequenziell die Verfügbarkeit
   (`/products/<handle>.js`); ausverkaufte Zeilen bekommen `.is-unavailable`. Bei Fehlern nach Teil-Add baut `rollback()`
   alle Zeilen mit derselben `_build_id` zurück (Quelle `builder:silent` → Drawer bleibt zu).
   E2E (`tests/builder.spec.ts`): HTTP 429 auf `?view=builder-data` = Store-Drosselung → Test wird übersprungen, andere

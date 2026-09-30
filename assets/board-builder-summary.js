@@ -50,6 +50,18 @@ export class BuilderSummary {
     const s = this.strings.summary;
     const rows = this.parts().map(({ part, step, entry }) => {
       const label = this.builder.partLabel(part);
+      if (!entry && this.builder.state.sel?.[part]) {
+        // Chosen and stored, but its collection could not be loaded (e.g. throttled) – never show it as "not selected".
+        return h(
+          'li',
+          { class: 'bb-sum__row is-missing is-pending', 'data-part': part },
+          h('span', { class: 'bb-sum__thumb bb-placeholder', 'aria-hidden': 'true' }),
+          h('span', { class: 'bb-sum__part label-mono' }, label),
+          h('span', { class: 'bb-sum__name text-muted' }, s.notLoaded),
+          h('span', { class: 'bb-sum__price' }, '–'),
+          h('button', { type: 'button', class: 'link-mono bb-sum__edit', 'data-bb-reload-part': part }, this.strings.retry)
+        );
+      }
       if (!entry) {
         return h(
           'li',
@@ -136,6 +148,8 @@ export class BuilderSummary {
 
   onClick = (event) => {
     if (event.target.closest('[data-bb-add]')) this.addToCart();
+    const reload = event.target.closest('[data-bb-reload-part]');
+    if (reload) this.reloadPart(reload.dataset.bbReloadPart);
     if (event.target.closest('[data-bb-remove-riser]')) {
       this.builder.deselect('riser');
       this.render(null);
@@ -291,6 +305,15 @@ export class BuilderSummary {
       this.render({ type: 'success' });
     } finally {
       this.setBusy(false);
+    }
+  }
+
+  /** Loads a stored part's collection again; on success `rehydrate` restores it and the summary re-renders. */
+  async reloadPart(part) {
+    try {
+      await this.builder.ensureData(part);
+    } catch {
+      this.fail(this.strings.loadError);
     }
   }
 

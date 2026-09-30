@@ -178,6 +178,7 @@
       "error": "Der Build konnte nicht in den Warenkorb gelegt werden. Bitte versuche es erneut.",
       "missing": "Noch offen: [parts]",
       "new_build": "Neuen Build starten",
+      "not_loaded": "Gespeichert – konnte gerade nicht geladen werden.",
       "part": "Teil",
       "price": "Preis",
       "product": "Produkt",

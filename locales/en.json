@@ -178,6 +178,7 @@
       "error": "The build could not be added to the cart. Please try again.",
       "missing": "Still open: [parts]",
       "new_build": "Start a new build",
+      "not_loaded": "Saved – could not be loaded right now.",
       "part": "Part",
       "price": "Price",
       "product": "Product",

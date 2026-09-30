@@ -132,7 +132,14 @@ test.describe("Board Builder", () => {
     // Reload behält die Auswahl
     await page.reload();
     await expect(page.locator("[data-bb-summary]")).toBeVisible({ timeout: 20_000 });
-    await expect(page.locator(".bb-sum__row:not(.is-missing)")).toHaveCount(rowCount, { timeout: 20_000 });
+    const restored = page.locator(".bb-sum__row:not(.is-missing)");
+    await expect.poll(() => restored.count(), { timeout: 20_000 }).toBe(rowCount).catch(() => {});
+    if ((await restored.count()) !== rowCount) {
+      // Stored parts whose data the store throttled stay stored and show a retry row instead of "not selected".
+      await expect(page.locator(".bb-sum__row.is-pending [data-bb-reload-part]").first()).toBeVisible();
+      test.skip(dataThrottled, "Store drosselt die Builder-Daten (HTTP 429) – später erneut ausführen");
+    }
+    await expect(restored).toHaveCount(rowCount);
 
     // In den Warenkorb
     await page.locator("[data-bb-add]").click();
@@ -179,6 +186,32 @@ test.describe("Board Builder", () => {
     if (await retry.isVisible()) test.skip(dataThrottled, "Store drosselt die Builder-Daten (HTTP 429) – später erneut ausführen");
     await expect(page.locator(".bb-card.is-selected")).toHaveCount(1);
     await expect(page.locator(".bb-legend__row.is-done")).toHaveCount(2);
+  });
+
+  test("Zusammenfassung: nicht ladbares gespeichertes Teil zeigt „Erneut versuchen“ statt „nicht gewählt“", async ({ page }) => {
+    await openBuilder(page);
+    await selectFirst(page, true);
+    await next(page);
+    await selectFirst(page, true);
+    await page.locator("[data-bb-stepper] [data-bb-goto='summary']").click();
+    await expect(page.locator("[data-bb-summary]")).toBeVisible();
+
+    const trucksData = /\/collections\/builder-trucks\?[^#]*view=builder-data/;
+    await page.route(trucksData, (route) => route.fulfill({ status: 500, body: "" }));
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const pending = page.locator(".bb-sum__row.is-pending[data-part='trucks']");
+    await expect(pending).toBeVisible({ timeout: 20_000 });
+    await expect(pending.locator("[data-bb-reload-part='trucks']")).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => (document.querySelector("board-builder") as (HTMLElement & { restoring?: boolean }) | null)?.restoring === false))
+      .toBe(true);
+    await page.unroute(trucksData);
+
+    await pending.locator("[data-bb-reload-part]").click();
+    const trucksRow = page.locator(".bb-sum__row[data-part='trucks']:not(.is-missing)");
+    await expect(trucksRow.or(page.locator(".bb-sum__row.is-pending[data-part='trucks']"))).toBeVisible({ timeout: 20_000 });
+    if (!(await trucksRow.isVisible())) test.skip(dataThrottled, "Store drosselt die Builder-Daten (HTTP 429) – später erneut ausführen");
+    await expect(trucksRow).toBeVisible();
   });
 
   test("manipulierter Speicher führt zu sauberem Start", async ({ page }) => {

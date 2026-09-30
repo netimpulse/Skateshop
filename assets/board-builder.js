@@ -14,6 +14,7 @@ import '@theme/board-builder-preview';
 
 const PARTS = ['deck', 'trucks', 'wheels', 'bearings', 'griptape', 'hardware'];
 const SAFE_PATH = /^\/[^\s]*$/;
+const RESTORE_RETRY_MS = 1500;
 
 function readConfig(element) {
   try {
@@ -151,13 +152,21 @@ class BoardBuilder extends HTMLElement {
    */
   async restore(deckHandle) {
     this.restoring = true;
-    for (const part of Object.keys({ ...(this.state.sel || {}) })) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await this.ensureData(part);
-      } catch {
-        /* kept in state.sel – rehydrated on a later successful load */
+    let failed = Object.keys({ ...(this.state.sel || {}) });
+    // Two passes: a short pause before the second one lets a throttled storefront (HTTP 429) recover.
+    for (let pass = 0; pass < 2 && failed.length; pass += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      if (pass) await new Promise((resolve) => setTimeout(resolve, RESTORE_RETRY_MS));
+      const next = [];
+      for (const part of failed) {
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await this.ensureData(part);
+        } catch {
+          next.push(part); // kept in state.sel – the summary offers a retry, a later successful load rehydrates it
+        }
       }
+      failed = next;
     }
 
     if (deckHandle && /^[a-z0-9][a-z0-9-]{0,99}$/.test(deckHandle) && this.stepKeys.includes('deck')) {
