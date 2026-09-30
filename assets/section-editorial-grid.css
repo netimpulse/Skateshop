@@ -1,0 +1,238 @@
+/* Editorial grid (sections/editorial-grid.liquid) – magazine layout with hairlines. */
+.editorial-grid__grid {
+  --ed-line: var(--border-width) solid var(--color-border);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-block-start: var(--ed-line);
+  border-inline-start: var(--ed-line);
+}
+
+.editorial-grid__story {
+  position: relative;
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  border-inline-end: var(--ed-line);
+  border-block-end: var(--ed-line);
+}
+
+.editorial-grid__media {
+  --media-ratio: 4 / 5;
+  border-radius: 0;
+}
+
+.editorial-grid__image,
+.editorial-grid__placeholder .placeholder-skate__art {
+  transition: transform 900ms var(--ease-out);
+}
+
+.editorial-grid__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+  padding: var(--space-m) var(--space-m) var(--space-l);
+}
+
+.editorial-grid__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-s);
+  color: var(--color-text-muted);
+}
+
+.editorial-grid__eyebrow {
+  color: var(--color-link);
+}
+
+.editorial-grid__title {
+  font-size: clamp(1.2rem, 1.05rem + 0.6vw, 1.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  text-transform: none;
+}
+
+.editorial-grid__story--large .editorial-grid__title {
+  font-size: clamp(1.5rem, 1rem + 1.8vw, 2.5rem);
+  line-height: 1.02;
+  max-width: 22ch;
+}
+
+.editorial-grid__link {
+  text-decoration: none;
+}
+
+.editorial-grid__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.editorial-grid__link:focus-visible {
+  outline: none;
+}
+
+.editorial-grid__link:focus-visible::after {
+  outline: var(--focus-ring);
+  outline-offset: -4px;
+}
+
+.editorial-grid__text {
+  max-width: 52ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-small);
+}
+
+.editorial-grid__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-block-start: var(--space-xs);
+  font-size: 0.6875rem;
+}
+
+.editorial-grid__more .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform var(--duration-short) var(--ease-out);
+}
+
+@media (hover: hover) {
+  html:not(.no-hover-effects) .editorial-grid__story:hover .editorial-grid__image,
+  html:not(.no-hover-effects) .editorial-grid__story:hover .editorial-grid__placeholder .placeholder-skate__art {
+    transform: scale(1.04);
+  }
+
+  .editorial-grid__story:hover .editorial-grid__link {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.15em;
+  }
+
+  .editorial-grid__story:hover .editorial-grid__more .icon {
+    transform: translateX(3px);
+  }
+}
+
+/* ---------------------------------------------------------------- Mobile: small stories as compact rows */
+@media (max-width: 749px) {
+  .editorial-grid__story--small {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  }
+
+  .editorial-grid__story--small .editorial-grid__media {
+    --media-ratio: 1 / 1;
+    border-inline-end: var(--ed-line);
+  }
+
+  .editorial-grid__story--small .editorial-grid__body {
+    padding: var(--space-s);
+  }
+
+  .editorial-grid__story--small .editorial-grid__text {
+    display: none;
+  }
+
+  .editorial-grid__story--large .editorial-grid__media {
+    border-block-end: var(--ed-line);
+  }
+}
+
+/* ---------------------------------------------------------------- Tablet */
+@media (min-width: 750px) {
+  .editorial-grid__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .editorial-grid__story--large {
+    grid-column: 1 / -1;
+  }
+
+  .editorial-grid__story--large .editorial-grid__media {
+    --media-ratio: 16 / 10;
+  }
+
+  .editorial-grid__story--small .editorial-grid__media {
+    --media-ratio: 4 / 3;
+  }
+
+  .editorial-grid__media {
+    border-block-end: var(--ed-line);
+  }
+
+  .editorial-grid__body {
+    padding: var(--space-l);
+  }
+}
+
+/* ---------------------------------------------------------------- Desktop: magazine */
+@media (min-width: 990px) {
+  /* Large story: tall portrait image with text below (left). Small stories: image | text rows (right),
+     each exactly half the height of the large one – portrait images stay nearly uncropped. */
+  .editorial-grid__grid--magazine {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-auto-flow: row dense;
+  }
+
+  .editorial-grid__grid--magazine .editorial-grid__story--large {
+    grid-column: 1;
+    grid-row: span 2;
+  }
+
+  .editorial-grid__grid--magazine .editorial-grid__story--large .editorial-grid__media {
+    --media-ratio: 4 / 5;
+  }
+
+  .editorial-grid__grid--magazine .editorial-grid__story--large .editorial-grid__body {
+    padding: var(--space-l) var(--space-l) var(--space-xl);
+  }
+
+  .editorial-grid__grid--magazine .editorial-grid__story--small {
+    grid-column: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: stretch;
+  }
+
+  .editorial-grid__grid--magazine .editorial-grid__story--small .editorial-grid__media {
+    aspect-ratio: auto;
+    min-height: 16rem;
+    border-block-end: 0;
+    border-inline-end: var(--ed-line);
+  }
+
+  /* Rubric on top, headline block anchored to the bottom edge. */
+  .editorial-grid__grid--magazine .editorial-grid__story--small .editorial-grid__body {
+    padding: var(--space-l);
+  }
+
+  .editorial-grid__grid--magazine .editorial-grid__story--small .editorial-grid__title {
+    margin-block-start: auto;
+  }
+
+  .editorial-grid__grid--magazine .editorial-grid__story--small .editorial-grid__title {
+    font-size: clamp(1.35rem, 1rem + 0.9vw, 1.9rem);
+  }
+
+  .editorial-grid__grid--even {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .editorial-grid__grid--even .editorial-grid__story,
+  .editorial-grid__grid--even .editorial-grid__story--large {
+    grid-column: auto;
+  }
+
+  .editorial-grid__grid--even .editorial-grid__media,
+  .editorial-grid__grid--even .editorial-grid__story--large .editorial-grid__media {
+    --media-ratio: 4 / 5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editorial-grid__image,
+  .editorial-grid__placeholder .placeholder-skate__art,
+  .editorial-grid__more .icon {
+    transition: none;
+  }
+}

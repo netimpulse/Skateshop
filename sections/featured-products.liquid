@@ -1,0 +1,298 @@
+{%- comment -%}
+  Products of one collection as grid, slider (<scroll-slider>, no autoplay) or horizontal cards.
+  Used twice on the homepage ("Featured Boards" horizontal, "Best Sellers" slider).
+  Empty or missing collection: placeholder cards in the theme editor, nothing in the storefront.
+{%- endcomment -%}
+{%- liquid
+  assign s = section.settings
+  assign collection = s.collection
+  assign limit = s.products_to_show
+  assign has_products = false
+  if collection != blank and collection.products_count > 0
+    assign has_products = true
+  endif
+
+  assign columns = s.columns_desktop
+  assign card_layout = 'default'
+  if s.layout == 'horizontal'
+    assign card_layout = 'horizontal'
+    if columns > 3
+      assign columns = 3
+    endif
+  endif
+
+  assign heading_id = 'Heading-' | append: section.id
+  assign link_url = s.link_url | default: collection.url
+  assign region_label = s.heading | strip_html | default: collection.title | escape
+
+  case s.layout
+    when 'horizontal'
+      assign sizes = '(min-width: 990px) calc(50vw / ' | append: columns | append: '), 50vw'
+    when 'slider'
+      assign sizes = '(min-width: 1200px) calc(1440px / ' | append: columns | append: '), (min-width: 990px) calc(100vw / ' | append: columns | append: '), (min-width: 750px) 40vw, 72vw'
+    else
+      assign sizes = '(min-width: 1200px) calc(1440px / ' | append: columns | append: '), (min-width: 990px) calc(100vw / ' | append: columns | append: '), (min-width: 750px) 33vw, 50vw'
+  endcase
+
+  assign placeholder_title = 'sections.featured.placeholder_title' | t
+  assign placeholder_vendor = 'sections.featured.placeholder_vendor' | t
+-%}
+
+{%- if has_products or request.design_mode -%}
+  {{ 'section-featured-products.css' | asset_url | stylesheet_tag }}
+  {% render 'section-style', section_id: section.id, padding_top: s.padding_top, padding_bottom: s.padding_bottom %}
+
+  {%- capture items -%}
+    {%- if has_products -%}
+      {%- for product in collection.products limit: limit -%}
+        <div class="featured-products__item">
+          {% render 'product-card', product: product, layout: card_layout, sizes: sizes, index: forloop.index %}
+        </div>
+      {%- endfor -%}
+    {%- else -%}
+      {%- for i in (1..limit) -%}
+        {%- liquid
+          assign art_index = forloop.index0 | modulo: 4
+          case art_index
+            when 0
+              assign art = 'deck'
+            when 1
+              assign art = 'trucks'
+            when 2
+              assign art = 'wheels'
+            else
+              assign art = 'bearings'
+          endcase
+        -%}
+        <div class="featured-products__item">
+          <article class="product-card product-card--{{ card_layout }} featured-products__placeholder">
+            <div class="product-card__media-wrap">
+              <div class="product-card__media media">
+                {% render 'placeholder-skate', kind: art %}
+              </div>
+            </div>
+            <div class="product-card__info">
+              <p class="product-card__vendor label-mono">{{ placeholder_vendor }}</p>
+              <h3 class="product-card__title">{{ placeholder_title }}</h3>
+              <p class="price product-card__price">{{ 4995 | money }}</p>
+            </div>
+          </article>
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endcapture -%}
+
+  <section
+    class="section featured-products featured-products--{{ s.layout }} featured-products--cols-{{ columns }} scheme color-{{ s.color_scheme }}"
+    data-section-id="{{ section.id }}"
+    data-testid="home-featured-products"
+    {% if s.heading != blank %}
+      aria-labelledby="{{ heading_id }}"
+    {% endif %}
+  >
+    {%- if s.layout == 'slider' -%}
+      <scroll-slider class="featured-products__slider">
+        <div class="page-width featured-products__head">
+          {% render 'section-heading',
+            eyebrow: s.eyebrow,
+            index: s.index,
+            heading: s.heading,
+            heading_id: heading_id,
+            text: s.text,
+            link_label: s.link_label,
+            link_url: link_url
+          %}
+          <div class="scroller-controls featured-products__controls">
+            <button
+              type="button"
+              class="icon-button"
+              data-slider-prev
+              aria-label="{{ 'accessibility.previous_slide' | t }}"
+            >
+              {%- render 'icon', name: 'arrow-left' -%}
+            </button>
+            <button
+              type="button"
+              class="icon-button"
+              data-slider-next
+              aria-label="{{ 'accessibility.next_slide' | t }}"
+            >
+              {%- render 'icon', name: 'arrow-right' -%}
+            </button>
+          </div>
+        </div>
+        <div class="featured-products__viewport">
+          <div
+            class="scroller featured-products__track"
+            data-slider-track
+            data-testid="featured-slider-track"
+            tabindex="0"
+            role="region"
+            aria-label="{{ region_label }}"
+          >
+            {{ items }}
+          </div>
+        </div>
+      </scroll-slider>
+    {%- else -%}
+      <div class="page-width">
+        {% render 'section-heading',
+          eyebrow: s.eyebrow,
+          index: s.index,
+          heading: s.heading,
+          heading_id: heading_id,
+          text: s.text,
+          link_label: s.link_label,
+          link_url: link_url
+        %}
+        <div class="grid featured-products__grid">
+          {{ items }}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if has_products == false -%}
+      <p class="page-width featured-products__editor-note text-small text-muted">
+        {{ 'sections.featured.editor_empty' | t }}
+      </p>
+    {%- endif -%}
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Produkte",
+  "class": "section-featured-products",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Überschrift"
+    },
+    {
+      "type": "text",
+      "id": "index",
+      "label": "Rubrik-Nummer",
+      "default": "02"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Rubrik",
+      "default": "Ausgewählt"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Featured Boards"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link-Text",
+      "default": "Alle ansehen"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link",
+      "info": "Leer = gewählte Kollektion."
+    },
+    {
+      "type": "header",
+      "content": "Produkte"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Kollektion"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Anzahl Produkte",
+      "min": 2,
+      "max": 16,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Darstellung",
+      "options": [
+        { "value": "grid", "label": "Raster" },
+        { "value": "slider", "label": "Slider" },
+        { "value": "horizontal", "label": "Horizontale Karten" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Spalten auf Desktop",
+      "info": "Horizontale Karten: höchstens 3.",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Produkte (Raster)"
+    },
+    {
+      "name": "Produkt-Slider",
+      "settings": {
+        "layout": "slider",
+        "index": "06",
+        "eyebrow": "Meistverkauft",
+        "heading": "Best Sellers"
+      }
+    },
+    {
+      "name": "Featured Boards",
+      "settings": {
+        "layout": "horizontal",
+        "columns_desktop": 2,
+        "products_to_show": 4
+      }
+    }
+  ]
+}
+{% endschema %}

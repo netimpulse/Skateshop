@@ -1,0 +1,153 @@
+{%- comment -%}
+  Plain content section for any page: rubric line, heading, rich text, up to two buttons.
+{%- endcomment -%}
+{{ 'section-rich-text.css' | asset_url | stylesheet_tag }}
+{% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
+
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'Heading-' | append: section.id
+-%}
+
+<section
+  class="section rich-text rich-text--{{ s.alignment }} scheme color-{{ s.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  {% if s.heading != blank %}
+    aria-labelledby="{{ heading_id }}"
+  {% endif %}
+>
+  <div class="page-width{% if s.width == 'narrow' %} page-width--narrow{% endif %}">
+    <div class="rich-text__content">
+      {%- if s.eyebrow != blank -%}
+        <p class="eyebrow{% if s.alignment == 'left' %} eyebrow--rule{% endif %} rich-text__eyebrow">{{ s.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="rich-text__heading {{ s.heading_size }}" id="{{ heading_id }}">{{ s.heading }}</h2>
+      {%- endif -%}
+      {%- if s.text != blank -%}
+        <div class="rich-text__text rte">{{ s.text }}</div>
+      {%- endif -%}
+      {%- if s.button_label != blank and s.button_link != blank or s.button_label_2 != blank and s.button_link_2 != blank -%}
+        <div class="rich-text__actions">
+          {%- if s.button_label != blank and s.button_link != blank -%}
+            <a class="button" href="{{ s.button_link }}">{{ s.button_label | escape }}</a>
+          {%- endif -%}
+          {%- if s.button_label_2 != blank and s.button_link_2 != blank -%}
+            <a class="button button--secondary" href="{{ s.button_link_2 }}">{{ s.button_label_2 | escape }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Text",
+  "class": "section-rich-text",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Rubrik"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Über uns"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Größe der Überschrift",
+      "options": [
+        { "value": "h3", "label": "Klein" },
+        { "value": "h2", "label": "Mittel" },
+        { "value": "h1", "label": "Groß" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Erzähle hier, wofür dein Shop steht – kurz, klar und in deinen Worten.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button 1 – Text"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button 1 – Link"
+    },
+    {
+      "type": "text",
+      "id": "button_label_2",
+      "label": "Button 2 – Text"
+    },
+    {
+      "type": "url",
+      "id": "button_link_2",
+      "label": "Button 2 – Link"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Ausrichtung",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Breite",
+      "options": [
+        { "value": "narrow", "label": "Schmal" },
+        { "value": "wide", "label": "Seitenbreite" }
+      ],
+      "default": "narrow"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text"
+    }
+  ]
+}
+{% endschema %}

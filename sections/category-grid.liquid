@@ -1,0 +1,303 @@
+{%- comment -%}
+  "Shop by Category": numbered category cards (collection, image override, title, short text, link label)
+  in a hairline grid. Falls back to the shop-style placeholder when neither override nor collection image exists.
+{%- endcomment -%}
+{{ 'section-category-grid.css' | asset_url | stylesheet_tag }}
+{% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
+
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'Heading-' | append: section.id
+  assign block_count = section.blocks.size
+  assign count_class = block_count
+  if block_count > 6
+    assign count_class = 6
+  endif
+
+  if s.desktop_layout == 'feature'
+    assign image_sizes = '(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw'
+  else
+    assign image_sizes = '(min-width: 1200px) calc(1440px / ' | append: count_class | append: '), (min-width: 990px) calc(100vw / ' | append: count_class | append: '), (min-width: 750px) 33vw, 50vw'
+  endif
+-%}
+
+<section
+  class="section category-grid scheme color-{{ s.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-testid="home-category-grid"
+  {% if s.heading != blank %}
+    aria-labelledby="{{ heading_id }}"
+  {% endif %}
+>
+  <div class="page-width">
+    {% render 'section-heading',
+      eyebrow: s.eyebrow,
+      index: s.index,
+      heading: s.heading,
+      heading_id: heading_id,
+      text: s.text,
+      link_label: s.link_label,
+      link_url: s.link_url
+    %}
+
+    {%- if block_count > 0 -%}
+      <ul
+        class="category-grid__list category-grid__list--{{ s.desktop_layout }} category-grid__list--mobile-{{ s.mobile_layout }} category-grid__list--count-{{ count_class }}"
+        role="list"
+      >
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign collection = block.settings.collection
+            assign title = block.settings.title | default: collection.title
+            if title == blank
+              assign title = 'sections.category_grid.fallback_title' | t
+            endif
+            assign url = collection.url | default: routes.collections_url
+            assign image = block.settings.image | default: collection.image
+
+            assign art = block.settings.art
+            if art == 'auto'
+              assign art_source = collection.handle | default: title | handleize
+              assign art = 'generic'
+              if art_source contains 'deck'
+                assign art = 'deck'
+              elsif art_source contains 'truck' or art_source contains 'achse'
+                assign art = 'trucks'
+              elsif art_source contains 'wheel' or art_source contains 'rolle'
+                assign art = 'wheels'
+              elsif art_source contains 'bearing' or art_source contains 'lager'
+                assign art = 'bearings'
+              elsif art_source contains 'grip'
+                assign art = 'griptape'
+              elsif art_source contains 'hardware' or art_source contains 'schraube'
+                assign art = 'hardware'
+              elsif art_source contains 'riser'
+                assign art = 'riser'
+              elsif art_source contains 'complete' or art_source contains 'skateboard'
+                assign art = 'complete'
+              endif
+            endif
+
+            assign number = forloop.index | prepend: '0' | slice: -2, 2
+            assign total = forloop.length | prepend: '0' | slice: -2, 2
+            assign reveal_index = forloop.index0 | modulo: 4
+          -%}
+          <li class="category-grid__item reveal" data-reveal-index="{{ reveal_index }}" {{ block.shopify_attributes }}>
+            <div class="category-grid__card">
+              <p class="category-grid__meta label-mono" aria-hidden="true">
+                <span>{{ number }} / {{ total }}</span>
+                {%- if s.show_count and collection != blank -%}
+                  <span>{{ 'sections.category_grid.products_count' | t: count: collection.products_count }}</span>
+                {%- endif -%}
+              </p>
+
+              <div class="category-grid__media media">
+                {%- if image -%}
+                  {{
+                    image
+                    | image_url: width: 1200
+                    | image_tag:
+                      widths: '240, 360, 480, 640, 800, 1000, 1200',
+                      sizes: image_sizes,
+                      loading: 'lazy',
+                      class: 'category-grid__image',
+                      alt: ''
+                  }}
+                {%- else -%}
+                  {% render 'placeholder-skate', kind: art, class: 'category-grid__placeholder' %}
+                {%- endif -%}
+              </div>
+
+              <div class="category-grid__body">
+                <h3 class="category-grid__title">
+                  <a class="category-grid__link" href="{{ url }}">{{ title | escape }}</a>
+                </h3>
+                {%- if block.settings.text != blank -%}
+                  <p class="category-grid__text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+                <p class="category-grid__more label-mono" aria-hidden="true">
+                  <span>{{ block.settings.link_label | escape }}</span>
+                  {%- render 'icon', name: 'arrow-right' -%}
+                </p>
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Kategorien",
+  "class": "section-category-grid",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Überschrift"
+    },
+    {
+      "type": "text",
+      "id": "index",
+      "label": "Rubrik-Nummer",
+      "default": "01"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Rubrik",
+      "default": "Kategorien"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link-Text",
+      "default": "Alle Kategorien"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link",
+      "default": "/collections"
+    },
+    {
+      "type": "header",
+      "content": "Karten"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Artikelanzahl zeigen",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "Layout auf Desktop",
+      "options": [
+        { "value": "row", "label": "Alle in einer Reihe" },
+        { "value": "feature", "label": "Erste Karte groß (ideal bei 5)" }
+      ],
+      "default": "row"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Layout auf Mobilgeräten",
+      "options": [
+        { "value": "grid", "label": "Raster, 2 Spalten" },
+        { "value": "scroller", "label": "Seitlich wischen" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Kategorie",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Kollektion"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Bild (optional)",
+          "info": "Ersetzt das Kollektionsbild. Hochformat 4:5 empfohlen."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel (optional)",
+          "info": "Leer = Titel der Kollektion."
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Kurztext"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link-Text",
+          "default": "Entdecken"
+        },
+        {
+          "type": "select",
+          "id": "art",
+          "label": "Platzhalter-Motiv",
+          "info": "Wird gezeigt, solange kein Bild vorhanden ist.",
+          "options": [
+            { "value": "auto", "label": "Automatisch (aus Handle)" },
+            { "value": "deck", "label": "Deck" },
+            { "value": "trucks", "label": "Achsen" },
+            { "value": "wheels", "label": "Rollen" },
+            { "value": "bearings", "label": "Kugellager" },
+            { "value": "griptape", "label": "Griptape" },
+            { "value": "hardware", "label": "Hardware" },
+            { "value": "complete", "label": "Complete" },
+            { "value": "generic", "label": "Neutral" }
+          ],
+          "default": "auto"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Kategorien",
+      "blocks": [
+        { "type": "category", "settings": { "title": "Decks", "text": "Popsicle, Shaped, Cruiser – sortiert nach Breite und Concave.", "link_label": "Zu den Decks", "art": "deck" } },
+        { "type": "category", "settings": { "title": "Trucks", "text": "Achsen passend zur Deckbreite, von Low bis High.", "link_label": "Zu den Trucks", "art": "trucks" } },
+        { "type": "category", "settings": { "title": "Wheels", "text": "Street bis Cruiser, mit Härte-Guide von 78A bis 101A.", "link_label": "Zu den Wheels", "art": "wheels" } },
+        { "type": "category", "settings": { "title": "Bearings", "text": "Stahl, Swiss oder Keramik – vorgeschmiert.", "link_label": "Zu den Bearings", "art": "bearings" } },
+        { "type": "category", "settings": { "title": "Completes", "text": "Fertig montiert und abgestimmt – auspacken, losrollen.", "link_label": "Zu den Completes", "art": "complete" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

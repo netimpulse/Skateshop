@@ -1,0 +1,184 @@
+{%- comment -%}
+  Newsletter sign-up: customer form tagged "newsletter", labelled e-mail field, success/error messages, privacy note.
+{%- endcomment -%}
+{{ 'section-newsletter.css' | asset_url | stylesheet_tag }}
+{% render 'section-style', section_id: section.id, padding_top: section.settings.padding_top, padding_bottom: section.settings.padding_bottom %}
+
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'Heading-' | append: section.id
+  assign form_id = 'NewsletterForm-' | append: section.id
+  assign input_id = 'NewsletterEmail-' | append: section.id
+  assign message_id = 'NewsletterMessage-' | append: section.id
+  assign privacy_id = 'NewsletterPrivacy-' | append: section.id
+  assign email_label = 'sections.newsletter.email_label' | t
+  assign email_placeholder = 'sections.newsletter.email_placeholder' | t
+-%}
+
+<section
+  class="section newsletter scheme color-{{ s.color_scheme }}{% if s.enable_grain %} has-grain{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-testid="home-newsletter"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="page-width">
+    <div class="newsletter__box{% if s.show_border %} newsletter__box--border{% endif %}">
+      <div class="newsletter__intro">
+        {%- if s.eyebrow != blank or s.index != blank -%}
+          <p class="eyebrow newsletter__eyebrow">
+            {%- if s.index != blank -%}
+              <span class="eyebrow__index">{{ s.index | escape }}</span>
+            {%- endif -%}
+            {%- if s.eyebrow != blank -%}
+              <span>{{ s.eyebrow | escape }}</span>
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+        <h2 class="newsletter__title" id="{{ heading_id }}">{{ s.heading }}</h2>
+        {%- if s.text != blank -%}
+          <div class="newsletter__text rte">{{ s.text }}</div>
+        {%- endif -%}
+      </div>
+
+      <div class="newsletter__form-wrap">
+        {%- form 'customer', id: form_id, class: 'newsletter__form', data-testid: 'newsletter-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="field newsletter__field">
+            <label class="field__label" for="{{ input_id }}">{{ email_label }}</label>
+            <div class="newsletter__row">
+              <input
+                id="{{ input_id }}"
+                class="field__input newsletter__input"
+                type="email"
+                name="contact[email]"
+                value="{{ form.email | escape }}"
+                autocomplete="email"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="{{ email_placeholder | escape }}"
+                required
+                {% if form.errors %}
+                  aria-invalid="true"
+                  aria-describedby="{{ message_id }}{% if s.privacy_text != blank %} {{ privacy_id }}{% endif %}"
+                {% elsif s.privacy_text != blank %}
+                  aria-describedby="{{ privacy_id }}"
+                {% endif %}
+              >
+              <button type="submit" class="button newsletter__submit" name="commit">
+                {{- 'sections.newsletter.submit' | t -}}
+              </button>
+            </div>
+          </div>
+
+          {%- if form.errors -%}
+            <p class="form-message form-message--error newsletter__message" id="{{ message_id }}" role="alert">
+              {%- render 'icon', name: 'alert' -%}
+              <span>
+                {%- if form.errors.messages.email != blank -%}
+                  {{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}
+                {%- else -%}
+                  {{ 'sections.newsletter.error' | t }}
+                {%- endif -%}
+              </span>
+            </p>
+          {%- elsif form.posted_successfully? -%}
+            <p class="form-message form-message--success newsletter__message" id="{{ message_id }}" role="status">
+              {%- render 'icon', name: 'check' -%}
+              <span>{{ 'sections.newsletter.success' | t }}</span>
+            </p>
+          {%- endif -%}
+
+          {%- if s.privacy_text != blank -%}
+            <div class="newsletter__privacy rte" id="{{ privacy_id }}">{{ s.privacy_text }}</div>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "class": "section-newsletter",
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "index",
+      "label": "Rubrik-Nummer",
+      "default": "07"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Rubrik",
+      "default": "Newsletter"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Stay in the loop."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Neue Drops, Restocks und Builder-Setups der Crew – einmal im Monat, ohne Spam.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "privacy_text",
+      "label": "Datenschutz-Hinweis",
+      "default": "<p>Abmeldung jederzeit über den Link in jeder Mail. Mehr in der <a href=\"/policies/privacy-policy\">Datenschutzerklärung</a>.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "label": "Rahmen um den Block",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_grain",
+      "label": "Körnung (Grain)",
+      "info": "Empfohlen nur für dunkle oder farbige Schemata.",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter"
+    }
+  ]
+}
+{% endschema %}
