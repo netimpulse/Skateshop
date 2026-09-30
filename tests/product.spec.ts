@@ -191,6 +191,21 @@ test.describe("Produktdetailseite", () => {
     expect(await specs.locator("tr:not([hidden])").count()).toBeGreaterThan(0);
     const width = specs.locator('[data-spec="deck_width"]');
     if (await width.count()) await expect(width).toHaveText(/^\d+(\.\d+)?"$/);
+
+    // Related products (same page load): visible only with cards, hidden when Shopify returns no recommendations.
+    const related = page.getByTestId("related-products");
+    if (await related.count()) {
+      const recommendations = page
+        .waitForResponse((res) => new URL(res.url()).pathname.includes("/recommendations/products"), { timeout: 15_000 })
+        .catch(() => null);
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      const response = await recommendations;
+      expect(response?.ok() ?? true, "Recommendations-Request fehlgeschlagen").toBe(true);
+      await page.waitForTimeout(500);
+      const visible = await related.isVisible();
+      const cards = await related.locator("[data-product-card]").count();
+      expect(visible, `Related sichtbar=${visible}, Karten=${cards}`).toBe(cards > 0);
+    }
   });
 
   test("In den Warenkorb öffnet den Drawer bzw. erhöht den Zähler", async ({ page }) => {
