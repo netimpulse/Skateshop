@@ -1,0 +1,75 @@
+{% doc %}
+  One part of a custom board build inside cart-build-group: part label (from _build_part), image, title,
+  variant and unit price. No quantity stepper – builds are only changed as a whole.
+
+  @param {object} item - Cart line item with _build_* properties
+  @param {string} [context] - drawer | page
+
+  @example
+  {% render 'cart-build-part', item: item, context: 'drawer' %}
+{% enddoc %}
+
+{%- liquid
+  assign part = item.properties['_build_part'] | default: '' | downcase
+  case part
+    when 'deck', 'trucks', 'wheels', 'bearings', 'griptape', 'hardware', 'riser'
+      assign part_key = 'cart.parts.' | append: part
+      assign placeholder_kind = part
+    else
+      assign part = 'part'
+      assign part_key = 'cart.parts.part'
+      assign placeholder_kind = 'generic'
+  endcase
+  assign part_label = part_key | t
+
+  assign position = item.properties['_build_pos'] | default: ''
+  assign valid_positions = '1,2,3,4,5,6,7' | split: ','
+  if valid_positions contains position
+    assign position_label = position | prepend: '0'
+  else
+    assign position_label = '––'
+  endif
+
+  if context == 'page'
+    assign image_sizes = '(min-width: 750px) 72px, 56px'
+  else
+    assign image_sizes = '56px'
+  endif
+-%}
+
+<li class="cart-build__part" data-cart-line data-line-key="{{ item.key }}" data-build-part="{{ part }}" data-testid="cart-build-part">
+  <div class="cart-build__media">
+    {%- render 'image',
+      image: item.image,
+      url: item.url,
+      alt: item.product.title,
+      sizes: image_sizes,
+      widths: '72, 112, 144, 216',
+      max_width: 216,
+      ratio: '1 / 1',
+      placeholder: placeholder_kind,
+      placeholder_label: item.product.title
+    -%}
+  </div>
+  <div class="cart-build__details">
+    <p class="cart-build__part-label label-mono">
+      <span class="cart-build__pos" aria-hidden="true">{{ position_label }}</span>
+      <span data-testid="cart-build-part-label">{{ part_label }}</span>
+    </p>
+    <p class="cart-build__title">
+      <a href="{{ item.url }}" class="cart-item__link">{{ item.product.title | escape }}</a>
+    </p>
+    {%- render 'cart-variant', item: item, class: 'cart-build__variant' -%}
+  </div>
+  <p class="cart-build__price">
+    {%- if item.original_line_price != item.final_line_price -%}
+      <span class="visually-hidden">{{ 'cart.line.original_price' | t }}</span>
+      <s class="cart-item__compare">{% render 'cart-money', amount: item.original_price %}</s>
+      <span class="visually-hidden">{{ 'cart.line.discounted_price' | t }}</span>
+    {%- endif -%}
+    <span>{%- render 'cart-money', amount: item.final_price -%}</span>
+    {%- if item.quantity > 1 -%}
+      <span class="cart-build__multiplier">× {{ item.quantity }}</span>
+    {%- endif -%}
+  </p>
+</li>

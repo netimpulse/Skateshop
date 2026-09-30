@@ -1,0 +1,171 @@
+{% doc %}
+  A regular (non-build) cart line: image, vendor, title link, variant, visible properties, quantity stepper,
+  remove link and line price incl. line-level discounts. Properties whose key starts with "_" are never shown.
+  Works without JS: the quantity input belongs to the cart form (updates[key]) and "remove" is a plain link.
+
+  @param {object} item - Cart line item
+  @param {number} line - 1-based line number (unique ids)
+  @param {string} id_prefix - Unique id prefix (section id)
+  @param {string} form_id - Id of the cart form the quantity input belongs to
+  @param {string} [context] - drawer | page
+
+  @example
+  {% render 'cart-line-item', item: item, line: forloop.index, id_prefix: section.id, form_id: form_id, context: 'drawer' %}
+{% enddoc %}
+
+{%- liquid
+  assign uid = id_prefix | append: '-' | append: line
+  assign placeholder_kind = item.product.metafields.custom.builder_category.value | default: 'generic'
+  assign quantity_step = item.variant.quantity_rule.increment | default: 1
+  assign quantity_max = item.variant.quantity_rule.max
+  assign title = item.product.title | escape
+
+  if context == 'page'
+    assign image_sizes = '(min-width: 750px) 128px, 88px'
+  else
+    assign image_sizes = '88px'
+  endif
+-%}
+
+<li
+  class="cart-item"
+  data-cart-line
+  data-line-key="{{ item.key }}"
+  data-quantity="{{ item.quantity }}"
+  data-testid="cart-line"
+>
+  <div class="cart-item__media">
+    {%- render 'image',
+      image: item.image,
+      url: item.url,
+      alt: item.product.title,
+      sizes: image_sizes,
+      widths: '96, 144, 192, 256, 384',
+      max_width: 384,
+      ratio: '4 / 5',
+      placeholder: placeholder_kind,
+      placeholder_label: item.product.title
+    -%}
+  </div>
+
+  <div class="cart-item__details">
+    {%- if item.vendor != blank -%}
+      <p class="cart-item__vendor label-mono">{{ item.vendor | escape }}</p>
+    {%- endif -%}
+    <p class="cart-item__title">
+      <a href="{{ item.url }}" class="cart-item__link">{{ title }}</a>
+    </p>
+    {%- render 'cart-variant', item: item, class: 'cart-item__variant' -%}
+
+    {%- liquid
+      assign has_visible_properties = false
+      for property in item.properties
+        assign property_first_char = property.first | slice: 0
+        if property.last != blank and property_first_char != '_'
+          assign has_visible_properties = true
+          break
+        endif
+      endfor
+    -%}
+    {%- if has_visible_properties -%}
+      <dl class="cart-item__properties">
+        {%- for property in item.properties -%}
+          {%- assign property_first_char = property.first | slice: 0 -%}
+          {%- if property.last == blank or property_first_char == '_' -%}
+            {%- continue -%}
+          {%- endif -%}
+          <div class="cart-item__property">
+            <dt>{{ property.first | escape }}:</dt>
+            <dd>
+              {%- if property.last contains '/uploads/' -%}
+                <a href="{{ property.last | escape }}" class="link">{{ property.last | split: '/' | last | escape }}</a>
+              {%- else -%}
+                {{ property.last | escape }}
+              {%- endif -%}
+            </dd>
+          </div>
+        {%- endfor -%}
+      </dl>
+    {%- endif -%}
+
+    {%- if item.selling_plan_allocation -%}
+      <p class="cart-item__meta">{{ item.selling_plan_allocation.selling_plan.name | escape }}</p>
+    {%- endif -%}
+
+    {%- if item.unit_price_measurement -%}
+      <p class="cart-item__meta">
+        {%- render 'cart-money', amount: item.unit_price -%}/
+        {%- if item.unit_price_measurement.reference_value != 1 -%}
+          {{- item.unit_price_measurement.reference_value -}}
+        {%- endif -%}
+        {{- item.unit_price_measurement.reference_unit -}}
+      </p>
+    {%- endif -%}
+
+    {%- if item.line_level_discount_allocations.size > 0 -%}
+      <ul role="list" class="cart-item__discounts">
+        {%- for allocation in item.line_level_discount_allocations -%}
+          <li class="label-mono">
+            {{ allocation.discount_application.title | escape }} (−{% render 'cart-money', amount: allocation.amount %})
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+
+  <div class="cart-item__actions">
+    <div class="quantity cart-item__quantity">
+      <button type="button" class="quantity__button" data-quantity-step="-1" data-focus-id="minus">
+        <span class="visually-hidden">{{ 'cart.line.decrease' | t }}: {{ title }}</span>
+        {%- render 'icon', name: 'minus' -%}
+      </button>
+      <label class="visually-hidden" for="CartQuantity-{{ uid }}">{{ 'cart.line.quantity' | t }}: {{ title }}</label>
+      <input
+        class="quantity__input"
+        type="number"
+        id="CartQuantity-{{ uid }}"
+        name="updates[{{ item.key }}]"
+        form="{{ form_id }}"
+        value="{{ item.quantity }}"
+        min="0"
+        step="{{ quantity_step }}"
+        {% if quantity_max != nil %}
+          max="{{ quantity_max }}"
+        {% endif %}
+        inputmode="numeric"
+        data-quantity-input
+        data-focus-id="quantity"
+        data-testid="cart-quantity"
+      >
+      <button type="button" class="quantity__button" data-quantity-step="1" data-focus-id="plus">
+        <span class="visually-hidden">{{ 'cart.line.increase' | t }}: {{ title }}</span>
+        {%- render 'icon', name: 'plus' -%}
+      </button>
+    </div>
+    <a
+      href="{{ item.url_to_remove }}"
+      class="cart-item__remove link-mono"
+      data-cart-remove
+      data-focus-id="remove"
+      data-testid="cart-remove"
+    >
+      {{- 'cart.remove' | t -}}
+      <span class="visually-hidden">: {{ title }}</span>
+    </a>
+  </div>
+
+  <div class="cart-item__price">
+    {%- if item.original_line_price != item.final_line_price -%}
+      <span class="visually-hidden">{{ 'cart.line.original_price' | t }}</span>
+      <s class="cart-item__compare">{% render 'cart-money', amount: item.original_line_price %}</s>
+      <span class="visually-hidden">{{ 'cart.line.discounted_price' | t }}</span>
+    {%- endif -%}
+    <span class="cart-item__line-price" data-testid="cart-line-price">
+      {%- render 'cart-money', amount: item.final_line_price -%}
+    </span>
+    {%- if item.quantity > 1 -%}
+      {%- capture each_price -%}{%- render 'cart-money', amount: item.final_price -%}{%- endcapture -%}
+      <span class="cart-item__each">{{ 'cart.line.each_html' | t: price: each_price }}</span>
+    {%- endif -%}
+  </div>
+</li>
