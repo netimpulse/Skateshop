@@ -717,13 +717,15 @@
   transform: rotate(180deg);
 }
 
-.menu-drawer__sublist {
+/* [role='list'] matches theme.css's list reset (ul[role='list'] { padding: 0 }) so the indent wins. */
+.menu-drawer__sublist[role='list'] {
   display: grid;
   padding: 0 var(--space-l) var(--space-m) calc(var(--space-l) + 1.5rem + var(--space-s));
 }
 
-.menu-drawer__sublist--nested {
-  padding: 0 0 var(--space-s) var(--space-m);
+.menu-drawer__sublist--nested[role='list'] {
+  margin-block-end: var(--space-xs);
+  padding: 0 0 var(--space-2xs) var(--space-m);
   border-inline-start: var(--border-width) solid var(--color-border);
 }
 
