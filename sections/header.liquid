@@ -1,76 +1,342 @@
-<header>
-  <h2 class="header__title">
-    {{ shop.name | link_to: routes.root_url }}
-  </h2>
+{% comment %}
+  Site header (header group): logo, main navigation with disclosure mega menus, search dialog,
+  account, cart (drawer opener + count), optional CTA. Mobile: burger → <dialog id="MenuDrawer">.
+  Behaviour comes from theme.js (<sticky-header>, <disclosure-nav>, dialogs) and predictive-search.js.
+  The header never outputs an <h1> – the page's main section owns it.
+{% endcomment %}
 
-  <div class="header__menu">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
-  </div>
+{{ 'section-header.css' | asset_url | stylesheet_tag }}
+{{ 'component-predictive-search.css' | asset_url | stylesheet_tag }}
+{%- if settings.predictive_search_enabled -%}
+  <script type="module" src="{{ 'predictive-search.js' | asset_url }}"></script>
+{%- endif -%}
 
-  <div class="header__icons">
-    {% if shop.customer_accounts_enabled %}
-      <shopify-account menu="{{ section.settings.customer_account_menu }}">
-        {{ 'icon-account.svg' | inline_asset_content }}
-      </shopify-account>
-    {% endif %}
+{%- liquid
+  assign menu = section.settings.menu
+  if menu == blank or menu.links.size == 0
+    assign menu = linklists['skate-main-menu']
+  endif
+  if menu == blank or menu.links.size == 0
+    assign menu = linklists['main-menu']
+  endif
 
-    <a href="{{ routes.cart_url }}">
-      {% if cart.item_count > 0 %}
-        <sup>{{ cart.item_count }}</sup>
-      {% endif %}
+  assign sticky = section.settings.sticky
+  assign scheme = section.settings.color_scheme | default: 'scheme-1'
+  assign highlight = section.settings.highlight_item | strip | downcase
 
-      {{ 'icon-cart.svg' | inline_asset_content }}
-    </a>
-  </div>
-</header>
+  assign cta_label = section.settings.cta_label | strip
+  assign cta_link = section.settings.cta_link
+  if cta_link == blank and pages['skateboard-builder'] != empty
+    assign cta_link = pages['skateboard-builder'].url
+  endif
 
-{% stylesheet %}
-  header {
-    height: 5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  assign show_account = false
+  if section.settings.show_account and shop.customer_accounts_enabled
+    assign show_account = true
+  endif
+  if customer
+    assign account_label = 'general.account' | t
+  else
+    assign account_label = 'general.log_in' | t
+  endif
+
+  assign nav_label = 'header.nav_label' | t
+  assign open_menu_label = 'accessibility.open_menu' | t
+  assign search_label = 'general.search' | t
+  assign search_open_label = 'header.search_open' | t
+  assign cart_label = 'cart.title' | t
+  assign home_label = 'header.home_label' | t: shop: shop.name
+  assign logo_width_2x = settings.logo_width | times: 2
+  assign logo_sizes = settings.logo_width | append: 'px'
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    position: {% if sticky %}sticky{% else %}relative{% endif %};
+    top: 0;
+    z-index: var(--z-header);
+    --logo-width: {{ settings.logo_width }}px;
   }
-  header a {
-    position: relative;
-    text-decoration: none;
-    color: var(--color-foreground);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  header a sup {
-    position: absolute;
-    left: 100%;
-    overflow: hidden;
-    max-width: var(--page-margin);
-  }
-  header svg {
-    width: 2rem;
-  }
-  header .header__menu,
-  header .header__icons {
-    display: flex;
-    gap: 1rem;
-  }
-{% endstylesheet %}
+{% endstyle %}
+
+<sticky-header
+  class="site-header scheme color-{{ scheme }}"
+  data-sticky="{{ sticky }}"
+  data-section-id="{{ section.id }}"
+>
+  <header class="site-header__bar">
+    <div class="page-width site-header__inner">
+      <div class="site-header__start hidden-desktop">
+        <button
+          type="button"
+          class="site-header__action site-header__burger"
+          data-dialog-open="MenuDrawer"
+          aria-haspopup="dialog"
+          aria-controls="MenuDrawer"
+          aria-label="{{ open_menu_label | escape }}"
+          data-testid="header-menu-toggle"
+        >
+          {%- render 'icon', name: 'menu' -%}
+        </button>
+      </div>
+
+      <a href="{{ routes.root_url }}" class="site-header__logo" aria-label="{{ home_label | escape }}">
+        {%- if settings.logo != blank -%}
+          {{
+            settings.logo
+            | image_url: width: logo_width_2x
+            | image_tag:
+              class: 'site-header__logo-image',
+              widths: '120, 180, 240, 320, 400, 600',
+              sizes: logo_sizes,
+              loading: 'eager',
+              alt: shop.name
+          }}
+        {%- else -%}
+          <span class="site-header__wordmark">{{ shop.name | escape }}</span>
+        {%- endif -%}
+      </a>
+
+      {%- if menu.links.size > 0 -%}
+        <nav class="site-header__nav hidden-below-desktop" aria-label="{{ nav_label | escape }}">
+          <disclosure-nav class="site-nav" data-hover>
+            <ul class="site-nav__list" role="list">
+              {%- for link in menu.links -%}
+                {%- liquid
+                  assign link_title = link.title | strip | downcase
+                  assign is_highlight = false
+                  if highlight != blank and link_title == highlight
+                    assign is_highlight = true
+                  endif
+                -%}
+                <li class="site-nav__item" data-disclosure-item>
+                  {%- if link.links.size > 0 -%}
+                    {%- capture panel_id -%}MegaMenu-{{ section.id }}-{{ forloop.index }}{%- endcapture -%}
+                    <button
+                      type="button"
+                      class="site-nav__link{% if is_highlight %} site-nav__link--highlight{% endif %}{% if link.child_active or link.active %} site-nav__link--active{% endif %}"
+                      aria-expanded="false"
+                      aria-controls="{{ panel_id }}"
+                      data-testid="mega-trigger"
+                    >
+                      <span>{{ link.title | escape }}</span>
+                      {%- render 'icon', name: 'chevron-down', class: 'site-nav__chevron' -%}
+                    </button>
+                    {%- render 'header-mega-menu',
+                      link: link,
+                      panel_id: panel_id,
+                      index: forloop.index,
+                      total: forloop.length,
+                      blocks: section.blocks
+                    -%}
+                  {%- else -%}
+                    <a
+                      href="{{ link.url }}"
+                      class="site-nav__link{% if is_highlight %} site-nav__link--highlight{% endif %}{% if link.active %} site-nav__link--active{% endif %}"
+                      {% if link.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      <span>{{ link.title | escape }}</span>
+                    </a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </disclosure-nav>
+        </nav>
+      {%- endif -%}
+
+      <div class="site-header__actions">
+        <a
+          href="{{ routes.search_url }}"
+          class="site-header__action site-header__action--search"
+          data-dialog-open="SearchDialog"
+          aria-haspopup="dialog"
+          data-testid="header-search"
+        >
+          {%- render 'icon', name: 'search' -%}
+          <span class="site-header__action-label" aria-hidden="true">{{ search_label }}</span>
+          <span class="visually-hidden">{{ search_open_label }}</span>
+        </a>
+
+        {%- if show_account -%}
+          <a
+            href="{{ routes.account_url }}"
+            class="site-header__action site-header__action--account hidden-below-desktop"
+            data-testid="header-account"
+          >
+            {%- render 'icon', name: 'account' -%}
+            <span class="site-header__action-label">{{ account_label }}</span>
+          </a>
+        {%- endif -%}
+
+        <a
+          href="{{ routes.cart_url }}"
+          class="site-header__action site-header__action--cart"
+          {% if settings.cart_type == 'drawer' %}
+            data-dialog-open="CartDrawer"
+            aria-haspopup="dialog"
+          {% endif %}
+          data-testid="header-cart"
+        >
+          {%- render 'icon', name: 'cart' -%}
+          <span class="site-header__action-label">{{ cart_label }}</span>
+          {%- render 'cart-count' -%}
+        </a>
+
+        {%- if cta_label != blank and cta_link != blank -%}
+          <a href="{{ cta_link }}" class="button button--small site-header__cta">
+            <span>{{ cta_label | escape }}</span>
+            {%- render 'icon', name: 'arrow-right' -%}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </header>
+
+  {%- render 'header-drawer',
+    menu: menu,
+    highlight: highlight,
+    section_id: section.id,
+    show_account: show_account,
+    account_label: account_label,
+    cta_label: cta_label,
+    cta_link: cta_link
+  -%}
+
+  {%- render 'header-search',
+    section_id: section.id,
+    popular_searches: section.settings.popular_searches
+  -%}
+</sticky-header>
 
 {% schema %}
 {
-  "name": "t:general.header",
+  "name": "Header",
+  "tag": "div",
+  "class": "section-header",
+  "max_blocks": 8,
+  "enabled_on": {
+    "groups": ["header"]
+  },
   "settings": [
     {
-      "type": "link_list",
-      "id": "menu",
-      "label": "t:labels.menu"
+      "type": "header",
+      "content": "Navigation"
     },
     {
       "type": "link_list",
-      "id": "customer_account_menu",
-      "label": "t:labels.customer_account_menu",
-      "default": "customer-account-main-menu"
+      "id": "menu",
+      "label": "Menü",
+      "default": "main-menu",
+      "info": "Empfohlen: „skate-main-menu“. Punkte mit Unterpunkten öffnen ein Mega-Menü (Spalten aus Unter- und Unter-Unterpunkten)."
+    },
+    {
+      "type": "text",
+      "id": "highlight_item",
+      "label": "Hervorgehobener Menüpunkt",
+      "default": "Konfigurator",
+      "info": "Titel des Menüpunkts, der mit einem Akzent-Quadrat markiert wird."
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky",
+      "label": "Header beim Scrollen fixieren",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Aktionen"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Kundenkonto anzeigen",
+      "default": true,
+      "info": "Nur sichtbar, wenn Kundenkonten im Shop aktiviert sind."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA-Button: Text",
+      "default": "Board bauen"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "CTA-Button: Link",
+      "info": "Leer = Seite „skateboard-builder“, falls vorhanden."
+    },
+    {
+      "type": "header",
+      "content": "Suche"
+    },
+    {
+      "type": "text",
+      "id": "popular_searches",
+      "label": "Beliebte Suchen",
+      "default": "Decks, Trucks, Wheels, Griptape",
+      "info": "Kommagetrennt. Erscheinen im Such-Dialog, solange nichts eingegeben ist."
+    },
+    {
+      "type": "paragraph",
+      "content": "Schnellsuche, Preis- und Herstelleranzeige steuerst du unter Theme-Einstellungen → Suche."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mega_promo",
+      "name": "Mega-Menü-Kachel",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item",
+          "label": "Menüpunkt (Titel)",
+          "default": "Decks",
+          "info": "Titel des Hauptmenüpunkts mit Unterpunkten, in dessen Mega-Menü die Kachel erscheint."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Bild"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Kleine Überschrift",
+          "default": "Neu im Shop"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Überschrift",
+          "default": "Sechs Motive, ein Shape"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "7-lagiger Ahorn, Medium Concave – direkt im Builder kombinierbar."
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link-Text",
+          "default": "Jetzt entdecken"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
     }
   ]
 }

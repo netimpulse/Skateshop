@@ -1,0 +1,150 @@
+{% doc %}
+  Search dialog opened from the header ([data-dialog-open="SearchDialog"], theme.js).
+  With predictive search enabled (Theme-Einstellungen → Suche) the form is wrapped in <predictive-search>
+  (assets/predictive-search.js), which fetches sections/predictive-search.liquid via the Section Rendering API.
+  Without it (or without JS) the form is a plain GET form to the search page.
+
+  @param {string} section_id - Header section id (for unique ids)
+  @param {string} [popular_searches] - Comma-separated search terms shown while the field is empty
+
+  @example
+  {% render 'header-search', section_id: section.id, popular_searches: 'Decks, Trucks' %}
+{% enddoc %}
+
+{%- liquid
+  assign predictive = settings.predictive_search_enabled
+  assign input_id = 'SearchInput-' | append: section_id
+  assign label_id = 'SearchLabel-' | append: section_id
+  assign results_id = 'PredictiveResults-' | append: section_id
+  assign status_id = 'PredictiveStatus-' | append: section_id
+  assign label = 'search.predictive.label' | t
+  assign placeholder = 'search.placeholder' | t
+  assign submit_label = 'search.submit' | t
+  assign close_label = 'accessibility.close' | t
+  assign clear_label = 'search.predictive.clear' | t
+  assign popular_label = 'search.predictive.popular' | t
+  assign popular_terms = popular_searches | split: ','
+
+  assign str_loading = 'search.predictive.loading' | t
+  assign str_status_one = 'search.predictive.status_one' | t
+  assign str_status_other = 'search.predictive.status_other' | t
+  assign str_status_none = 'search.predictive.status_none' | t
+  assign str_rate_limited = 'search.predictive.error_rate_limited' | t
+  assign str_unavailable = 'search.predictive.error_unavailable' | t
+  assign str_search_page = 'search.predictive.search_page' | t
+-%}
+
+{%- capture search_body -%}
+  <form action="{{ routes.search_url }}" method="get" role="search" class="search-modal__form">
+    <div class="search-modal__top">
+      <label id="{{ label_id }}" for="{{ input_id }}" class="search-modal__label label-mono">{{ label }}</label>
+      <button type="button" class="icon-button search-modal__close" data-dialog-close aria-label="{{ close_label | escape }}">
+        {%- render 'icon', name: 'close' -%}
+      </button>
+    </div>
+
+    <div class="search-modal__field">
+      {%- render 'icon', name: 'search', class: 'search-modal__icon' -%}
+      <input
+        id="{{ input_id }}"
+        class="search-modal__input"
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="{{ placeholder | escape }}"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="search"
+        autofocus
+        {% if predictive %}
+          aria-controls="{{ results_id }}"
+        {% endif %}
+        data-testid="search-input"
+      >
+      <input type="hidden" name="options[prefix]" value="last">
+      {%- if predictive -%}
+        <span class="spinner search-modal__spinner" aria-hidden="true" data-predictive-spinner hidden></span>
+        <button
+          type="button"
+          class="icon-button search-modal__clear"
+          aria-label="{{ clear_label | escape }}"
+          data-predictive-clear
+          hidden
+        >
+          {%- render 'icon', name: 'close' -%}
+        </button>
+      {%- endif -%}
+      <button type="submit" class="button button--ink search-modal__submit">
+        <span class="search-modal__submit-label">{{ submit_label }}</span>
+        {%- render 'icon', name: 'arrow-right', class: 'search-modal__submit-icon' -%}
+      </button>
+    </div>
+  </form>
+
+  {%- if predictive -%}
+    <p id="{{ status_id }}" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-predictive-status></p>
+    <div
+      id="{{ results_id }}"
+      class="predictive-search__results"
+      data-predictive-results
+      data-testid="predictive-results"
+      hidden
+    ></div>
+  {%- endif -%}
+
+  {%- if popular_terms.size > 0 -%}
+    <div class="search-modal__popular" data-predictive-empty>
+      <p class="label-mono search-modal__popular-title">{{ popular_label }}</p>
+      <ul class="search-modal__chips" role="list">
+        {%- for term in popular_terms -%}
+          {%- assign clean_term = term | strip -%}
+          {%- if clean_term != blank -%}
+            <li>
+              <a
+                class="search-modal__chip"
+                href="{{ routes.search_url }}?q={{ clean_term | url_encode }}&amp;options%5Bprefix%5D=last"
+              >
+                {{- clean_term | escape -}}
+              </a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+
+<dialog
+  id="SearchDialog"
+  class="search-modal"
+  aria-labelledby="{{ label_id }}"
+  data-backdrop-close
+  data-testid="search-dialog"
+>
+  <div class="page-width search-modal__inner">
+    {%- if predictive -%}
+      <predictive-search class="predictive-search">
+        {{- search_body -}}
+        <script type="application/json" data-predictive-config>
+          {
+            "strings": {
+              "loading": {{ str_loading | json }},
+              "statusOne": {{ str_status_one | json }},
+              "statusOther": {{ str_status_other | json }},
+              "statusNone": {{ str_status_none | json }},
+              "rateLimited": {{ str_rate_limited | json }},
+              "unavailable": {{ str_unavailable | json }},
+              "searchPage": {{ str_search_page | json }}
+            }
+          }
+        </script>
+      </predictive-search>
+    {%- else -%}
+      <div class="predictive-search predictive-search--static">
+        {{- search_body -}}
+      </div>
+    {%- endif -%}
+  </div>
+</dialog>
