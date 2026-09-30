@@ -420,5 +420,36 @@
     "results_for_html": "{{ count }} results for \"{{ terms }}\"",
     "submit": "Search",
     "title": "Search"
+  },
+  "sections": {
+    "category_grid": {
+      "fallback_title": "Category",
+      "products_count": {
+        "one": "{{ count }} item",
+        "other": "{{ count }} items"
+      }
+    },
+    "community": {
+      "tile_label": "View community post {{ number }}"
+    },
+    "featured": {
+      "editor_empty": "Visible in the editor only: choose a collection with products. In the storefront this section stays hidden while the collection is empty.",
+      "placeholder_title": "Product name",
+      "placeholder_vendor": "Brand"
+    },
+    "marquee": {
+      "count": {
+        "one": "{{ count }} brand",
+        "other": "{{ count }} brands"
+      },
+      "editor_empty": "No brands found. Add products with a vendor or choose “Custom brand blocks”."
+    },
+    "newsletter": {
+      "email_label": "Email address",
+      "email_placeholder": "name@example.com",
+      "error": "Please check your email address and try again.",
+      "submit": "Sign up",
+      "success": "Thanks! You're on the list."
+    }
   }
 }

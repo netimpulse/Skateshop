@@ -420,5 +420,36 @@
     "results_for_html": "{{ count }} Ergebnisse für „{{ terms }}“",
     "submit": "Suchen",
     "title": "Suche"
+  },
+  "sections": {
+    "category_grid": {
+      "fallback_title": "Kategorie",
+      "products_count": {
+        "one": "{{ count }} Artikel",
+        "other": "{{ count }} Artikel"
+      }
+    },
+    "community": {
+      "tile_label": "Community-Beitrag {{ number }} ansehen"
+    },
+    "featured": {
+      "editor_empty": "Nur im Editor sichtbar: Wähle eine Kollektion mit Produkten. Im Shop bleibt diese Section ausgeblendet, solange die Kollektion leer ist.",
+      "placeholder_title": "Produktname",
+      "placeholder_vendor": "Marke"
+    },
+    "marquee": {
+      "count": {
+        "one": "{{ count }} Marke",
+        "other": "{{ count }} Marken"
+      },
+      "editor_empty": "Keine Marken gefunden. Lege Produkte mit Hersteller an oder wähle „Eigene Marken-Blocks“."
+    },
+    "newsletter": {
+      "email_label": "E-Mail-Adresse",
+      "email_placeholder": "name@beispiel.de",
+      "error": "Bitte prüfe deine E-Mail-Adresse und versuche es erneut.",
+      "submit": "Anmelden",
+      "success": "Danke! Du bist auf der Liste."
+    }
   }
 }

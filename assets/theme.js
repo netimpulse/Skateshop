@@ -302,6 +302,20 @@ document.addEventListener('shopify:block:select', (event) => {
 });
 document.addEventListener('shopify:block:deselect', (event) => event.target.closest?.('disclosure-nav')?.closeAll());
 
+// Expose the announcement bar height (used e.g. by the hero to fit the first viewport).
+function observeAnnouncementBar() {
+  const bar = document.querySelector('.announcement-bar');
+  const root = document.documentElement;
+  if (!bar) {
+    root.style.setProperty('--announcement-height', '0px');
+    return;
+  }
+  new ResizeObserver(() => root.style.setProperty('--announcement-height', `${Math.round(bar.offsetHeight)}px`)).observe(bar);
+}
+
+observeAnnouncementBar();
+document.addEventListener('shopify:section:load', observeAnnouncementBar);
+
 initReveal();
 document.documentElement.classList.add('theme-ready');
 document.addEventListener('shopify:section:load', (event) => initReveal(event.target));
