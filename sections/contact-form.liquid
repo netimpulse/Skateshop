@@ -1,0 +1,291 @@
+{%- comment -%}
+  Contact form ({% form 'contact' %}) with name, email, optional phone and message, server-side
+  errors (form.errors) and success message (form.posted_successfully?), plus a contact info column.
+{%- endcomment -%}
+
+{{ 'section-content.css' | asset_url | stylesheet_tag }}
+{% render 'section-style',
+  section_id: section.id,
+  padding_top: section.settings.padding_top,
+  padding_bottom: section.settings.padding_bottom
+%}
+
+{%- liquid
+  assign heading_id = 'ContactHeading-' | append: section.id
+  assign info_heading_id = 'ContactInfo-' | append: section.id
+  assign form_id = 'ContactForm-' | append: section.id
+
+  assign heading = section.settings.heading
+  if heading == blank
+    assign heading = 'contact.heading' | t
+  endif
+  assign info_heading = section.settings.info_heading
+  if info_heading == blank
+    assign info_heading = 'contact.info_heading' | t
+  endif
+-%}
+
+<section
+  class="section content-contact scheme color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="page-width">
+    <div class="content-contact__layout content-contact__layout--form-{{ section.settings.form_position }}">
+      <div class="content-contact__main">
+        {% render 'section-heading',
+          eyebrow: section.settings.eyebrow,
+          heading: heading,
+          heading_id: heading_id,
+          heading_class: 'h3',
+          text: section.settings.text
+        %}
+
+        {%- form 'contact', id: form_id, class: 'content-form content-contact__form', data-testid: 'contact-form' -%}
+          {%- if form.posted_successfully? -%}
+            <div class="form-message form-message--success" role="status" data-testid="contact-success">
+              {% render 'icon', name: 'check' %}
+              <p>{{ 'contact.form.success' | t }}</p>
+            </div>
+          {%- elsif form.errors -%}
+            <div class="form-message form-message--error" role="alert" data-testid="contact-errors">
+              {% render 'icon', name: 'alert' %}
+              <div class="content-form__errors">
+                <p>{{ 'pages.form.error_heading' | t }}</p>
+                <ul>
+                  {%- for field in form.errors -%}
+                    <li>
+                      {%- if field == 'form' -%}
+                        {{ form.errors.messages[field] }}
+                      {%- else -%}
+                        <a href="#{{ form_id }}-{{ field }}">
+                          {{- form.errors.translated_fields[field] | capitalize }}
+                          {{ form.errors.messages[field] -}}
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            </div>
+          {%- endif -%}
+
+          <p class="content-form__note">{{ 'pages.form.required_note' | t }}</p>
+
+          <div class="content-form__row">
+            <div class="field">
+              <label class="field__label" for="{{ form_id }}-name">
+                {{- 'contact.form.name' | t -}}
+                <span class="content-form__required" aria-hidden="true">*</span>
+              </label>
+              <input
+                class="field__input"
+                type="text"
+                id="{{ form_id }}-name"
+                name="contact[name]"
+                autocomplete="name"
+                required
+                value="{% if form.name %}{{ form.name | escape }}{% elsif customer %}{{ customer.name | escape }}{% endif %}"
+                {% if form.errors contains 'name' %}
+                  aria-invalid="true"
+                {% endif %}
+              >
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="{{ form_id }}-email">
+                {{- 'contact.form.email' | t -}}
+                <span class="content-form__required" aria-hidden="true">*</span>
+              </label>
+              <input
+                class="field__input"
+                type="email"
+                id="{{ form_id }}-email"
+                name="contact[email]"
+                autocomplete="email"
+                spellcheck="false"
+                autocapitalize="off"
+                required
+                value="{% if form.email %}{{ form.email | escape }}{% elsif customer %}{{ customer.email | escape }}{% endif %}"
+                {% if form.errors contains 'email' %}
+                  aria-invalid="true" aria-describedby="{{ form_id }}-email-error"
+                {% endif %}
+              >
+              {%- if form.errors contains 'email' -%}
+                <p class="content-form__field-error" id="{{ form_id }}-email-error">
+                  {{- form.errors.translated_fields.email | capitalize }}
+                  {{ form.errors.messages.email -}}
+                </p>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- if section.settings.show_phone -%}
+            <div class="field">
+              <label class="field__label" for="{{ form_id }}-phone">
+                {{- 'contact.form.phone' | t }}
+                <span class="content-form__optional">({{ 'pages.form.optional' | t }})</span>
+              </label>
+              <input
+                class="field__input"
+                type="tel"
+                id="{{ form_id }}-phone"
+                name="contact[phone]"
+                autocomplete="tel"
+                value="{{ form.phone | escape }}"
+              >
+            </div>
+          {%- endif -%}
+
+          <div class="field">
+            <label class="field__label" for="{{ form_id }}-body">
+              {{- 'contact.form.message' | t -}}
+              <span class="content-form__required" aria-hidden="true">*</span>
+            </label>
+            <textarea
+              class="field__input field__textarea"
+              id="{{ form_id }}-body"
+              name="contact[body]"
+              rows="7"
+              required
+              {% if form.errors contains 'body' %}
+                aria-invalid="true" aria-describedby="{{ form_id }}-body-error"
+              {% endif %}
+            >
+              {{- form.body | escape -}}
+            </textarea>
+            {%- if form.errors contains 'body' -%}
+              <p class="content-form__field-error" id="{{ form_id }}-body-error">
+                {{- form.errors.translated_fields.body | capitalize }}
+                {{ form.errors.messages.body -}}
+              </p>
+            {%- endif -%}
+          </div>
+
+          <div class="content-form__actions">
+            <button type="submit" class="button">
+              {{- 'contact.form.submit' | t -}}
+              {% render 'icon', name: 'arrow-right' %}
+            </button>
+            {%- if section.settings.privacy_text != blank -%}
+              <div class="content-form__privacy rte">{{ section.settings.privacy_text }}</div>
+            {%- endif -%}
+          </div>
+        {%- endform -%}
+      </div>
+
+      {%- if section.settings.info != blank -%}
+        <aside class="content-contact__info" aria-labelledby="{{ info_heading_id }}">
+          <div class="tri-stripe" aria-hidden="true"><span></span></div>
+          <h2 id="{{ info_heading_id }}" class="content-contact__info-title h4">{{ info_heading | escape }}</h2>
+          <div class="content-contact__info-text rte">{{ section.settings.info }}</div>
+        </aside>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Kontaktformular",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Formular"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Label über der Überschrift"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "info": "Leer lassen für den Standardtext."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_phone",
+      "label": "Feld „Telefon“ (optional) anzeigen",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "privacy_text",
+      "label": "Datenschutzhinweis",
+      "default": "<p>Wir nutzen deine Angaben nur, um deine Anfrage zu beantworten.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Kontaktinfos"
+    },
+    {
+      "type": "text",
+      "id": "info_heading",
+      "label": "Überschrift",
+      "info": "Leer lassen für den Standardtext."
+    },
+    {
+      "type": "richtext",
+      "id": "info",
+      "label": "Kontaktinfos",
+      "info": "Adresse, E-Mail, Telefon, Öffnungszeiten. Leer lassen zum Ausblenden.",
+      "default": "<p><strong>Kerbside Skate Supply</strong><br>Musterstraße 12<br>10115 Berlin</p><p>hallo@example.com<br>+49 30 1234567</p><p>Mo–Fr 10–18 Uhr · Sa 11–16 Uhr</p>"
+    },
+    {
+      "type": "select",
+      "id": "form_position",
+      "label": "Formular auf dem Desktop",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Kontaktformular"
+    }
+  ]
+}
+{% endschema %}

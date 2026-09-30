@@ -8,23 +8,38 @@
  * ------------------------------------------------------------
  */
 {
-  "layout": "password",
   "sections": {
     "main": {
-      "type": "password",
+      "type": "page",
+      "settings": {
+        "show_breadcrumbs": true,
+        "eyebrow": "Service",
+        "heading_size": "h-display",
+        "show_content": true,
+        "lead_paragraph": true,
+        "width": "wide",
+        "image_ratio": "16-9",
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 16
+      }
+    },
+    "contact": {
+      "type": "contact-form",
       "settings": {
         "eyebrow": "",
         "heading": "",
-        "heading_size": "h-display",
-        "show_newsletter": true,
-        "newsletter_heading": "",
+        "show_phone": true,
+        "info_heading": "",
+        "form_position": "left",
         "color_scheme": "scheme-1",
         "padding_top": 32,
-        "padding_bottom": 32
+        "padding_bottom": 96
       }
     }
   },
   "order": [
-    "main"
+    "main",
+    "contact"
   ]
 }

@@ -1,68 +1,402 @@
-{% comment %}
-  This section is used in the article template to render the article page, which
-  displays the full content of the blog post and can optionally include a
-  comments section for customers (not shown in this example).
+{%- comment -%}
+  Article in a magazine layout: breadcrumbs, H1, meta line (date, author, reading time), large
+  title image (eager, LCP), content in a comfortable reading width, tags, newer/older navigation,
+  comments and the comment form. Outputs the Article JSON-LD via structured_data.
+{%- endcomment -%}
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/article
-{% endcomment %}
+{{ 'section-content.css' | asset_url | stylesheet_tag }}
+{% render 'section-style',
+  section_id: section.id,
+  padding_top: section.settings.padding_top,
+  padding_bottom: section.settings.padding_bottom
+%}
 
-{% if article.image %}
-  {{ article.image | image_url: width: 1000 | image_tag }}
-{% endif %}
+{%- liquid
+  assign heading_id = 'ArticleTitle-' | append: section.id
+  assign comments_heading_id = 'ArticleComments-' | append: section.id
+  assign hero_alt = article.image.alt | default: article.title
 
-<h1>{{ article.title }}</h1>
+  assign word_count = article.content | replace: '<', ' <' | strip_html | split: ' ' | size
+  assign reading_minutes = word_count | divided_by: 200 | at_least: 1
 
-{% assign date = article.published_at | time_tag: format: 'date' %}
-<p>{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
+  assign newer_article = blog.previous_article
+  assign older_article = blog.next_article
+-%}
 
-{{ article.content }}
+<article
+  class="section content-article scheme color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="page-width">
+    {%- if section.settings.show_breadcrumbs -%}
+      {% render 'breadcrumbs', class: 'content-article__breadcrumbs' %}
+    {%- endif -%}
 
-{% if blog.comments_enabled? %}
-  <h2>{{ 'blog.article_comments' | t }}</h2>
+    <header class="content-article__header">
+      <p class="eyebrow eyebrow--rule">
+        {%- if section.settings.show_tags and article.tags.size > 0 -%}
+          <a class="content-article__kicker" href="{{ blog.url }}/tagged/{{ article.tags.first | handle }}">
+            {{- article.tags.first | escape -}}
+          </a>
+        {%- else -%}
+          <a class="content-article__kicker" href="{{ blog.url }}">{{ blog.title | escape }}</a>
+        {%- endif -%}
+      </p>
 
-  <div id="comments">
-    {% paginate article.comments by 10 %}
-      {% for comment in article.comments %}
-        <div>
-          <p>{{ comment.author }}</p>
-          <p>
-            {{- comment.created_at | time_tag: format: 'date' -}}
-          </p>
-          <p>{{ comment.content }}</p>
-        </div>
-      {% endfor %}
+      <h1 id="{{ heading_id }}" class="content-article__title {{ section.settings.heading_size }}">
+        {{- article.title | escape -}}
+      </h1>
 
-      {{ paginate | default_pagination: anchor: 'comments' }}
-    {% endpaginate %}
+      {%- if section.settings.show_excerpt and article.excerpt != blank -%}
+        <p class="content-article__standfirst">{{ article.excerpt | strip_html | strip }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.show_date or section.settings.show_author or section.settings.show_reading_time -%}
+        <p class="content-article__meta label-mono">
+          {%- if section.settings.show_date -%}
+            <span>{{ article.published_at | time_tag: format: 'date' }}</span>
+          {%- endif -%}
+          {%- if section.settings.show_author and article.author != blank -%}
+            <span>{{ 'blog.author' | t: author: article.author }}</span>
+          {%- endif -%}
+          {%- if section.settings.show_reading_time -%}
+            <span>{{ 'blog.reading_time' | t: count: reading_minutes }}</span>
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+    </header>
+
+    {%- if section.settings.show_image and article.image -%}
+      <figure class="content-article__hero">
+        {% render 'image',
+          image: article.image,
+          alt: hero_alt,
+          ratio: section.settings.image_ratio,
+          sizes: '(min-width: 1440px) 1376px, calc(100vw - 32px)',
+          widths: '480, 720, 960, 1280, 1600, 2000, 2400',
+          max_width: 2400,
+          eager: true
+        %}
+      </figure>
+    {%- endif -%}
+
+    <div
+      class="content-article__body rte{% if section.settings.drop_cap %} content-article__body--drop-cap{% endif %}"
+      data-testid="article-body"
+    >
+      {{ article.content }}
+    </div>
+
+    {%- if section.settings.show_tags and article.tags.size > 0 -%}
+      <div class="content-article__tags content-tags">
+        <p class="content-tags__label label-mono">{{ 'blog.tags' | t }}</p>
+        <ul class="content-tags__list" role="list">
+          {%- for tag in article.tags -%}
+            <li>
+              <a class="content-tags__link" href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag | escape }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    <nav class="content-article__nav" aria-label="{{ 'blog.article_navigation' | t }}">
+      <a class="content-article__back link-mono" href="{{ blog.url }}" data-testid="article-back">
+        {% render 'icon', name: 'arrow-left' %}
+        {{- 'blog.back_to_blog' | t -}}
+      </a>
+      {%- if newer_article or older_article -%}
+        <ul class="content-article__siblings" role="list">
+          {%- if newer_article -%}
+            <li class="content-article__sibling">
+              <a class="content-article__sibling-link" href="{{ newer_article.url }}">
+                <span class="label-mono">{{ 'blog.newer_article' | t }}</span>
+                <span class="content-article__sibling-title h4">{{ newer_article.title | escape }}</span>
+              </a>
+            </li>
+          {%- endif -%}
+          {%- if older_article -%}
+            <li class="content-article__sibling content-article__sibling--older">
+              <a class="content-article__sibling-link" href="{{ older_article.url }}">
+                <span class="label-mono">{{ 'blog.older_article' | t }}</span>
+                <span class="content-article__sibling-title h4">{{ older_article.title | escape }}</span>
+              </a>
+            </li>
+          {%- endif -%}
+        </ul>
+      {%- endif -%}
+    </nav>
+
+    {%- if blog.comments_enabled? -%}
+      <section class="content-comments" id="comments" aria-labelledby="{{ comments_heading_id }}">
+        <h2 id="{{ comments_heading_id }}" class="content-comments__title h3">
+          {{- 'blog.article_comments' | t }}
+          <span class="content-comments__count label-mono">{{ 'blog.comments_count' | t: count: article.comments_count }}</span>
+        </h2>
+
+        {%- if article.comments_count > 0 -%}
+          {%- paginate article.comments by 10 -%}
+            <ol class="content-comments__list" role="list">
+              {%- for comment in article.comments -%}
+                <li class="content-comments__item" id="comment-{{ comment.id }}">
+                  <p class="content-comments__meta label-mono">
+                    <span class="content-comments__author">{{ comment.author | escape }}</span>
+                    <span>{{ comment.created_at | time_tag: format: 'date' }}</span>
+                  </p>
+                  <div class="content-comments__body rte">{{ comment.content }}</div>
+                </li>
+              {%- endfor -%}
+            </ol>
+            {%- if paginate.pages > 1 -%}
+              {%- liquid
+                assign previous_label = 'pages.pagination.previous' | t
+                assign next_label = 'pages.pagination.next' | t
+              -%}
+              <nav class="content-pagination content-pagination--default" aria-label="{{ 'accessibility.pagination' | t }}">
+                {{- paginate | default_pagination: previous: previous_label, next: next_label, anchor: 'comments' -}}
+              </nav>
+            {%- endif -%}
+          {%- endpaginate -%}
+        {%- else -%}
+          <p class="content-comments__empty">{{ 'blog.comments_empty' | t }}</p>
+        {%- endif -%}
+
+        {%- form 'new_comment', article, class: 'content-form content-comments__form' -%}
+          <h3 class="content-comments__form-title h4">{{ 'blog.comment_form_title' | t }}</h3>
+
+          {%- if form.posted_successfully? -%}
+            <div class="form-message form-message--success" role="status">
+              {% render 'icon', name: 'check' %}
+              <p>
+                {%- if blog.moderated? -%}
+                  {{ 'blog.comment_success_moderated' | t }}
+                {%- else -%}
+                  {{ 'blog.comment_success' | t }}
+                {%- endif -%}
+              </p>
+            </div>
+          {%- elsif form.errors -%}
+            <div class="form-message form-message--error" role="alert">
+              {% render 'icon', name: 'alert' %}
+              <div class="content-form__errors">
+                <p>{{ 'pages.form.error_heading' | t }}</p>
+                <ul>
+                  {%- for field in form.errors -%}
+                    <li>
+                      {%- if field == 'form' -%}
+                        {{ form.errors.messages[field] }}
+                      {%- else -%}
+                        <a href="#CommentForm-{{ field }}">
+                          {{- form.errors.translated_fields[field] | capitalize }}
+                          {{ form.errors.messages[field] -}}
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            </div>
+          {%- endif -%}
+
+          <p class="content-form__note">{{ 'pages.form.required_note' | t }}</p>
+
+          <div class="content-form__row">
+            <div class="field">
+              <label class="field__label" for="CommentForm-author">
+                {{- 'blog.comment_form_name' | t -}}
+                <span class="content-form__required" aria-hidden="true">*</span>
+              </label>
+              <input
+                class="field__input"
+                type="text"
+                id="CommentForm-author"
+                name="comment[author]"
+                autocomplete="name"
+                required
+                value="{{ form.author | escape }}"
+                {% if form.errors contains 'author' %}
+                  aria-invalid="true"
+                {% endif %}
+              >
+            </div>
+            <div class="field">
+              <label class="field__label" for="CommentForm-email">
+                {{- 'blog.comment_form_email' | t -}}
+                <span class="content-form__required" aria-hidden="true">*</span>
+              </label>
+              <input
+                class="field__input"
+                type="email"
+                id="CommentForm-email"
+                name="comment[email]"
+                autocomplete="email"
+                spellcheck="false"
+                autocapitalize="off"
+                required
+                value="{{ form.email | escape }}"
+                {% if form.errors contains 'email' %}
+                  aria-invalid="true"
+                {% endif %}
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="CommentForm-body">
+              {{- 'blog.comment_form_body' | t -}}
+              <span class="content-form__required" aria-hidden="true">*</span>
+            </label>
+            <textarea
+              class="field__input field__textarea"
+              id="CommentForm-body"
+              name="comment[body]"
+              rows="6"
+              required
+              {% if form.errors contains 'body' %}
+                aria-invalid="true"
+              {% endif %}
+            >
+              {{- form.body | escape -}}
+            </textarea>
+          </div>
+
+          <div class="content-form__actions">
+            <button type="submit" class="button">{{ 'blog.comment_form_submit' | t }}</button>
+            {%- if blog.moderated? -%}
+              <p class="content-form__privacy">{{ 'blog.comments_moderated_note' | t }}</p>
+            {%- endif -%}
+          </div>
+        {%- endform -%}
+      </section>
+    {%- endif -%}
   </div>
+</article>
 
-  {% form 'new_comment', article %}
-    <h2>{{ 'blog.comment_form_title' | t }}</h2>
-
-    {{ form.errors | default_errors }}
-
-    <div>
-      <label for="author">{{ 'blog.comment_form_name' | t }}</label>
-      <input type="text" name="comment[author]" id="author" value="{{ form.author }}" required>
-    </div>
-
-    <div>
-      <label for="email">{{ 'blog.comment_form_email' | t }}</label>
-      <input type="email" name="comment[email]" id="email" value="{{ form.email }}" required>
-    </div>
-
-    <div>
-      <label for="body">{{ 'blog.comment_form_body' | t }}</label>
-      <textarea name="comment[body]" id="body" required>{{ form.body }}</textarea>
-    </div>
-
-    <input type="submit" value="{{ 'blog.comment_form_submit' | t }}">
-  {% endform %}
-{% endif %}
+<script type="application/ld+json">
+  {{ article | structured_data }}
+</script>
 
 {% schema %}
 {
-  "name": "t:general.article",
-  "settings": []
+  "name": "Artikel",
+  "enabled_on": {
+    "templates": ["article"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Kopfbereich"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Brotkrumen anzeigen",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Größe der Überschrift",
+      "options": [
+        { "value": "h2", "label": "Klein" },
+        { "value": "h1", "label": "Mittel" },
+        { "value": "h-display", "label": "Groß (Display)" }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Auszug als Vorspann anzeigen",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Datum anzeigen",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Autor anzeigen",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reading_time",
+      "label": "Lesezeit anzeigen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Titelbild"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Titelbild anzeigen",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Bildformat",
+      "options": [
+        { "value": "natural", "label": "Original" },
+        { "value": "16-9", "label": "Breit (16:9)" },
+        { "value": "21-9", "label": "Panorama (21:9)" },
+        { "value": "3-2", "label": "Quer (3:2)" }
+      ],
+      "default": "16-9"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "checkbox",
+      "id": "drop_cap",
+      "label": "Initiale im ersten Absatz",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Themen (Tags) anzeigen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ]
 }
 {% endschema %}
