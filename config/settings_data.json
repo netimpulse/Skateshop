@@ -33,7 +33,7 @@
           "button": "#1C1D1B",
           "button_label": "#FFFFFF",
           "secondary_button_label": "#1C1D1B",
-          "link": "#C8401F"
+          "link": "#B8391B"
         }
       },
       "scheme-3": {
@@ -54,7 +54,7 @@
           "background": "#C8401F",
           "surface": "#B23819",
           "text": "#FFFFFF",
-          "text_muted": "#FBE3DC",
+          "text_muted": "#FFFFFF",
           "border": "#DD6B4F",
           "button": "#1C1D1B",
           "button_label": "#FFFFFF",

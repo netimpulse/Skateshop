@@ -125,7 +125,8 @@
           assign encoded_terms = search.terms | url_encode
           assign clear_url = routes.search_url | append: '?q=' | append: encoded_terms | append: '&options%5Bprefix%5D=last'
           if search.sort_by != blank
-            assign clear_url = clear_url | append: '&sort_by=' | append: search.sort_by
+            assign sort_param = search.sort_by | url_encode
+            assign clear_url = clear_url | append: '&sort_by=' | append: sort_param
           endif
           assign results_heading = 'search.results.heading' | t
           assign product_total = 0

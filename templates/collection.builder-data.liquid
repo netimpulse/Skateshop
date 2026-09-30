@@ -83,6 +83,7 @@
               assign vmeta = variant.metafields.custom
               assign variant_color = vmeta.preview_color.value | append: ''
               assign variant_image = variant.featured_media.preview_image
+              assign variant_layer = vmeta.preview_layer.value
             -%}
             {
               "id": {{ variant.id }},
@@ -103,7 +104,9 @@
                 {%- if vmeta.hardware_length.value != blank -%}{% if spec_written %},{% endif %}"hardware_length": {{ vmeta.hardware_length.value | json }}{%- endif -%}
               },
               "preview": {
-                "color": {{ variant_color | json }}
+                "color": {{ variant_color | json }},
+                "layer": {% if variant_layer %}{{ variant_layer | image_url: width: 1600 | json }}{% else %}null{% endif %},
+                "layerRatio": {% if variant_layer %}{{ variant_layer.aspect_ratio | default: 0 }}{% else %}null{% endif %}
               }
             }{% unless forloop.last %},{% endunless %}
           {%- endfor -%}

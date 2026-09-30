@@ -465,7 +465,8 @@
       "tax_included": "Inkl. MwSt.",
       "unavailable": "Nicht verfügbar",
       "value_sold_out": "ausverkauft",
-      "value_unavailable": "nicht verfügbar"
+      "value_unavailable": "nicht verfügbar",
+      "variant": "Variante"
     },
     "recently_viewed": {
       "editor_note": "Hier erscheinen die zuletzt besuchten Produkte des Besuchers. Ohne Verlauf bleibt die Section im Shop unsichtbar.",
@@ -561,6 +562,7 @@
       "email_label": "E-Mail-Adresse",
       "email_placeholder": "name@beispiel.de",
       "error": "Bitte prüfe deine E-Mail-Adresse und versuche es erneut.",
+      "privacy_link": "Datenschutzerklärung",
       "submit": "Anmelden",
       "success": "Danke! Du bist auf der Liste."
     }

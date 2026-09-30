@@ -21,7 +21,8 @@
 
   assign clear_url = collection.url
   if collection.sort_by != blank
-    assign clear_url = collection.url | append: '?sort_by=' | append: collection.sort_by
+    assign sort_param = collection.sort_by | url_encode
+    assign clear_url = collection.url | append: '?sort_by=' | append: sort_param
   endif
 
   assign columns_desktop = section.settings.columns_desktop | plus: 0

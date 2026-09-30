@@ -77,7 +77,8 @@
           <div class="cart-item__property">
             <dt>{{ property.first | escape }}:</dt>
             <dd>
-              {%- if property.last contains '/uploads/' -%}
+              {%- assign property_scheme = property.last | slice: 0, 8 | downcase -%}
+              {%- if property_scheme == 'https://' and property.last contains '/uploads/' -%}
                 <a href="{{ property.last | escape }}" class="link">{{ property.last | split: '/' | last | escape }}</a>
               {%- else -%}
                 {{ property.last | escape }}

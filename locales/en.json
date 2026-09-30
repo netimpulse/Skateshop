@@ -465,7 +465,8 @@
       "tax_included": "Incl. tax",
       "unavailable": "Unavailable",
       "value_sold_out": "sold out",
-      "value_unavailable": "unavailable"
+      "value_unavailable": "unavailable",
+      "variant": "Variant"
     },
     "recently_viewed": {
       "editor_note": "Products the visitor viewed recently appear here. Without a history the section stays hidden in the store.",
@@ -561,6 +562,7 @@
       "email_label": "Email address",
       "email_placeholder": "name@example.com",
       "error": "Please check your email address and try again.",
+      "privacy_link": "Privacy policy",
       "submit": "Sign up",
       "success": "Thanks! You're on the list."
     }

@@ -62,12 +62,13 @@ export class BuilderSummary {
         );
       }
       const { product, variant } = entry;
+      const unavailable = variant.available === false;
       const specs = resolveSpecs(product, variant);
       const specLine = (SUMMARY_SPECS[part] || []).map((key) => formatSpec(key, specs[key])).filter(Boolean).join(' · ');
       const variantTitle = variant.title && variant.title !== 'Default Title' ? variant.title : '';
       return h(
         'li',
-        { class: 'bb-sum__row', 'data-part': part },
+        { class: `bb-sum__row${unavailable ? ' is-unavailable' : ''}`, 'data-part': part },
         productImage(product, variant, 'bb-sum__thumb'),
         h('span', { class: 'bb-sum__part label-mono' }, label),
         h(
@@ -75,7 +76,8 @@ export class BuilderSummary {
           { class: 'bb-sum__name' },
           h('span', { class: 'bb-sum__vendor label-mono' }, product.vendor),
           h('a', { href: product.url || null, class: 'bb-sum__title' }, product.title),
-          variantTitle || specLine ? h('span', { class: 'bb-sum__meta label-mono' }, [variantTitle, specLine].filter(Boolean).join(' · ')) : null
+          variantTitle || specLine ? h('span', { class: 'bb-sum__meta label-mono' }, [variantTitle, specLine].filter(Boolean).join(' · ')) : null,
+          unavailable ? h('span', { class: 'bb-sum__warning label-mono' }, this.strings.soldOut) : null
         ),
         h('span', { class: 'bb-sum__price' }, variant.priceFormatted || formatMoney(variant.price)),
         part === 'riser'
@@ -107,7 +109,7 @@ export class BuilderSummary {
 
     const addButton = h(
       'button',
-      { type: 'button', class: 'button button--full bb-sum__add', 'data-bb-add': true, disabled: missing.length > 0, 'aria-busy': String(this.busy) },
+      { type: 'button', class: 'button button--full bb-sum__add', 'data-bb-add': true, 'data-focus-key': 'builder-add', disabled: missing.length > 0, 'aria-busy': String(this.busy) },
       s.add
     );
 
@@ -186,10 +188,17 @@ export class BuilderSummary {
       await this.builder.ensureData('riser');
     } catch {
       open.removeAttribute('aria-busy');
+      open.setAttribute('aria-expanded', 'false');
+      container.append(h('p', { class: 'form-message form-message--error', role: 'alert' }, this.strings.loadError));
       return;
     }
     open.removeAttribute('aria-busy');
     const products = (this.builder.data.get('riser') || []).filter((product) => product.available);
+    if (!products.length) {
+      open.setAttribute('aria-expanded', 'false');
+      container.append(h('p', { class: 'text-small', role: 'status' }, this.strings.emptyStep));
+      return;
+    }
     const list = h(
       'ul',
       { class: 'bb-riser__list', role: 'list', 'aria-label': this.strings.riser.choose },
@@ -254,7 +263,11 @@ export class BuilderSummary {
     try {
       const unavailable = await this.checkAvailability(parts);
       if (unavailable.length) {
-        this.render({ type: 'error', message: interpolate(s.unavailable, { parts: unavailable.map((part) => this.builder.partLabel(part)).join(', ') }) });
+        unavailable.forEach((part) => {
+          const entry = this.builder.selection.get(part);
+          if (entry) entry.variant.available = false;
+        });
+        this.fail(interpolate(s.unavailable, { parts: unavailable.map((part) => this.builder.partLabel(part)).join(', ') }));
         return;
       }
       const buildId = newBuildId();
@@ -267,7 +280,7 @@ export class BuilderSummary {
         await addItems(items, { source: 'builder' });
       } catch (error) {
         await this.rollback(buildId);
-        this.render({ type: 'error', message: error.userMessage || s.error });
+        this.fail(error.userMessage || s.error);
         return;
       }
       announce(s.added);
@@ -279,6 +292,11 @@ export class BuilderSummary {
     } finally {
       this.setBusy(false);
     }
+  }
+
+  fail(message) {
+    this.render({ type: 'error', message });
+    announce(message);
   }
 
   async rollback(buildId) {

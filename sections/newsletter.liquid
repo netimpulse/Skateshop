@@ -13,13 +13,23 @@
   assign privacy_id = 'NewsletterPrivacy-' | append: section.id
   assign email_label = 'sections.newsletter.email_label' | t
   assign email_placeholder = 'sections.newsletter.email_placeholder' | t
+  assign privacy_url = blank
+  if s.show_privacy_link and shop.privacy_policy
+    assign privacy_url = shop.privacy_policy.url
+  endif
+  assign has_privacy = false
+  if s.privacy_text != blank or privacy_url != blank
+    assign has_privacy = true
+  endif
 -%}
 
 <section
   class="section newsletter scheme color-{{ s.color_scheme }}{% if s.enable_grain %} has-grain{% endif %}"
   data-section-id="{{ section.id }}"
   data-testid="home-newsletter"
-  aria-labelledby="{{ heading_id }}"
+  {% if s.heading != blank %}
+    aria-labelledby="{{ heading_id }}"
+  {% endif %}
 >
   <div class="page-width">
     <div class="newsletter__box{% if s.show_border %} newsletter__box--border{% endif %}">
@@ -34,7 +44,9 @@
             {%- endif -%}
           </p>
         {%- endif -%}
-        <h2 class="newsletter__title" id="{{ heading_id }}">{{ s.heading }}</h2>
+        {%- if s.heading != blank -%}
+          <h2 class="newsletter__title" id="{{ heading_id }}">{{ s.heading }}</h2>
+        {%- endif -%}
         {%- if s.text != blank -%}
           <div class="newsletter__text rte">{{ s.text }}</div>
         {%- endif -%}
@@ -59,8 +71,8 @@
                 required
                 {% if form.errors %}
                   aria-invalid="true"
-                  aria-describedby="{{ message_id }}{% if s.privacy_text != blank %} {{ privacy_id }}{% endif %}"
-                {% elsif s.privacy_text != blank %}
+                  aria-describedby="{{ message_id }}{% if has_privacy %} {{ privacy_id }}{% endif %}"
+                {% elsif has_privacy %}
                   aria-describedby="{{ privacy_id }}"
                 {% endif %}
               >
@@ -88,8 +100,13 @@
             </p>
           {%- endif -%}
 
-          {%- if s.privacy_text != blank -%}
-            <div class="newsletter__privacy rte" id="{{ privacy_id }}">{{ s.privacy_text }}</div>
+          {%- if has_privacy -%}
+            <div class="newsletter__privacy rte" id="{{ privacy_id }}">
+              {{- s.privacy_text -}}
+              {%- if privacy_url != blank -%}
+                <p><a href="{{ privacy_url }}">{{ 'sections.newsletter.privacy_link' | t }}</a></p>
+              {%- endif -%}
+            </div>
           {%- endif -%}
         {%- endform -%}
       </div>
@@ -133,7 +150,14 @@
       "type": "richtext",
       "id": "privacy_text",
       "label": "Datenschutz-Hinweis",
-      "default": "<p>Abmeldung jederzeit über den Link in jeder Mail. Mehr in der <a href=\"/policies/privacy-policy\">Datenschutzerklärung</a>.</p>"
+      "default": "<p>Abmeldung jederzeit über den Link in jeder Mail.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_privacy_link",
+      "label": "Link zur Datenschutzerklärung",
+      "info": "Verlinkt die unter Einstellungen > Richtlinien hinterlegte Datenschutzerklärung (in der Sprache des Besuchers).",
+      "default": true
     },
     {
       "type": "checkbox",

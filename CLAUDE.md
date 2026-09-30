@@ -50,6 +50,8 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
 - Keine `style="…"`-Attribute (auch nicht in SVG): Werte aus Settings über `{% style %}` mit `#shopify-section-{{ section.id }}`
   bzw. `snippets/section-style.liquid`; Farben in SVG über Klassen oder `fill="#hex"`, nie `fill="var(--x)"`.
 - Farben nur über Farbschemata (`color_scheme`-Setting → Klasse `color-scheme-N` + `scheme`) und die Akzent-Variablen `--color-accent-1…5`.
+  Text auf Akzentflächen (Badges, Zähler, Fit-Labels) immer mit `--color-accent-N-label` (Weiß oder Ink, was stärker kontrastiert),
+  nie mit festem `#fff` – Händler können die Akzente frei wählen.
 - CSS: `assets/theme.css` (Reset, Tokens-Nutzung, Utilities, Buttons, Formulare, Badges), Feature-CSS als `section-*.css` /
   `component-*.css`, geladen in der jeweiligen Section. `component-product-card.css` lädt global im Layout.
 - JS: Vanilla ES-Module über die Import-Map in `layout/theme.liquid` (`@theme/<name>`); jedes `assets/*.js` muss dort stehen.
@@ -74,6 +76,13 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
 - **Hängt an:** Theme-Settings (Fonts `archivo_n8`/`archivo_n4`/`ibm_plex_mono_n5`, Akzente, `color_schemes`), `routes.*`,
   `shop.money_format`, Import-Map (`@theme/*`), `#theme-config` (Routes, Money-Format, Strings, cartType)
 - **Wird genutzt von:** allen Sections/Snippets (CSS-Variablen, Scheme-Klassen, Utilities), allen JS-Modulen (`@theme/utils`)
+- **Details:**
+  - `css-variables.liquid` berechnet `--color-accent-1…5-label` per `color_contrast` gegen Weiß und die Textfarbe des ersten
+    Schemas (Ink). Nutzer: `.badge--new/sale/bestseller/limited` (theme.css), `.bb-fit--*` (board-builder.css),
+    Filter-Zähler (component-facets.css).
+  - `section-heading.liquid` mappt die zulässigen url-Defaults `/collections` → `routes.collections_url` und
+    `/collections/all` → `routes.all_products_collection_url` (sprachbewusst). Andere relative Links bleiben unverändert.
+  - Kontrast der Schemata (WCAG AA): scheme-2 Link `#B8391B`, scheme-4 Text gedämpft `#FFFFFF` (vorher < 4.5:1).
 - **Offen / To-do:** –
 - **Stand:** 2026-09-30
 
@@ -108,6 +117,8 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   - Setting `highlight_item` (Default „Konfigurator“) = Menüpunkt-Titel mit Akzent-Quadrat (Desktop + Drawer).
   - `theme.js`: `<sticky-header data-sticky>` (setzt `--header-height`, Klasse `is-scrolled`), `<disclosure-nav data-hover>`
     (Buttons `aria-expanded`/`aria-controls`, Panels `hidden`, Items `[data-disclosure-item]`), Dialog-Öffner `[data-dialog-open]`.
+    Hover öffnet ein Panel „vorläufig“ (`openedByHover`); ein Klick danach lässt es offen statt es zu schließen.
+    Fokus-Rückgabe nach Dialogen: Öffner, falls sichtbar → zugehöriges `<details>`-Summary → `[data-focus-key]` → `#MainContent`.
   - Sticky: `{% style %}` setzt `position: sticky` auf `#shopify-section-<header-id>` (Wrapper, sonst wirkt sticky nicht).
   - Globale Settings: `logo`, `logo_width`, `cart_type` (bei `drawer` → `data-dialog-open="CartDrawer"`), `predictive_search_enabled`,
     `social_*` (Drawer-Fuß über `social-links`), `shop.customer_accounts_enabled` (Konto-Link nur dann, `routes.account_url`).
@@ -194,7 +205,9 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   - Collections per Handle: `decks`, `trucks`, `wheels`, `bearings`, `completes`, `featured-boards`, `bestsellers`
     (Artikelanzahl über `collection.products_count`); Pages `skateboard-builder` (Fallback-Link Hero/Promo über
     `pages['skateboard-builder'].url`), `groessenberatung`; Blog `news`; `shop.vendors` + `url_for_vendor` (Marquee)
-  - `{% form 'customer' %}` mit `contact[tags]=newsletter` (Shopify-Kundenliste, Marketing-Zustimmung)
+  - `{% form 'customer' %}` mit `contact[tags]=newsletter` (Shopify-Kundenliste, Marketing-Zustimmung); Datenschutz-Link über
+    Setting `show_privacy_link` → `shop.privacy_policy.url` (Label `sections.newsletter.privacy_link`), nicht als fester Pfad im Richtext
+  - Newsletter und Builder-Promo geben H2 + `aria-labelledby` nur aus, wenn eine Überschrift gesetzt ist
   - Section-Bilder als Shop-Files `shopify://shop_images/skate-demo-*.png` (Seed, `.werkbank-tmp/fixtures/seed.json` → `sectionImages`)
   - Locales: Namespace `sections.*` (`category_grid`, `community`, `featured`, `marquee`, `newsletter`) sowie
     `accessibility.previous_slide/next_slide/pause_animation`
@@ -295,7 +308,8 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   - `sections/product.liquid` (Galerie links, Info-Spalte rechts, sticky; Blocks: `breadcrumbs`, `vendor`, `title` (einzige H1),
     `price`, `rating`, `variant_picker`, `quantity`, `buy_buttons`, `delivery`, `description`, `specs`, `builder_cta`, `text`, `@app`)
   - `snippets/product-gallery.liquid` (Scroll-Snap-Slider mobil mit Zähler/Dots; Desktop „thumbnails“ | „grid“ | „stack“; `<dialog>`-Lightbox)
-  - `snippets/variant-picker.liquid` (Swatches für Farbe/Color/Colour, eckige Pills sonst; Varianten-JSON `[data-variant-json]`)
+  - `snippets/variant-picker.liquid` (Swatches für Farbe/Color/Colour, eckige Pills sonst; Varianten-JSON `[data-variant-json]`
+    inkl. `quantity_rule` {min, increment, max} je Variante)
   - `snippets/product-specs.liquid` (Tech-Tabelle), `snippets/delivery-status.liquid` (Lieferstatus)
   - Helfer: `snippets/product-kind.liquid` (Kategorie → kind / Spec-Keys / Builder-Teil), `snippets/product-spec-value.liquid`
     (ein Spec-Wert formatiert), `snippets/product-stock-state.liquid` (in_stock | low:n | backorder | sold_out | unavailable)
@@ -311,6 +325,10 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
     Länge/Length, Durchmesser/Diameter; Plausibilitätsgrenzen wie Builder) → Produkt-Metafield. `reviews.rating` + `reviews.rating_count` (optional).
   - `<product-form>` + `addItems` aus `assets/cart.js` (Formular `ProductForm-<section.id>`, hidden `[data-variant-id]`,
     Menge über `form=`-Attribut, Fehler in `[data-form-error]`), Drawer `#CartDrawer` via `cart:updated`
+  - Mengenfeld `product-quantity [data-quantity-input]`: `updateQuantity()` in `product.js` setzt min/step/max bei jedem
+    Variantenwechsel aus `quantity_rule` und rundet den Wert auf ein gültiges Vielfaches
+  - Ohne JS: `<noscript>`-Select `name="id"` im Produktformular NACH dem hidden `id`-Input (letzter Wert gewinnt),
+    `.no-js .product-picker__option` ausgeblendet; Locale `products.product.variant`
   - `formatMoney`, `emit/on`, `EVENTS.variantChanged`, `fetchSection`, `routes.productRecommendations` aus `@theme/utils`;
     `openDialog` aus `@theme/theme` (Lightbox, Fokus-Rückgabe)
   - Foundation-Snippets `price`, `breadcrumbs` (BreadcrumbList-JSON-LD), `swatch`, `icon`, `placeholder-skate`, `section-style`
@@ -438,6 +456,7 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   - `@theme/cart` (eingefroren): `changeLine`, `updateLines`, `shouldOpenDrawer`, `CART_DRAWER_SECTION`, `sectionsToRender` (liest `[data-cart-section][data-section-id]`); `@theme/theme`: `openDialog/closeDialog`; `@theme/utils`: `on/emit`, `EVENTS`, `fetchJSON`, `fetchSection`, `parseHTML`, `sectionIdOf`, `announce`, `debounce`, `routes.cartUpdate`, `strings.cartError`
   - Events: `cart:updated` (`detail.sections[<id>]` → `[data-cart-content]` wird ersetzt; fehlt die Section, wird sie per Section Rendering nachgeladen), `cart:error` (nur eigene `source`)
   - Line-Item-Properties aus dem Builder: `_build_id` (`^b-[a-z0-9]{6,24}$`, sonst normale Zeile), `_build_part` (deck|trucks|wheels|bearings|griptape|hardware|riser), `_build_pos` ("1"–"7", unbekannt → ans Ende). `_`-Properties werden nie ausgegeben.
+    Sichtbare Properties werden escaped; als Link nur `https://…/uploads/…` (Datei-Uploads), sonst Text.
   - Theme-Settings: `cart_type` (über `shouldOpenDrawer`), `cart_show_note` (Notiz → `cart/update.js` `{note}`), `cart_free_shipping_threshold` (ganze Beträge; Vergleich mit `cart.total_price`), `currency_code_enabled`
   - Snippets aus dem Fundament: `image`, `icon` (minus, plus, trash, wrench, lock, truck, chevron-down, arrow-right, close), `placeholder-skate` (kind = `_build_part` bzw. `custom.builder_category`)
   - Metafield (lesend): `product.metafields.custom.builder_category` (Placeholder-Art normaler Zeilen)
@@ -471,7 +490,14 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   „CUSTOM BOARD BUILD“), Header-CTA und Homepage-Promo (Links auf `/pages/skateboard-builder`), PDP-Block „Builder-CTA“
   (Deep-Link `?deck=<handle>`).
 - **Wichtig:** Fetches auf `?view=builder-data` ohne `Accept: application/json` – sonst liefert Shopify das native
-  Collection-JSON statt des Alternate-Templates. Kompatibilitätsregeln nur in `board-builder-rules.js` ändern
+  Collection-JSON statt des Alternate-Templates. Varianten liefern `preview.layer`/`layerRatio` (Varianten-Metafield
+  `custom.preview_layer`); die Vorschau nimmt zuerst den Varianten-Layer, dann den Produkt-Layer.
+  Wiederherstellung aus `localStorage`: Teile werden nur bei eindeutigem Ergebnis (Produkt/Variante weg oder ausverkauft)
+  entfernt, bei Ladefehlern bleibt die Auswahl. Vor dem Hinzufügen prüft die Summary sequenziell die Verfügbarkeit
+  (`/products/<handle>.js`); ausverkaufte Zeilen bekommen `.is-unavailable`. Bei Fehlern nach Teil-Add baut `rollback()`
+  alle Zeilen mit derselben `_build_id` zurück (Quelle `builder:silent` → Drawer bleibt zu).
+  E2E (`tests/builder.spec.ts`): HTTP 429 auf `?view=builder-data` = Store-Drosselung → Test wird übersprungen, andere
+  Ladefehler lassen den Test fehlschlagen. Kompatibilitätsregeln nur in `board-builder-rules.js` ändern
   (+ Locale `builder.rules.*`). Regel-Toleranz/Riser-Schwelle zusätzlich als Section-Settings.
 - **Offen / To-do:** Search-&-Discovery-Filter für die Collection-Seiten legt der Händler an (Builder filtert clientseitig und
   braucht sie nicht).
@@ -489,7 +515,8 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
 - **Hängt an:**
   - Admin API 2025-07, Env `SHOPIFY_STORE_URL`/`SHOPIFY_ADMIN_TOKEN`, Node 22 mit `NODE_USE_ENV_PROXY=1`, Playwright-Chromium (`/opt/pw-browsers`)
   - Metafield-Definitionen `custom.*` (Produkt, Variante, Collection; Storefront PUBLIC_READ, Beschreibung mit Marker `[skate-demo]`)
-  - Marker: Produkte Tag `skate-demo`; Collections/Seiten Metafield `skate_demo.seeded=true` (ohne Definition); Menüs Handle `skate-*`; Files `skate-demo-*`
+  - Marker: Produkte Tag `skate-demo`; Collections/Seiten Metafield `skate_demo.seeded=true` (ohne Definition); Menüs Handle `skate-*`
+    (Cleanup löscht nur die exakten Handles aus `MENUS` in `data/content.mjs`); Files `skate-demo-*`
   - Smart-Collection-Regeln: `product_type` (Deck, Trucks, Wheels, Bearings, Griptape, Hardware, Riser Pads, Complete, Zubehör) bzw. Tags, immer UND Tag `skate-demo`
 - **Wird genutzt von:**
   - **Builder** (`collection.builder-data`, board-builder-*.js): Collections `builder-decks … builder-risers`, Metafields `custom.builder_category`, Variant-Maße, `custom.preview_layer` (transparentes PNG 2000×520, quer, Nose links, nur Decks), `custom.preview_color` (Decks, Trucks, Wheels, Griptape, Hardware-Varianten)

@@ -8,6 +8,10 @@
 {%- liquid
   assign s = section.settings
   assign heading_id = 'Heading-' | append: section.id
+  assign has_heading = false
+  if s.heading != blank or s.heading_accent != blank
+    assign has_heading = true
+  endif
 
   assign cta_link = s.button_link
   if cta_link == blank
@@ -31,7 +35,9 @@
   class="section builder-promo scheme color-{{ s.color_scheme }} {{ classes }}"
   data-section-id="{{ section.id }}"
   data-testid="home-builder-promo"
-  aria-labelledby="{{ heading_id }}"
+  {% if has_heading %}
+    aria-labelledby="{{ heading_id }}"
+  {% endif %}
 >
   <div class="page-width builder-promo__inner">
     <div class="builder-promo__copy">
@@ -46,15 +52,17 @@
         </p>
       {%- endif -%}
 
-      <h2 class="builder-promo__title reveal" id="{{ heading_id }}" data-reveal-index="1">
-        {%- if s.heading != blank -%}
-          <span class="builder-promo__line">{{ s.heading | escape }}</span>
-        {%- endif -%}
-        {{ ' ' }}
-        {%- if s.heading_accent != blank -%}
-          <span class="builder-promo__line builder-promo__line--accent">{{ s.heading_accent | escape }}</span>
-        {%- endif -%}
-      </h2>
+      {%- if has_heading -%}
+        <h2 class="builder-promo__title reveal" id="{{ heading_id }}" data-reveal-index="1">
+          {%- if s.heading != blank -%}
+            <span class="builder-promo__line">{{ s.heading | escape }}</span>
+          {%- endif -%}
+          {{ ' ' }}
+          {%- if s.heading_accent != blank -%}
+            <span class="builder-promo__line builder-promo__line--accent">{{ s.heading_accent | escape }}</span>
+          {%- endif -%}
+        </h2>
+      {%- endif -%}
 
       <div class="builder-promo__body reveal" data-reveal-index="2">
         {%- if s.text != blank -%}

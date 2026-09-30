@@ -114,24 +114,31 @@ class BoardBuilder extends HTMLElement {
     return promise;
   }
 
-  /** Rehydrates stored selections against fresh data; drops parts that vanished or sold out. */
+  /**
+   * Rehydrates stored selections against fresh data. A part is only dropped on a conclusive result
+   * (product gone or variant sold out); load errors (throttling, network) keep the stored choice.
+   * Collections load one after another to stay below storefront rate limits.
+   */
   async restore(deckHandle) {
-    const entries = Object.entries(this.state.sel || {});
     const removed = [];
-    await Promise.all(
-      entries.map(async ([part, stored]) => {
-        try {
-          const products = await this.ensureData(part);
-          const product = products.find((item) => item.id === stored.p);
-          const variant = product?.variants.find((item) => item.id === stored.v);
-          if (product && variant?.available) this.selection.set(part, { product, variant });
-          else removed.push(part);
-        } catch {
-          removed.push(part);
-        }
-      })
-    );
-    removed.forEach((part) => delete this.state.sel[part]);
+    for (const [part, stored] of Object.entries({ ...(this.state.sel || {}) })) {
+      let products;
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        products = await this.ensureData(part);
+      } catch {
+        continue;
+      }
+      const product = products.find((item) => item.id === stored.p);
+      const variant = product?.variants.find((item) => item.id === stored.v);
+      if (product && variant?.available) {
+        if (!this.selection.has(part)) this.selection.set(part, { product, variant });
+      } else if (this.state.sel[part]?.v === stored.v) {
+        // Only remove it if the user did not pick something else in the meantime.
+        delete this.state.sel[part];
+        removed.push(part);
+      }
+    }
 
     if (deckHandle && /^[a-z0-9][a-z0-9-]{0,99}$/.test(deckHandle) && this.stepKeys.includes('deck')) {
       const decks = await this.ensureData('deck').catch(() => []);
@@ -143,7 +150,7 @@ class BoardBuilder extends HTMLElement {
     this.persist();
     this.refresh();
     const current = this.steps.find((step) => step.part === this.state.step);
-    if (current && this.selection.has(current.part)) this.list.render(current);
+    if (current) this.list.render(current);
     if (removed.length) {
       announce(removed.map((part) => interpolate(this.strings.partUnavailable, { part: this.partLabel(part) })).join(' '));
     }
@@ -405,11 +412,12 @@ class BoardBuilder extends HTMLElement {
     if (!this.preview?.update) return;
     const parts = {};
     for (const [part, { product, variant }] of this.selection) {
+      const variantLayer = variant.preview?.layer;
       parts[part] = {
         specs: resolveSpecs(product, variant),
         color: previewColor(product, variant),
-        layer: product.preview.layer,
-        layerRatio: product.preview.layerRatio,
+        layer: variantLayer || product.preview.layer,
+        layerRatio: variantLayer ? variant.preview.layerRatio : product.preview.layerRatio,
       };
     }
     const context = this.ruleContext();

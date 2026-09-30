@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 // Removes the demo data again – and only the demo data:
 //   products with tag `skate-demo`, collections and pages with the marker metafield skate_demo.seeded,
-//   menus whose handle starts with `skate-`, files named `skate-demo-*`.
+//   menus whose handle is one of the seeded MENUS handles, files named `skate-demo-*`.
 //   Metafield definitions only with --definitions (and only those whose description carries the seed marker).
 // Usage: NODE_USE_ENV_PROXY=1 node scripts/demo-data/cleanup.mjs [--dry-run] [--definitions]
 import { gql, assertNoUserErrors, parseArgs, listDemoFiles, DEMO_TAG, MARKER } from './lib/admin.mjs';
 import { DEF_MARKER } from './data/definitions.mjs';
+import { MENUS } from './data/content.mjs';
 
 async function paginate(field, query, nodeFields, variables = {}) {
   const out = [];
@@ -60,7 +61,9 @@ export async function run({ dryRun = false, flags = {} } = {}) {
   }
 
   console.log('=== menus ===');
-  const menus = (await paginate('menus', null, 'id handle')).filter((m) => m.handle.startsWith('skate-'));
+  // Only the exact handles the seed creates – other projects in the shared store may use a `skate-` prefix too.
+  const seededMenus = new Set(MENUS.map((menu) => menu.handle));
+  const menus = (await paginate('menus', null, 'id handle')).filter((m) => seededMenus.has(m.handle));
   for (const m of menus) {
     await act(`menu ${m.handle}`, async () => {
       const data = await gql(`mutation ($id: ID!) { menuDelete(id: $id) { deletedMenuId userErrors { field message } } }`, { id: m.id });

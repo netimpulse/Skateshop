@@ -1,7 +1,7 @@
 import { test, expect, type Page, type TestInfo } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
-import { withTheme } from "./fixtures";
+import { DEMO, withTheme } from "./fixtures";
 
 /**
  * Produktdetailseite (Bereich D): Galerie, Variantenwechsel, Specs, JSON-LD, Add to Cart, Recently Viewed, Mobile.
@@ -183,11 +183,12 @@ test.describe("Produktdetailseite", () => {
   });
 
   test("Specs-Tabelle bei Decks", async ({ page }) => {
-    const [url] = await findProductUrls(page, 1);
-    test.skip(!url, "Keine Produkte im Shop");
-    await gotoOk(page, url);
+    // Seeded demo deck (scripts/demo-data) – a fixed deck, so the test never silently skips on a non-deck first card.
+    const response = await open(page, `${LOCALE}/products/${DEMO.deckWithThreeWidths}`);
+    test.skip(response?.status() === 404, `Demo-Deck ${DEMO.deckWithThreeWidths} fehlt (Seed nicht gelaufen)`);
+    expect(response?.ok(), `HTTP ${response?.status()} für Demo-Deck`).toBe(true);
     const kind = await page.locator("[data-product-section]").first().getAttribute("data-product-kind");
-    test.skip(kind !== "deck", `Erstes Produkt ist kein Deck (${kind})`);
+    expect(kind).toBe("deck");
 
     const specs = page.getByTestId("product-specs");
     await expect(specs).toBeVisible();
@@ -209,6 +210,25 @@ test.describe("Produktdetailseite", () => {
       const visible = await related.isVisible();
       const cards = await related.locator("[data-product-card]").count();
       expect(visible, `Related sichtbar=${visible}, Karten=${cards}`).toBe(cards > 0);
+    }
+  });
+
+  test("Ohne JavaScript: Variantenauswahl per Select im Produktformular", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    try {
+      const response = await open(page, `${LOCALE}/products/${DEMO.deckWithThreeWidths}`);
+      test.skip(response?.status() === 404, `Demo-Deck ${DEMO.deckWithThreeWidths} fehlt (Seed nicht gelaufen)`);
+      const select = page.locator('form[id^="ProductForm-"] select[name="id"]');
+      await expect(select).toBeVisible();
+      expect(await select.locator("option").count()).toBeGreaterThan(1);
+      // The select follows the hidden input, so its value is the one the cart receives.
+      const names = await page
+        .locator('form[id^="ProductForm-"] [name="id"]')
+        .evaluateAll((fields) => fields.map((field) => field.tagName.toLowerCase()));
+      expect(names.at(-1)).toBe("select");
+    } finally {
+      await context.close();
     }
   });
 

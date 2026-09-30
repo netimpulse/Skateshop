@@ -38,7 +38,7 @@ Weitere Flags: `--handle=a,b` (nur diese Produkte), `--filter=teil` (nur passend
 | Produkte | Tag `skate-demo`, Upsert per `productSet(identifier: {handle})` | Handle ohne Tag → nicht angefasst, gemeldet |
 | Collections | Metafield `skate_demo.seeded = true` | Handle ohne Marker → nicht angefasst, gemeldet |
 | Seiten | Metafield `skate_demo.seeded = true` | Fremde Seite → bleibt, Demo-Seite unter `skate-<handle>` |
-| Menüs | Handle beginnt mit `skate-` | `main-menu` & Co. werden nie berührt |
+| Menüs | Handle beginnt mit `skate-`; Cleanup löscht nur die exakten Seed-Handles (`MENUS`) | `main-menu` & Co. werden nie berührt |
 | Dateien | Dateiname `skate-demo-*` | Vorhandene Namen werden nicht neu hochgeladen |
 
 Alle Smart Collections verlangen zusätzlich den Tag `skate-demo`, damit keine Produkte anderer Projekte hineinrutschen.

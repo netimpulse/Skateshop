@@ -214,6 +214,7 @@
                     {% endif %}
                     inputmode="numeric"
                     form="{{ form_id }}"
+                    data-quantity-input
                   >
                   <button
                     type="button"
@@ -238,6 +239,36 @@
               <product-form class="product-main__form" data-source="product-form" data-section-id="{{ section.id }}">
                 {%- form 'product', product, id: form_id, class: 'product-main__form-inner', novalidate: 'novalidate' -%}
                   <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+                  {%- unless product.has_only_default_variant -%}
+                    {%- comment -%}
+                      Without JS the radio picker cannot change the variant: this select comes after the hidden
+                      input, so its "id" is the one the cart uses (last value wins).
+                    {%- endcomment -%}
+                    <noscript>
+                      <div class="product-main__noscript">
+                        <label class="label-mono" for="Variants-{{ section.id }}">{{ 'products.product.variant' | t }}</label>
+                        <div class="select">
+                          <select id="Variants-{{ section.id }}" name="id" class="select__select">
+                            {%- for variant in product.variants -%}
+                              <option
+                                value="{{ variant.id }}"
+                                {% if variant.id == current_variant.id %}
+                                  selected
+                                {% endif %}
+                                {% unless variant.available %}
+                                  disabled
+                                {% endunless %}
+                              >
+                                {{ variant.title | escape }} – {{ variant.price | money | strip_html }}
+                                {%- unless variant.available %} ({{ label_sold_out }}){% endunless -%}
+                              </option>
+                            {%- endfor -%}
+                          </select>
+                          {%- render 'icon', name: 'chevron-down' -%}
+                        </div>
+                      </div>
+                    </noscript>
+                  {%- endunless -%}
                   <button
                     type="submit"
                     name="add"

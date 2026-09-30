@@ -55,6 +55,15 @@
     --color-accent-3: {{ settings.accent_3 }};
     --color-accent-4: {{ settings.accent_4 }};
     --color-accent-5: {{ settings.accent_5 }};
+    {%- comment -%} Text on accent surfaces (badges, counters): white or ink, whichever contrasts more. {%- endcomment -%}
+    {%- assign ink_hex = settings.color_schemes.first.settings.text | default: '#1C1D1B' | append: '' -%}
+    {%- for i in (1..5) -%}
+      {%- assign accent_key = 'accent_' | append: i -%}
+      {%- assign accent_hex = settings[accent_key] | append: '' -%}
+      {%- assign contrast_white = accent_hex | color_contrast: '#FFFFFF' -%}
+      {%- assign contrast_ink = accent_hex | color_contrast: ink_hex %}
+    --color-accent-{{ i }}-label: {% if contrast_white >= contrast_ink %}#FFFFFF{% else %}{{ ink_hex }}{% endif %};
+    {%- endfor %}
     --color-success: {{ settings.color_success }};
     --color-error: {{ settings.color_error }};
 

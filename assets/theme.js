@@ -48,13 +48,31 @@ document.addEventListener('click', (event) => {
   }
 });
 
+/**
+ * Returns focus after a dialog closed. If the opener was re-rendered or hidden meanwhile (e.g. a quick-add pill in a
+ * closed <details>, a re-rendered builder button), fall back to its disclosure summary, an element with the same
+ * [data-focus-key], or the main landmark – never to <body>.
+ */
+function returnFocus(opener) {
+  const visible = (element) => element && element.isConnected && element.getClientRects().length > 0;
+  if (visible(opener)) {
+    opener.focus();
+    return;
+  }
+  const summary = opener?.isConnected ? opener.closest('details')?.querySelector('summary') : null;
+  const key = opener?.dataset?.focusKey;
+  const sibling = key ? document.querySelector(`[data-focus-key="${CSS.escape(key)}"]`) : null;
+  const target = [summary, sibling].find(visible) || document.getElementById('MainContent');
+  target?.focus({ preventScroll: Boolean(target?.id === 'MainContent') });
+}
+
 document.addEventListener(
   'close',
   (event) => {
     if (!(event.target instanceof HTMLDialogElement)) return;
     const opener = dialogOpeners.get(event.target);
-    if (opener && document.contains(opener)) opener.focus();
     dialogOpeners.delete(event.target);
+    returnFocus(opener);
   },
   true
 );
@@ -93,6 +111,7 @@ class DisclosureNav extends HTMLElement {
   }
 
   closeAll() {
+    this.openedByHover = null;
     this.triggers.forEach((trigger) => this.toggle(trigger, false));
   }
 
@@ -100,6 +119,11 @@ class DisclosureNav extends HTMLElement {
     const trigger = event.target.closest('[aria-controls][aria-expanded]');
     if (trigger && this.contains(trigger)) {
       event.preventDefault();
+      // A click right after hover-opening keeps the panel open instead of closing it again.
+      if (this.openedByHover === trigger && trigger.getAttribute('aria-expanded') === 'true') {
+        this.openedByHover = null;
+        return;
+      }
       this.toggle(trigger);
     }
   };
@@ -127,8 +151,12 @@ class DisclosureNav extends HTMLElement {
     const trigger = item.querySelector('[aria-controls][aria-expanded]');
     clearTimeout(this.hoverIntent);
     this.hoverIntent = setTimeout(() => {
-      if (trigger) this.toggle(trigger, true);
-      else this.closeAll();
+      if (trigger) {
+        if (trigger.getAttribute('aria-expanded') !== 'true') this.openedByHover = trigger;
+        this.toggle(trigger, true);
+      } else {
+        this.closeAll();
+      }
     }, 120);
   };
 

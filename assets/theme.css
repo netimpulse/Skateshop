@@ -718,23 +718,25 @@ h3,
 
 .badge--new {
   background: var(--color-accent-4);
+  color: var(--color-accent-4-label);
 }
 
 .badge--sale {
   background: var(--color-accent-1);
   border-color: var(--color-accent-1);
-  color: #fff;
+  color: var(--color-accent-1-label);
   box-shadow: 2px 2px 0 var(--color-ink);
 }
 
 .badge--bestseller {
   background: var(--color-accent-5);
+  color: var(--color-accent-5-label);
 }
 
 .badge--limited {
   background: var(--color-accent-2);
   border-color: var(--color-accent-2);
-  color: #fff;
+  color: var(--color-accent-2-label);
 }
 
 .badge--sold-out {

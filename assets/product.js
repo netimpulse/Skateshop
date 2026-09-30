@@ -114,6 +114,27 @@ class VariantPicker extends HTMLElement {
     this.section.querySelectorAll('product-form [data-form-error]').forEach((error) => {
       error.hidden = true;
     });
+    this.updateQuantity(variant);
+  }
+
+  /** Applies the variant's quantity rule (min/increment/max) to the quantity input and keeps the value valid. */
+  updateQuantity(variant) {
+    const rule = variant?.quantity_rule;
+    if (!rule) return;
+    const min = Math.max(1, Number(rule.min) || 1);
+    const step = Math.max(1, Number(rule.increment) || 1);
+    const max = Number(rule.max) > 0 ? Number(rule.max) : null;
+    this.section.querySelectorAll('product-quantity [data-quantity-input]').forEach((input) => {
+      input.min = String(min);
+      input.step = String(step);
+      if (max) input.max = String(max);
+      else input.removeAttribute('max');
+      const current = Number(input.value) || min;
+      let next = Math.max(min, current);
+      next = min + Math.ceil((next - min) / step) * step;
+      if (max && next > max) next = Math.max(min, min + Math.floor((max - min) / step) * step);
+      if (next !== current) input.value = String(next);
+    });
   }
 
   updatePrice(variant) {

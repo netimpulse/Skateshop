@@ -170,7 +170,11 @@ export function normalize(payload, origin = '') {
             options: Array.isArray(variant.options) ? variant.options.map((value) => str(value, 120)) : [],
             image: safeImageUrl(variant.image, origin),
             specs: variant.specs && typeof variant.specs === 'object' ? variant.specs : {},
-            preview: { color: HEX.test(variant.preview?.color || '') ? variant.preview.color : null },
+            preview: {
+              color: HEX.test(variant.preview?.color || '') ? variant.preview.color : null,
+              layer: safeImageUrl(variant.preview?.layer, origin),
+              layerRatio: Number(variant.preview?.layerRatio) || null,
+            },
           };
         })
         .filter(Boolean);

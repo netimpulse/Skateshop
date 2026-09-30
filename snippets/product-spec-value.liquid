@@ -14,12 +14,12 @@
 {% enddoc %}
 
 {%- liquid
-  assign raw = blank
+  assign spec_raw = blank
   if variant
-    assign raw = variant.metafields.custom[key].value
+    assign spec_raw = variant.metafields.custom[key].value
   endif
 
-  if raw == blank and variant
+  if spec_raw == blank and variant
     assign aliases = ''
     assign min = 0
     assign max = 0
@@ -55,7 +55,7 @@
           assign cleaned = variant.options[option_index] | downcase | remove: '"' | remove: '″' | remove: 'mm' | remove: 'zoll' | replace: ',', '.' | strip
           assign number = cleaned | plus: 0
           if number >= min and number <= max
-            assign raw = number
+            assign spec_raw = number
           endif
           break
         endif
@@ -63,12 +63,12 @@
     endif
   endif
 
-  if raw == blank
-    assign raw = product.metafields.custom[key].value
+  if spec_raw == blank
+    assign spec_raw = product.metafields.custom[key].value
   endif
 
-  if raw != blank
-    assign text = raw | append: '' | strip
+  if spec_raw != blank
+    assign text = spec_raw | append: '' | strip
     case key
       when 'deck_width', 'deck_length', 'wheelbase', 'truck_width', 'hardware_length', 'riser_height'
         assign text = text | remove: '"' | remove: '″' | strip | append: '"'

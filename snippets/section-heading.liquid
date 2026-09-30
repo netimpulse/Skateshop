@@ -16,7 +16,16 @@
   {% render 'section-heading', eyebrow: section.settings.eyebrow, index: '01', heading: section.settings.heading %}
 {% enddoc %}
 
-{%- assign tag = tag | default: 'h2' -%}
+{%- liquid
+  assign tag = tag | default: 'h2'
+  # url settings may only default to /collections or /collections/all – map both to the locale-aware routes.
+  assign heading_link = link_url
+  if link_url == '/collections'
+    assign heading_link = routes.collections_url
+  elsif link_url == '/collections/all'
+    assign heading_link = routes.all_products_collection_url
+  endif
+-%}
 
 <div class="section-heading{% if align == 'center' %} section-heading--center{% endif %}">
   {%- if eyebrow != blank or index != blank -%}
@@ -42,7 +51,7 @@
         </{{ tag }}>
       {%- endif -%}
       {%- if link_url != blank and link_label != blank -%}
-        <a class="link-mono" href="{{ link_url }}">{{ link_label | escape }}</a>
+        <a class="link-mono" href="{{ heading_link }}">{{ link_label | escape }}</a>
       {%- endif -%}
     </div>
   {%- endif -%}

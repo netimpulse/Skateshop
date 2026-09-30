@@ -203,6 +203,17 @@
   margin-block-start: var(--space-xs);
 }
 
+/* No-JS fallback: the select inside <noscript> replaces the radio picker. */
+.product-main__noscript {
+  display: grid;
+  gap: var(--space-2xs);
+  margin-block-end: var(--space-s);
+}
+
+.no-js .product-picker__option {
+  display: none;
+}
+
 .product-main__payment .shopify-payment-button__button {
   min-height: 3.25rem;
   border-radius: var(--radius-button);

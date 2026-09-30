@@ -18,9 +18,18 @@ async function openBuilder(page: Page) {
   await expect(page.locator("[data-bb-list]")).toHaveAttribute("aria-busy", "false", { timeout: 20_000 });
 }
 
+/** Set per test in beforeEach: whether the store answered a builder data request with 429 (rate limit). */
+let dataThrottled = false;
+
 async function selectFirst(page: Page, preferFit = false) {
   const cards = page.locator(".bb-card__select:not([disabled])");
-  await expect(cards.first()).toBeVisible();
+  const loadError = page.locator("[data-bb-list] [data-bb-retry]");
+  await expect(cards.first().or(loadError)).toBeVisible();
+  if (await loadError.isVisible()) {
+    // Same policy as the page-load challenge: a throttled store is not a theme defect; any other load error fails.
+    test.skip(dataThrottled, "Store drosselt die Builder-Daten (HTTP 429) – später erneut ausführen");
+    throw new Error("Builder-Daten konnten nicht geladen werden (kein 429)");
+  }
   if (preferFit) {
     const fitting = page.locator(".bb-card:has(.bb-fit--ok) .bb-card__select:not([disabled])");
     if (await fitting.count()) return fitting.first().click();
@@ -42,6 +51,10 @@ async function clearCart(page: Page) {
 
 test.describe("Board Builder", () => {
   test.beforeEach(async ({ page }) => {
+    dataThrottled = false;
+    page.on("response", (response) => {
+      if (response.status() === 429 && response.url().includes("view=builder-data")) dataThrottled = true;
+    });
     await page.addInitScript((key) => {
       try {
         if (window !== window.top) return;
@@ -169,6 +182,41 @@ test.describe("Board Builder", () => {
     await page.locator("[data-bb-add]").click();
     await expect(page.locator(".bb-sum__status .form-message--error")).toContainText("Test: nicht genug Bestand");
     expect(rollbackCalled).toBe(false); // nichts angelegt → kein Rückbau nötig
+    await expect(page.locator("#CartDrawer[open]")).toHaveCount(0);
+  });
+
+  test("422 nach teilweise angelegten Zeilen: Rückbau entfernt alle Zeilen des Builds", async ({ page }) => {
+    await openBuilder(page);
+    await clearCart(page);
+    for (let index = 0; index < 6; index += 1) {
+      await selectFirst(page, true);
+      if (index < 5) await next(page);
+    }
+    await page.locator("[data-bb-next]").click();
+
+    // Simulates a partial success: the first part really lands in the cart, then the request answers 422.
+    let buildId = "";
+    await page.route(/\/cart\/add\.js/, async (route) => {
+      const body = JSON.parse(route.request().postData() || "{}");
+      buildId = body.items?.[0]?.properties?._build_id || "";
+      await route.fetch({ postData: JSON.stringify({ items: body.items.slice(0, 1) }) });
+      await route.fulfill({ status: 422, contentType: "application/json", body: JSON.stringify({ status: 422, message: "Cart Error", description: "Test: Teilfehler" }) });
+    });
+    const rollback = page.waitForRequest((request) => /\/cart\/update\.js/.test(request.url()) && request.method() === "POST");
+    await page.locator("[data-bb-add]").click();
+
+    await expect(page.locator(".bb-sum__status .form-message--error")).toContainText("Test: Teilfehler");
+    await rollback;
+    expect(buildId).not.toBe("");
+    await expect
+      .poll(() =>
+        page.evaluate(async (id) => {
+          const root = JSON.parse(document.getElementById("theme-config")?.textContent || "{}").routes?.root || "/";
+          const cart = await (await fetch(`${root.replace(/\/?$/, "/")}cart.js`)).json();
+          return cart.items.filter((item: { properties?: Record<string, string> }) => item.properties?._build_id === id).length;
+        }, buildId)
+      )
+      .toBe(0);
     await expect(page.locator("#CartDrawer[open]")).toHaveCount(0);
   });
 

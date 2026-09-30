@@ -748,9 +748,9 @@
 }
 
 .bb-card__selected {
-  background: var(--color-link);
-  border-color: var(--color-link);
-  color: #fff;
+  background: var(--color-button);
+  border-color: var(--color-button);
+  color: var(--color-button-label);
 }
 
 .bb-fit {
@@ -768,16 +768,18 @@
 
 .bb-fit--ok {
   background: var(--color-accent-4);
+  color: var(--color-accent-4-label);
 }
 
 .bb-fit--info {
   background: var(--color-accent-5);
+  color: var(--color-accent-5-label);
 }
 
 .bb-fit--warn {
   background: var(--color-accent-1);
   border-color: var(--color-accent-1);
-  color: #fff;
+  color: var(--color-accent-1-label);
 }
 
 .bb-card__variants {
@@ -903,6 +905,15 @@
 .bb-sum__price {
   font-weight: var(--font-body-weight-bold);
   white-space: nowrap;
+}
+
+.bb-sum__row.is-unavailable .bb-sum__title {
+  text-decoration: line-through;
+}
+
+.bb-sum__warning {
+  color: var(--color-error);
+  font-size: 0.625rem;
 }
 
 .bb-sum__row.is-missing .bb-sum__part {

@@ -2,7 +2,8 @@
   Variant picker for the product page. Color options (farbe/color/colour) render as swatches, all other options
   (Breite 8.0"/8.25"/8.5", Durchmesser, Länge …) as square pills. Values stay selectable when sold out or not
   combinable – they are struck through and carry a screen-reader hint.
-  The variant JSON (id, title, options, availability, prices, featured media, SKU, stock hint, specs per variant)
+  The variant JSON (id, title, options, availability, prices, featured media, SKU, stock hint, quantity rule,
+  specs per variant)
   lets product.js (<variant-picker>) switch variants without a fetch. Renders nothing for default-only products.
 
   @param {product} product - The product
@@ -117,6 +118,11 @@
             "sku": {{ variant.sku | json }},
             "stock": {{ stock_parts[0] | json }},
             "stock_count": {{ stock_count | json }},
+            "quantity_rule": {
+              "min": {{ variant.quantity_rule.min | default: 1 | json }},
+              "increment": {{ variant.quantity_rule.increment | default: 1 | json }},
+              "max": {{ variant.quantity_rule.max | json }}
+            },
             "specs": {
               {%- for key in key_list -%}
                 {%- capture spec_value -%}{%- render 'product-spec-value', product: product, variant: variant, key: key, raw: true -%}{%- endcapture -%}

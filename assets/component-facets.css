@@ -463,7 +463,7 @@
   height: 1.25rem;
   padding-inline: 0.3rem;
   background: var(--color-accent-1);
-  color: #fff;
+  color: var(--color-accent-1-label);
   font-size: 0.6875rem;
   line-height: 1;
 }
