@@ -152,7 +152,7 @@ test.describe("Homepage", () => {
     expect(errors, errors.join("\n")).toEqual([]);
   });
 
-  test("Interaktion: Slider per Button und Tastatur, Marquee pausierbar", async ({ page }) => {
+  test("Interaktion: Slider per Button und Tastatur, Marquee pausierbar", async ({ page }, testInfo) => {
     await openHome(page);
 
     // ---- Slider (Best Sellers)
@@ -173,11 +173,13 @@ test.describe("Homepage", () => {
     await prev.click();
     await expect.poll(scrollLeft, { message: "Zurück-Button scrollt nicht" }).toBeLessThanOrEqual(2);
 
-    // Tastatur: fokussierter Track scrollt mit Pfeiltasten.
+    // Tastatur: fokussierter Track scrollt mit Pfeiltasten (nur Desktop – die Touch-Emulation scrollt nicht per Taste).
     await track.focus();
     await expect(track).toBeFocused();
-    for (let i = 0; i < 6; i += 1) await page.keyboard.press("ArrowRight");
-    await expect.poll(scrollLeft, { message: "Track scrollt nicht per Tastatur" }).toBeGreaterThan(0);
+    if (testInfo.project.name === "desktop") {
+      for (let i = 0; i < 6; i += 1) await page.keyboard.press("ArrowRight");
+      await expect.poll(scrollLeft, { message: "Track scrollt nicht per Tastatur" }).toBeGreaterThan(0);
+    }
 
     // ---- Marquee
     const strip = page.getByTestId("brand-marquee");
