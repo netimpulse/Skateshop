@@ -294,15 +294,6 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
 - **Offen / To-do:** `search.predictive.*` gehört Agent H. Leerzustand-Vorschläge: Setting `suggestions` (Standard in `templates/search.json`: decks, trucks, wheels, bearings, griptape, hardware, completes; leer = automatisch aus `collections`).
 - **Stand:** 2026-09-30
 
-<!-- Für „## Offene Abhängigkeiten (To-do)“ -->
-- [ ] Search & Discovery: Filter je Kategorie laut Liste „Empfohlene Filter“ anlegen (keine Admin-API) → docs/theme-setup.md
-- [ ] Pro Kategorie `custom.hidden_filters` befüllen, falls ein S&D-Filter dort nicht passt (Definition legt der Seed an)
-
-<!-- Für „## Metafields & Namespaces (Referenz)“ -->
-| `custom.banner` (Collection) | file_reference (Bild) | Banner im Kategorie-Kopf (`collection-header`) |
-| `custom.seo_text` (Collection) | rich_text_field | Langer SEO-Text unter dem Raster (`collection-seo`) |
-| `custom.hidden_filters` (Collection) | list.single_line_text_field | `filter.param_name`-Werte, die Sidebar/Drawer ausblendet (`collection`) |
-
 ### Produktdetailseite (PDP)
 - **Dateien:**
   - `sections/product.liquid` (Galerie links, Info-Spalte rechts, sticky; Blocks: `breadcrumbs`, `vendor`, `title` (einzige H1),
@@ -440,9 +431,9 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   `{% form 'customer' %}` mit `contact[tags]=newsletter`, `{% form 'storefront_password' %}` (hinter `<details>`, bei Fehler geöffnet)
 - **Wird genutzt von:** Storefront-Passwortschutz; `tests/global-setup.ts` (Login per `input[type="password"]` + erster
   `form button[type="submit"]`) – heute gegen das Live-Theme, da `/password` ohne `preview_theme_id` aufgerufen wird
-- **Offen / To-do:** Sobald dieses Theme live ist, passt `tests/global-setup.ts` nicht mehr: das Passwortfeld liegt in einem geschlossenen
-  `<details>` und der erste Submit-Button im DOM gehört zum Newsletter. Fix im global-setup: vorher
-  `details:has(input[type="password"]) > summary` klicken, dann `form:has(input[type="password"]) [type="submit"]` klicken.
+- **Offen / To-do:** – (erledigt: `tests/global-setup.ts` öffnet das geschlossene `<details>` über
+  `details:has(input[type="password"]):not([open]) > summary` und sendet `form:has(input[type="password"])` ab – funktioniert
+  mit diesem Theme und mit dem Live-Theme)
 - **Stand:** 2026-09-30
 
 ### Cart-Drawer, Cart-Seite & Build-Gruppierung
@@ -467,12 +458,11 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
   - **PDP / Quick Add** (`<product-form>` in cart.js) → Add öffnet den Drawer; ohne `<cart-drawer>` Weiterleitung zur Cart-Seite
   - Drawer-Mutationen senden `source: 'cart-drawer'`, Cart-Seite `source: 'main-cart'` (öffnen den Drawer nie)
 - **Offen / To-do:**
-  - Header-Warenkorb-Link (Bereich H) braucht bei `settings.cart_type == 'drawer'` zusätzlich `data-dialog-open="CartDrawer"` (href `/cart` bleibt als No-JS-Fallback); Stand 2026-09-30 ist es nur ein Link auf `/cart`.
+  - (erledigt) Header-Warenkorb-Link setzt bei `settings.cart_type == 'drawer'` `data-dialog-open="CartDrawer"` (`sections/header.liquid`); href `routes.cart_url` bleibt als No-JS-Fallback.
   - Versandkosten-Schwelle wird nicht in Fremdwährungen umgerechnet (Markets) – Vergleich in Shopwährung.
   - `content_for_additional_checkout_buttons` (Setting der Cart-Seite) wird nach Ajax-Updates nicht neu initialisiert.
   - Kein automatischer Refresh des Drawers bei Änderungen in einem anderen Tab / bfcache.
   - Visuelle QA wegen Cloudflare-Rate-Limit ggf. nachholen (siehe Abschlussmeldung).
-- **Offene Abhängigkeit (To-do-Liste):** [ ] Header: Cart-Icon als Drawer-Öffner (`data-dialog-open="CartDrawer"`) bei `cart_type = drawer`.
 - **Stand:** 2026-09-30
 
 ### Board Builder (Skateboard-Konfigurator)
@@ -492,8 +482,9 @@ Bei Unsicherheit, ob etwas eingetragen werden soll: lieber eintragen.
 - **Wichtig:** Fetches auf `?view=builder-data` ohne `Accept: application/json` – sonst liefert Shopify das native
   Collection-JSON statt des Alternate-Templates. Varianten liefern `preview.layer`/`layerRatio` (Varianten-Metafield
   `custom.preview_layer`); die Vorschau nimmt zuerst den Varianten-Layer, dann den Produkt-Layer.
-  Wiederherstellung aus `localStorage`: Teile werden nur bei eindeutigem Ergebnis (Produkt/Variante weg oder ausverkauft)
-  entfernt, bei Ladefehlern bleibt die Auswahl. Vor dem Hinzufügen prüft die Summary sequenziell die Verfügbarkeit
+  Wiederherstellung aus `localStorage`: `rehydrate()` läuft nach JEDEM erfolgreichen Laden einer Collection (`ensureData`),
+  auch nach „Erneut versuchen“ oder Schrittwechsel; Teile werden nur bei eindeutigem Ergebnis (Produkt/Variante weg oder
+  ausverkauft) entfernt und nie, wenn im aktuellen Besuch schon neu gewählt wurde. Bei Ladefehlern bleibt die Auswahl. Vor dem Hinzufügen prüft die Summary sequenziell die Verfügbarkeit
   (`/products/<handle>.js`); ausverkaufte Zeilen bekommen `.is-unavailable`. Bei Fehlern nach Teil-Add baut `rollback()`
   alle Zeilen mit derselben `_build_id` zurück (Quelle `builder:silent` → Drawer bleibt zu).
   E2E (`tests/builder.spec.ts`): HTTP 429 auf `?view=builder-data` = Store-Drosselung → Test wird übersprungen, andere
@@ -570,6 +561,7 @@ VORLAGE für neue Einträge – kopieren und ausfüllen:
 
 - [ ] Search & Discovery: Filter laut `docs/theme-setup.md` Abschnitt 6 anlegen (Breite, Länge, Concave, Achsbreite, Höhe,
       Durchmesser, Härte, Rating, Farbe als Swatch) – derzeit nur Verfügbarkeit + Preis aktiv. Nur in der App möglich.
+- [ ] Pro Kategorie `custom.hidden_filters` befüllen, falls ein S&D-Filter dort nicht passt (Definition legt der Seed an).
 - [ ] Social-URLs in den Theme-Einstellungen pflegen (Footer-/Drawer-Social-Block ist sonst leer).
 - [ ] Community-Profil-Link in `templates/index.json` (Platzhalter instagram.com) und Journal-Blog (derzeit `news`) ersetzen.
 - [ ] Produkt-Bewertungen: Rating-Block der PDP zeigt nur etwas, wenn `reviews.rating` (z. B. über eine Review-App) gesetzt ist.

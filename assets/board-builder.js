@@ -52,6 +52,8 @@ class BoardBuilder extends HTMLElement {
     this.data = new Map();
     this.loading = new Map();
     this.selection = new Map();
+    this.removedParts = [];
+    this.restoring = false;
     this.storage = safeStorage();
     this.state = load(this.storage, { stepKeys: this.stepKeys }) || emptyState(this.stepKeys[0]);
 
@@ -104,6 +106,7 @@ class BoardBuilder extends HTMLElement {
       .then((products) => {
         this.data.set(part, products);
         this.loading.delete(part);
+        this.rehydrate(part, products);
         return products;
       })
       .catch((error) => {
@@ -115,28 +118,45 @@ class BoardBuilder extends HTMLElement {
   }
 
   /**
-   * Rehydrates stored selections against fresh data. A part is only dropped on a conclusive result
-   * (product gone or variant sold out); load errors (throttling, network) keep the stored choice.
-   * Collections load one after another to stay below storefront rate limits.
+   * Applies a stored selection to freshly loaded data. Runs on every successful load, so a part whose
+   * collection failed earlier (throttling, network) comes back after a retry or step change. A part is only
+   * dropped on a conclusive result (product gone or variant sold out) and never once the user picked
+   * something for it in this visit (then `selection` already has the part).
+   */
+  rehydrate(part, products) {
+    const stored = this.state.sel?.[part];
+    if (!stored || this.selection.has(part)) return;
+    const product = products.find((item) => item.id === stored.p);
+    const variant = product?.variants.find((item) => item.id === stored.v);
+    if (product && variant?.available) {
+      this.selection.set(part, { product, variant });
+    } else {
+      delete this.state.sel[part];
+      this.removedParts.push(part);
+    }
+    if (!this.restoring) this.flushRehydrated();
+  }
+
+  flushRehydrated() {
+    this.persist();
+    this.refresh();
+    if (!this.removedParts.length) return;
+    announce(this.removedParts.map((part) => interpolate(this.strings.partUnavailable, { part: this.partLabel(part) })).join(' '));
+    this.removedParts = [];
+  }
+
+  /**
+   * Loads the collections of all stored parts one after another (storefront rate limits); `rehydrate` does
+   * the matching. Load errors keep the stored choice.
    */
   async restore(deckHandle) {
-    const removed = [];
-    for (const [part, stored] of Object.entries({ ...(this.state.sel || {}) })) {
-      let products;
+    this.restoring = true;
+    for (const part of Object.keys({ ...(this.state.sel || {}) })) {
       try {
         // eslint-disable-next-line no-await-in-loop
-        products = await this.ensureData(part);
+        await this.ensureData(part);
       } catch {
-        continue;
-      }
-      const product = products.find((item) => item.id === stored.p);
-      const variant = product?.variants.find((item) => item.id === stored.v);
-      if (product && variant?.available) {
-        if (!this.selection.has(part)) this.selection.set(part, { product, variant });
-      } else if (this.state.sel[part]?.v === stored.v) {
-        // Only remove it if the user did not pick something else in the meantime.
-        delete this.state.sel[part];
-        removed.push(part);
+        /* kept in state.sel – rehydrated on a later successful load */
       }
     }
 
@@ -147,13 +167,10 @@ class BoardBuilder extends HTMLElement {
       if (product && variant) this.select('deck', product, variant, { silent: true });
     }
 
-    this.persist();
-    this.refresh();
+    this.restoring = false;
+    this.flushRehydrated();
     const current = this.steps.find((step) => step.part === this.state.step);
     if (current) this.list.render(current);
-    if (removed.length) {
-      announce(removed.map((part) => interpolate(this.strings.partUnavailable, { part: this.partLabel(part) })).join(' '));
-    }
     this.prefetchNext();
   }
 

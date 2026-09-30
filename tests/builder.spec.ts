@@ -150,6 +150,35 @@ test.describe("Board Builder", () => {
     expect(errors, errors.join("\n")).toEqual([]);
   });
 
+  test("gespeichertes Teil erscheint nach Ladefehler und „Erneut versuchen“ wieder als gewählt", async ({ page }) => {
+    await openBuilder(page);
+    await selectFirst(page, true);
+    await next(page);
+    await selectFirst(page, true);
+    await expect(page.locator(".bb-card.is-selected")).toHaveCount(1);
+
+    // Reload while the trucks collection fails: the stored truck must survive and come back after a retry.
+    const trucksData = /\/collections\/builder-trucks\?[^#]*view=builder-data/;
+    await page.route(trucksData, (route) => route.fulfill({ status: 500, body: "" }));
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-bb-list] [data-bb-retry]")).toBeVisible({ timeout: 20_000 });
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const builder = document.querySelector("board-builder") as (HTMLElement & { restoring?: boolean; data?: Map<string, unknown> }) | null;
+          return Boolean(builder && builder.restoring === false && builder.data?.has("deck"));
+        })
+      )
+      .toBe(true);
+    await page.unroute(trucksData);
+
+    await page.locator("[data-bb-list] [data-bb-retry]").click();
+    await expect(page.locator("[data-bb-list]")).toHaveAttribute("aria-busy", "false", { timeout: 20_000 });
+    test.skip(dataThrottled, "Store drosselt die Builder-Daten (HTTP 429) – später erneut ausführen");
+    await expect(page.locator(".bb-card.is-selected")).toHaveCount(1);
+    await expect(page.locator(".bb-legend__row.is-done")).toHaveCount(2);
+  });
+
   test("manipulierter Speicher führt zu sauberem Start", async ({ page }) => {
     await page.addInitScript((key) => {
       try {
