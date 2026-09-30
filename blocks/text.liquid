@@ -1,59 +1,76 @@
 {% doc %}
-  Renders a text block.
+  Renders a rich text block in one of the theme's text styles.
 
   @example
   {% content_for 'block', type: 'text', id: 'text' %}
 {% enddoc %}
 
 <div
-  class="text {{ block.settings.text_style }}"
-  style="--text-align: {{ block.settings.alignment }}"
+  class="block-text block-text--{{ block.settings.text_style }} block-text--{{ block.settings.alignment }}{% if block.settings.text_style == 'body' %} rte{% endif %}"
   {{ block.shopify_attributes }}
 >
   {{ block.settings.text }}
 </div>
 
 {% stylesheet %}
-  .text {
-    text-align: var(--text-align);
+  .block-text--left {
+    text-align: start;
   }
-  .text--title {
-    font-size: 2rem;
-    font-weight: 700;
+  .block-text--center {
+    text-align: center;
   }
-  .text--subtitle {
-    font-size: 1.5rem;
+  .block-text--right {
+    text-align: end;
+  }
+  .block-text--title {
+    font-family: var(--font-heading-family);
+    font-weight: var(--font-heading-weight);
+    text-transform: var(--font-heading-transform);
+    font-size: var(--text-h2);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  .block-text--subtitle {
+    font-size: var(--text-h4);
+    font-weight: var(--font-body-weight-semibold);
+  }
+  .block-text--eyebrow {
+    font-family: var(--font-mono-family);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.text",
+  "name": "Text",
   "settings": [
     {
-      "type": "text",
+      "type": "richtext",
       "id": "text",
-      "label": "t:labels.text",
-      "default": "Text"
+      "label": "Text",
+      "default": "<p>Text</p>"
     },
     {
       "type": "select",
       "id": "text_style",
-      "label": "t:labels.text_style",
+      "label": "Textstil",
       "options": [
-        { "value": "text--title", "label": "t:options.text_style.title" },
-        { "value": "text--subtitle", "label": "t:options.text_style.subtitle" },
-        { "value": "text--normal", "label": "t:options.text_style.normal" }
+        { "value": "title", "label": "Überschrift" },
+        { "value": "subtitle", "label": "Unterüberschrift" },
+        { "value": "eyebrow", "label": "Label (Mono)" },
+        { "value": "body", "label": "Fließtext" }
       ],
-      "default": "text--title"
+      "default": "body"
     },
     {
       "type": "text_alignment",
       "id": "alignment",
-      "label": "t:labels.alignment",
+      "label": "Ausrichtung",
       "default": "left"
     }
   ],
-  "presets": [{ "name": "t:general.text" }]
+  "presets": [{ "name": "Text", "category": "Basis" }]
 }
 {% endschema %}

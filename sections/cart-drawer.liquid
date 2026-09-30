@@ -1,0 +1,44 @@
+{% comment %}
+  Cart drawer (static section rendered in layout/theme.liquid, id "cart-drawer").
+  Base version – full UI with build grouping follows in step 10.
+{% endcomment %}
+
+<cart-drawer data-section-id="{{ section.id }}">
+  <dialog id="CartDrawer" class="drawer cart-drawer scheme color-scheme-1" aria-labelledby="CartDrawerTitle" data-backdrop-close>
+    <div class="drawer__header">
+      <h2 id="CartDrawerTitle" class="drawer__title">{{ 'cart.title' | t }}</h2>
+      <button type="button" class="icon-button" data-dialog-close aria-label="{{ 'accessibility.close' | t }}">
+        {%- render 'icon', name: 'close' -%}
+      </button>
+    </div>
+    <div class="cart-drawer__content" data-cart-drawer-content>
+      <div class="drawer__body">
+        {%- if cart.item_count == 0 -%}
+          <p>{{ 'general.continue_shopping' | t }}</p>
+        {%- else -%}
+          <ul role="list" class="stack">
+            {%- for item in cart.items -%}
+              <li>{{ item.product.title | escape }} × {{ item.quantity }} – {{ item.final_line_price | money }}</li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+      {%- if cart.item_count > 0 -%}
+        <div class="drawer__footer">
+          <form action="{{ routes.cart_url }}" method="post">
+            <button type="submit" name="checkout" class="button button--full">{{ 'cart.checkout' | t }}</button>
+          </form>
+        </div>
+      {%- endif -%}
+    </div>
+  </dialog>
+</cart-drawer>
+
+<script type="module" src="{{ 'cart-drawer.js' | asset_url }}"></script>
+
+{% schema %}
+{
+  "name": "Warenkorb-Drawer",
+  "settings": []
+}
+{% endschema %}

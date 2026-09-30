@@ -1,0 +1,73 @@
+{% doc %}
+  Quick add inside a product card. Single variant: one button. One option with up to 8 values:
+  a disclosure with one submit button per value (e.g. deck widths). Otherwise: link to the product.
+
+  @param {product} product - The product
+
+  @example
+  {% render 'quick-add', product: product %}
+{% enddoc %}
+
+{%- liquid
+  assign form_id = 'quick-add-' | append: product.id
+  assign single = product.has_only_default_variant
+  if product.variants.size == 1
+    assign single = true
+  endif
+  assign pills = false
+  if single == false and product.options.size == 1 and product.variants.size <= 8
+    assign pills = true
+  endif
+-%}
+
+{%- if product.available == false -%}
+  {%- comment -%} Sold out: the badge communicates it; no quick add. {%- endcomment -%}
+{%- elsif single -%}
+  <product-form class="quick-add" data-source="quick-add">
+    {%- form 'product', product, id: form_id, class: 'quick-add__form', novalidate: 'novalidate' -%}
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      <button type="submit" class="quick-add__button" aria-label="{{ 'products.card.add_to_cart' | t }}: {{ product.title | escape }}">
+        {%- render 'icon', name: 'plus' -%}
+        <span class="quick-add__label">{{ 'products.card.quick_add' | t }}</span>
+      </button>
+    {%- endform -%}
+    <p class="quick-add__error form-message form-message--error" data-form-error hidden role="alert">
+      <span data-form-error-text></span>
+    </p>
+  </product-form>
+{%- elsif pills -%}
+  <product-form class="quick-add" data-source="quick-add">
+    <details class="quick-add__details">
+      <summary class="quick-add__button" aria-label="{{ 'products.card.select_variant' | t }}: {{ product.title | escape }}">
+        {%- render 'icon', name: 'plus' -%}
+        <span class="quick-add__label">{{ 'products.card.quick_add' | t }}</span>
+      </summary>
+      {%- form 'product', product, id: form_id, class: 'quick-add__panel', novalidate: 'novalidate' -%}
+        <p class="quick-add__option label-mono">{{ product.options.first | escape }}</p>
+        <div class="quick-add__pills">
+          {%- for variant in product.variants -%}
+            <button
+              type="submit"
+              name="id"
+              value="{{ variant.id }}"
+              class="quick-add__pill"
+              {% unless variant.available %}
+                disabled
+              {% endunless %}
+            >
+              {{- variant.title | escape -}}
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endform -%}
+    </details>
+    <p class="quick-add__error form-message form-message--error" data-form-error hidden role="alert">
+      <span data-form-error-text></span>
+    </p>
+  </product-form>
+{%- else -%}
+  <a class="quick-add__button quick-add__button--link" href="{{ product.url }}" aria-label="{{ 'products.card.choose_options' | t }}: {{ product.title | escape }}">
+    {%- render 'icon', name: 'arrow-right' -%}
+    <span class="quick-add__label">{{ 'products.card.choose_options' | t }}</span>
+  </a>
+{%- endif -%}

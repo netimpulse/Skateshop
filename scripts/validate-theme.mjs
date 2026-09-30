@@ -197,7 +197,7 @@ async function main() {
   const layout = existsSync(join(ROOT, 'layout/theme.liquid')) ? await read('layout/theme.liquid') : '';
   const importMapMatch = layout.match(/<script type="importmap">([\s\S]*?)<\/script>/);
   const mappedAssets = new Set(importMapMatch ? [...importMapMatch[1].matchAll(/'([\w.-]+\.js)'\s*\|\s*asset_url/g)].map((m) => m[1]) : []);
-  if (importMapMatch && layout.indexOf('<script type="importmap">') > layout.indexOf('content_for_header')) {
+  if (importMapMatch && layout.indexOf('<script type="importmap">') > layout.indexOf('{{ content_for_header }}')) {
     error('layout/theme.liquid', 'import map must precede content_for_header');
   }
   for (const file of await list('assets', '.js')) {

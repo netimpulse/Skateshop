@@ -1,0 +1,108 @@
+{% doc %}
+  Visible breadcrumb trail plus BreadcrumbList JSON-LD for the current template.
+  On product pages the collection context (URL) wins; otherwise the first "real" collection is used
+  (builder-*, all, frontpage and handles listed in `exclude` are skipped).
+
+  @param {string} [exclude] - Comma-separated collection handles to skip for product pages
+  @param {string} [class] - Extra class on the nav element
+
+  @example
+  {% render 'breadcrumbs' %}
+{% enddoc %}
+
+{%- liquid
+  assign separator = '§§'
+  assign names = 'general.home' | t
+  assign urls = routes.root_url
+  assign skip = 'all,frontpage,bestsellers,featured-boards,skate-all'
+  if exclude != blank
+    assign skip = skip | append: ',' | append: exclude
+  endif
+  assign skip_list = skip | split: ','
+
+  case request.page_type
+    when 'product'
+      assign crumb_collection = collection
+      if crumb_collection == blank
+        for candidate in product.collections
+          if skip_list contains candidate.handle
+            continue
+          endif
+          if candidate.handle contains 'builder-'
+            continue
+          endif
+          assign crumb_collection = candidate
+          break
+        endfor
+      endif
+      if crumb_collection
+        assign names = names | append: separator | append: crumb_collection.title
+        assign urls = urls | append: separator | append: crumb_collection.url
+      endif
+      assign names = names | append: separator | append: product.title
+      assign urls = urls | append: separator | append: product.url
+    when 'collection'
+      assign names = names | append: separator | append: collection.title
+      assign urls = urls | append: separator | append: collection.url
+    when 'list-collections'
+      assign crumb_label = 'collections.title' | t
+      assign names = names | append: separator | append: crumb_label
+      assign urls = urls | append: separator | append: routes.collections_url
+    when 'page'
+      assign names = names | append: separator | append: page.title
+      assign urls = urls | append: separator | append: page.url
+    when 'blog'
+      assign names = names | append: separator | append: blog.title
+      assign urls = urls | append: separator | append: blog.url
+    when 'article'
+      assign names = names | append: separator | append: blog.title | append: separator | append: article.title
+      assign urls = urls | append: separator | append: blog.url | append: separator | append: article.url
+    when 'search'
+      assign crumb_label = 'search.title' | t
+      assign names = names | append: separator | append: crumb_label
+      assign urls = urls | append: separator | append: routes.search_url
+    when 'cart'
+      assign crumb_label = 'cart.title' | t
+      assign names = names | append: separator | append: crumb_label
+      assign urls = urls | append: separator | append: routes.cart_url
+  endcase
+
+  assign name_list = names | split: separator
+  assign url_list = urls | split: separator
+-%}
+
+{%- if name_list.size > 1 -%}
+  <nav class="breadcrumbs {{ class }}" aria-label="{{ 'accessibility.breadcrumbs' | t }}">
+    <ol role="list">
+      {%- for name in name_list -%}
+        {%- assign index = forloop.index0 -%}
+        <li>
+          {%- if forloop.last -%}
+            <span aria-current="page">{{ name | escape }}</span>
+          {%- else -%}
+            <a href="{{ url_list[index] }}">{{ name | escape }}</a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ol>
+  </nav>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {%- for name in name_list -%}
+          {%- assign index = forloop.index0 -%}
+          {%- assign absolute_url = request.origin | append: url_list[index] -%}
+          {
+            "@type": "ListItem",
+            "position": {{ forloop.index }},
+            "name": {{ name | json }},
+            "item": {{ absolute_url | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}

@@ -1,64 +1,58 @@
 {% doc %}
-  Renders a responsive image that might be wrapped in a link.
+  Responsive image inside an aspect-ratio media box. Falls back to the shop-style placeholder when
+  no image is given, so there is never a broken image.
 
-  When `width`, `height` and `crop` are provided, the image will be rendered
-  with a fixed aspect ratio.
-
-  Serves as an example of how to use the `image_url` filter and `image_tag` filter
-  as well as how you can use LiquidDoc to document your code.
-
-  @param {image} image - The image to be rendered
-  @param {string} [url] - An optional destination URL for the image
-  @param {string} [class] - Optional class to be added to the image wrapper
-  @param {number} [width] - The highest resolution width of the image to be rendered
-  @param {number} [height] - The highest resolution height of the image to be rendered
-  @param {string} [crop] - The crop position of the image
+  @param {image} [image] - Image object (product media, image_picker setting, collection image …)
+  @param {string} [url] - Optional link target; wraps the media box in a link
+  @param {string} [alt] - Alt text override (defaults to image.alt)
+  @param {string} [sizes] - sizes attribute, e.g. "(min-width: 990px) 25vw, 50vw"
+  @param {string} [widths] - Comma-separated srcset widths
+  @param {number} [max_width] - Largest rendered width (default 1800)
+  @param {boolean} [eager] - Load eagerly with high fetch priority (only for the LCP image)
+  @param {string} [ratio] - CSS aspect ratio, e.g. "4 / 5"; "natural" uses the image's own ratio
+  @param {string} [fit] - cover | contain
+  @param {string} [class] - Extra class on the media box
+  @param {string} [placeholder] - Placeholder kind for placeholder-skate
+  @param {string} [placeholder_label] - Accessible placeholder label
 
   @example
-  {% render 'image', image: product.featured_image %}
-  {% render 'image', image: product.featured_image, url: product.url %}
-  {% render 'image',
-    class: 'product__image',
-    image: product.featured_image,
-    url: product.url,
-    width: 1200,
-    height: 800,
-    crop: 'center',
-  %}
+  {% render 'image', image: section.settings.image, sizes: '100vw', eager: true, ratio: '16 / 9' %}
 {% enddoc %}
 
-{% liquid
-  unless height
-    assign width = width | default: image.width
-  endunless
-
-  if url
-    assign wrapper = 'a'
-  else
-    assign wrapper = 'div'
+{%- liquid
+  assign max_width = max_width | default: 1800
+  assign widths = widths | default: '360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048'
+  assign sizes = sizes | default: '100vw'
+  assign fit_class = ''
+  if fit == 'contain'
+    assign fit_class = ' media--contain'
   endif
-%}
 
-<{{ wrapper }}
-  class="image {{ class }}"
-  {% if url %}
-    href="{{ url }}"
-  {% endif %}
->
-  {{ image | image_url: width: width, height: height, crop: crop | image_tag }}
-</{{ wrapper }}>
+  if eager
+    assign loading = 'eager'
+    assign priority = 'high'
+  else
+    assign loading = 'lazy'
+    assign priority = 'auto'
+  endif
 
-{% stylesheet %}
-  .image {
-    display: block;
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    height: auto;
-  }
+  assign image_alt = alt | default: image.alt | escape
+-%}
 
-  .image > img {
-    width: 100%;
-    height: auto;
-  }
-{% endstylesheet %}
+{%- capture media -%}
+  {%- if image -%}
+    {{
+      image
+      | image_url: width: max_width
+      | image_tag: widths: widths, sizes: sizes, loading: loading, fetchpriority: priority, alt: image_alt
+    }}
+  {%- else -%}
+    {% render 'placeholder-skate', kind: placeholder, label: placeholder_label %}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if url != blank -%}
+  <a href="{{ url }}" class="media{{ fit_class }} {{ class }}" data-ratio="{{ ratio | default: 'default' | handleize }}" tabindex="-1" aria-hidden="true">{{ media }}</a>
+{%- else -%}
+  <div class="media{{ fit_class }} {{ class }}" data-ratio="{{ ratio | default: 'default' | handleize }}">{{ media }}</div>
+{%- endif -%}

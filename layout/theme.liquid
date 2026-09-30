@@ -1,36 +1,110 @@
 <!doctype html>
-<html lang="{{ request.locale.iso_code }}">
+<html
+  class="no-js{% unless settings.animations_hover %} no-hover-effects{% endunless %}"
+  lang="{{ request.locale.iso_code }}"
+>
   <head>
-    {% # Inlined CSS Variables %}
-    {% render 'css-variables' %}
-
-    {% comment %}
-      Font preloading:
-      1. Preconnect to font CDN for faster connection
-      2. Preload only the critical font variant (base weight)
-      3. Additional variants load on-demand via @font-face
-    {% endcomment %}
-    {% unless settings.type_primary_font.system? %}
-      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-
-      {% comment %} Preload the base font variant for initial page render {% endcomment %}
-      {{ settings.type_primary_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
-    {% endunless %}
-
-    {% # Load and preload the critical CSS %}
-    {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
-
-    {% # Social, title, etc. %}
     {% render 'meta-tags' %}
 
+    {%- if settings.favicon -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 64, height: 64 }}">
+    {%- endif -%}
+
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    {%- unless settings.type_heading_font.system? and settings.type_body_font.system? -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+    {%- unless settings.type_heading_font.system? -%}
+      {{ settings.type_heading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+    {%- endunless -%}
+    {%- unless settings.type_body_font.system? -%}
+      {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+    {%- endunless -%}
+
+    {% render 'css-variables' %}
+    {{ 'theme.css' | asset_url | stylesheet_tag: preload: true }}
+    {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+
+    <script>
+      document.documentElement.classList.replace('no-js', 'js');
+      {%- if settings.animations_reveal %}
+        document.documentElement.classList.add('js-reveal');
+      {%- endif %}
+    </script>
+
+    {%- comment -%} The import map must precede content_for_header and every module script. {%- endcomment -%}
+    <script type="importmap">
+      {
+        "imports": {
+          "@theme/utils": "{{ 'utils.js' | asset_url }}",
+          "@theme/theme": "{{ 'theme.js' | asset_url }}",
+          "@theme/cart": "{{ 'cart.js' | asset_url }}",
+          "@theme/cart-drawer": "{{ 'cart-drawer.js' | asset_url }}",
+          "@theme/predictive-search": "{{ 'predictive-search.js' | asset_url }}",
+          "@theme/facets": "{{ 'facets.js' | asset_url }}",
+          "@theme/product": "{{ 'product.js' | asset_url }}",
+          "@theme/recently-viewed": "{{ 'recently-viewed.js' | asset_url }}",
+          "@theme/board-builder": "{{ 'board-builder.js' | asset_url }}",
+          "@theme/board-builder-list": "{{ 'board-builder-list.js' | asset_url }}",
+          "@theme/board-builder-summary": "{{ 'board-builder-summary.js' | asset_url }}",
+          "@theme/board-builder-preview": "{{ 'board-builder-preview.js' | asset_url }}",
+          "@theme/board-builder-data": "{{ 'board-builder-data.js' | asset_url }}",
+          "@theme/board-builder-state": "{{ 'board-builder-state.js' | asset_url }}",
+          "@theme/board-builder-rules": "{{ 'board-builder-rules.js' | asset_url }}"
+        }
+      }
+    </script>
+    <link rel="modulepreload" href="{{ 'utils.js' | asset_url }}">
+    <link rel="modulepreload" href="{{ 'theme.js' | asset_url }}">
+    <link rel="modulepreload" href="{{ 'cart.js' | asset_url }}">
+
+    <script type="application/json" id="theme-config">
+      {
+        "routes": {
+          "root": {{ routes.root_url | json }},
+          "cart": {{ routes.cart_url | json }},
+          "cartAdd": {{ routes.cart_add_url | json }},
+          "cartChange": {{ routes.cart_change_url | json }},
+          "cartUpdate": {{ routes.cart_update_url | json }},
+          "search": {{ routes.search_url | json }},
+          "predictiveSearch": {{ routes.predictive_search_url | json }},
+          "productRecommendations": {{ routes.product_recommendations_url | json }}
+        },
+        "moneyFormat": {{ shop.money_format | strip_html | json }},
+        "moneyWithCurrencyFormat": {{ shop.money_with_currency_format | strip_html | json }},
+        "showCurrencyCode": {{ settings.currency_code_enabled | json }},
+        "currency": {{ cart.currency.iso_code | json }},
+        "locale": {{ request.locale.iso_code | json }},
+        "cartType": {{ settings.cart_type | json }},
+        "strings": {
+          "cartAdded": {{ 'cart.added' | t | json }},
+          "cartError": {{ 'cart.error_generic' | t | json }},
+          "loading": {{ 'accessibility.loading' | t | json }},
+          "pause": {{ 'accessibility.pause_animation' | t | json }},
+          "play": {{ 'accessibility.play_animation' | t | json }}
+        }
+      }
+    </script>
+
     {{ content_for_header }}
+
+    <script type="module" src="{{ 'theme.js' | asset_url }}"></script>
+    <script type="module" src="{{ 'cart.js' | asset_url }}"></script>
   </head>
 
-  <body>
+  <body class="scheme color-scheme-1">
+    <a class="skip-link" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
+
     {% sections 'header-group' %}
 
-    {{ content_for_layout }}
+    <main id="MainContent" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
 
     {% sections 'footer-group' %}
+
+    {% section 'cart-drawer' %}
+
+    <div id="live-region" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
   </body>
 </html>

@@ -1,0 +1,127 @@
+{
+  "404": {
+    "back_to_shopping": "Back to shopping",
+    "not_found": "Page not found.",
+    "title": "404"
+  },
+  "accessibility": {
+    "breadcrumbs": "Breadcrumbs",
+    "close": "Close",
+    "close_menu": "Close menu",
+    "external_link": "Opens external website.",
+    "loading": "Loading …",
+    "new_window": "Opens in a new window.",
+    "next_slide": "Next",
+    "open_menu": "Open menu",
+    "pagination": "Pagination",
+    "pause_animation": "Pause marquee",
+    "play_animation": "Play marquee",
+    "previous_slide": "Previous",
+    "skip_to_content": "Skip to content",
+    "social_links": "Social media",
+    "star_rating": "{{ rating }} out of {{ max }} stars",
+    "unit_price_separator": "per",
+    "vendor": "Vendor:"
+  },
+  "blog": {
+    "article_comments": "Comments",
+    "article_metadata_html": "{{ date }} by {{ author }}",
+    "comment_form_body": "Comment",
+    "comment_form_email": "Email",
+    "comment_form_name": "Name",
+    "comment_form_submit": "Post",
+    "comment_form_title": "Add a comment"
+  },
+  "cart": {
+    "added": "Added to cart",
+    "checkout": "Checkout",
+    "count": {
+      "one": "{{ count }} item",
+      "other": "{{ count }} items"
+    },
+    "error_generic": "Something went wrong. Please try again.",
+    "remove": "Remove",
+    "title": "Cart",
+    "update": "Update"
+  },
+  "collections": {
+    "title": "Categories"
+  },
+  "customers": {
+    "login": {
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "title": "Login"
+    }
+  },
+  "general": {
+    "account": "Account",
+    "continue_shopping": "Continue shopping",
+    "home": "Home",
+    "log_in": "Log in",
+    "meta": {
+      "page": "Page {{ page }}",
+      "tagged": "Tagged \"{{ tags }}\""
+    },
+    "read_more": "Read more",
+    "search": "Search",
+    "view_all": "View all"
+  },
+  "gift_card": {
+    "add_to_apple_wallet": "Add to Apple Wallet",
+    "card": "Gift card",
+    "expired": "This gift card has expired",
+    "expires_on": "Expires on {{ expires_on }}",
+    "use_at_checkout": "Use this gift card at checkout"
+  },
+  "password": {
+    "enter": "Enter",
+    "password": "Password",
+    "title": "This shop is private"
+  },
+  "products": {
+    "badges": {
+      "bestseller": "Bestseller",
+      "limited": "Limited",
+      "new": "New",
+      "sale": "Sale",
+      "sold_out": "Sold out"
+    },
+    "card": {
+      "add_to_cart": "Add to cart",
+      "choose_options": "Choose options",
+      "colors": "Available colors",
+      "more_colors": {
+        "one": "+{{ count }} color",
+        "other": "+{{ count }} colors"
+      },
+      "quick_add": "Quick add",
+      "select_variant": "Select variant",
+      "sold_out": "Sold out"
+    },
+    "placeholder": {
+      "bearings": "Bearings – image coming soon",
+      "deck": "Deck – image coming soon",
+      "generic": "Image coming soon",
+      "griptape": "Griptape – image coming soon",
+      "hardware": "Hardware – image coming soon",
+      "trucks": "Trucks – image coming soon",
+      "wheels": "Wheels – image coming soon"
+    },
+    "price": {
+      "compare_at": "Was",
+      "from_html": "from {{ price }}",
+      "regular": "Regular price",
+      "sale": "Sale price",
+      "unit": "Unit price"
+    }
+  },
+  "search": {
+    "no_results_html": "No results for \"{{ terms }}\"",
+    "placeholder": "Search decks, trucks, brands …",
+    "results_for_html": "{{ count }} results for \"{{ terms }}\"",
+    "submit": "Search",
+    "title": "Search"
+  }
+}
