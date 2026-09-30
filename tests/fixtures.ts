@@ -40,7 +40,7 @@ const discovered: Discovered = (() => {
 
 export const QA = {
   /** Test-Theme-ID (UNPUBLISHED). Pro Shop einmalig setzen. */
-  themeId: process.env.SHOPIFY_TEST_THEME_ID || "__THEME_ID__",
+  themeId: process.env.SHOPIFY_TEST_THEME_ID || "164173611123",
 
   /** Erstes Produkt aus dem Shop, automatisch ermittelt. */
   product: {

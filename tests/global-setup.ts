@@ -16,7 +16,7 @@ import * as path from "path";
  * des shopify-visual-qa Skills.
  */
 export default async function globalSetup(_config: FullConfig) {
-  const STORE_BASE = "https://__STORE_DOMAIN__.myshopify.com";
+  const STORE_BASE = "https://dev-store-4ogqgshg.myshopify.com";
   const password = process.env.SHOPIFY_STOREFRONT_PASSWORD;
 
   const authDir = path.resolve("playwright/.auth");

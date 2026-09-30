@@ -6,8 +6,8 @@
 # Workflow, bis die Werte gesetzt sind.
 
 [environments.development]
-store = "__STORE_DOMAIN__.myshopify.com"
-theme = "__THEME_ID__"
+store = "dev-store-4ogqgshg.myshopify.com"
+theme = "164173611123"
 
 # Production-Block wird pro Kundenshop ergaenzt:
 # [environments.production]
