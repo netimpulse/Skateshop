@@ -11,6 +11,9 @@ import { withTheme } from "./fixtures";
  * weil der Dev-Store bei zu viel Headless-Traffic eine Cloudflare-Prüfung zeigt – dann wird übersprungen.
  */
 
+// The "mobile" project emulates iPhone 13 – run it in Chromium (WebKit is not installed in this environment).
+test.use({ browserName: "chromium" });
+
 const HOME = withTheme("/de");
 
 const HOME_SECTIONS = [
@@ -40,7 +43,21 @@ async function openHome(page: Page): Promise<string[]> {
   });
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
 
-  const response = await page.goto(HOME, { waitUntil: "domcontentloaded" });
+  let response = await page.goto(HOME, { waitUntil: "domcontentloaded" });
+
+  // Storefront password page (global setup could not log in): log in here, then load the homepage again.
+  const passwordField = page.locator("input[type='password']");
+  if (new URL(page.url()).pathname.includes("/password") || (await passwordField.count()) > 0) {
+    const password = process.env.SHOPIFY_STOREFRONT_PASSWORD;
+    test.skip(!password, "Storefront ist passwortgeschützt, SHOPIFY_STOREFRONT_PASSWORD fehlt.");
+    await passwordField.first().fill(password as string);
+    await Promise.all([
+      page.waitForLoadState("domcontentloaded"),
+      page.locator("form button[type='submit'], form input[type='submit']").first().click(),
+    ]);
+    response = await page.goto(HOME, { waitUntil: "domcontentloaded" });
+  }
+
   const challenged =
     response?.status() === 429 ||
     (await page.getByText(/connection needs to be verified|just a moment/i).count()) > 0;

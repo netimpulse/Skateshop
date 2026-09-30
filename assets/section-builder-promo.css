@@ -22,6 +22,11 @@
   opacity: 0.5;
 }
 
+/* One accent per viewport: the rubric number follows the scheme's button colour, not its link colour. */
+.builder-promo__eyebrow .eyebrow__index {
+  color: var(--promo-accent);
+}
+
 .builder-promo__title {
   font-size: var(--text-h1);
   font-size: calc(clamp(2.75rem, 15cqi, 6.25rem) * var(--font-heading-scale));
