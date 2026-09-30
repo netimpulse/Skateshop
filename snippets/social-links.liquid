@@ -1,0 +1,52 @@
+{% doc %}
+  Social media links from the global theme settings (Theme-Einstellungen → Social Media).
+  Renders nothing when no profile URL is set. Icons come from snippets/icon.liquid.
+
+  @param {string} [class] - Extra class on the list
+  @param {boolean} [show_labels] - Show the platform name next to the icon (default: icon only, name visually hidden)
+
+  @example
+  {% render 'social-links', class: 'footer__social', show_labels: true %}
+{% enddoc %}
+
+{%- liquid
+  assign platforms = 'instagram,tiktok,youtube,facebook,pinterest,x' | split: ','
+  assign list_label = 'accessibility.social_links' | t
+-%}
+
+{%- capture items -%}
+  {%- for platform in platforms -%}
+    {%- liquid
+      assign setting_key = 'social_' | append: platform
+      assign profile_url = settings[setting_key]
+      case platform
+        when 'instagram'
+          assign platform_name = 'Instagram'
+        when 'tiktok'
+          assign platform_name = 'TikTok'
+        when 'youtube'
+          assign platform_name = 'YouTube'
+        when 'facebook'
+          assign platform_name = 'Facebook'
+        when 'pinterest'
+          assign platform_name = 'Pinterest'
+        else
+          assign platform_name = 'X'
+      endcase
+    -%}
+    {%- if profile_url != blank -%}
+      <li class="social-links__item">
+        <a href="{{ profile_url | escape }}" class="social-links__link" rel="me noopener">
+          {%- render 'icon', name: platform -%}
+          <span class="{% if show_labels %}social-links__label{% else %}visually-hidden{% endif %}">{{ platform_name }}</span>
+        </a>
+      </li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if items != blank -%}
+  <ul class="social-links{% if show_labels %} social-links--labels{% endif %} {{ class }}" role="list" aria-label="{{ list_label | escape }}">
+    {{- items -}}
+  </ul>
+{%- endif -%}

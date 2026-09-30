@@ -1,56 +1,435 @@
-<footer>
-  <div class="footer__copyright">
-    &copy;
-    {{ 'now' | date: '%Y' }}
-    {{ shop.name | link_to: routes.root_url }}, {{ powered_by_link }}
+{% comment %}
+  Site footer (footer group). Blocks: brand, links (menu), text, social.
+  Bottom bar: copyright, policies, localization form (only with > 1 country/language), payment icons.
+  Mobile: link groups become <details> accordions (desktop list is a second copy of the same markup,
+  only one of them is displayed per breakpoint). Optional oversized wordmark as editorial sign-off.
+{% endcomment %}
+
+{{ 'section-footer.css' | asset_url | stylesheet_tag }}
+{%- render 'section-style',
+  section_id: section.id,
+  padding_top: section.settings.padding_top,
+  padding_bottom: section.settings.padding_bottom
+-%}
+
+{%- liquid
+  assign scheme = section.settings.color_scheme | default: 'scheme-1'
+  assign heading_id = 'FooterHeading-' | append: section.id
+  assign footer_label = 'footer.label' | t
+  assign payment_label = 'footer.payment_methods' | t
+  assign policies_label = 'footer.policies' | t
+  assign country_label = 'footer.localization.country' | t
+  assign language_label = 'footer.localization.language' | t
+  assign apply_label = 'footer.localization.submit' | t
+  assign localization_label = 'footer.localization.label' | t
+
+  assign show_country = false
+  if section.settings.show_country_selector and localization.available_countries.size > 1
+    assign show_country = true
+  endif
+  assign show_language = false
+  if section.settings.show_language_selector and localization.available_languages.size > 1
+    assign show_language = true
+  endif
+
+  assign wordmark = section.settings.wordmark_text | default: shop.name | strip
+  assign wordmark_chars = wordmark | size
+  if wordmark_chars < 4
+    assign wordmark_chars = 4
+  endif
+  assign wordmark_vw = 88.0 | divided_by: wordmark_chars | divided_by: 0.68
+  if wordmark_vw > 20
+    assign wordmark_vw = 20
+  endif
+  assign page_px = settings.page_width | remove: 'px' | times: 1
+  assign wordmark_px = page_px | times: wordmark_vw | divided_by: 100 | round
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --logo-width: {{ settings.logo_width }}px;
+  }
+  {%- if section.settings.show_wordmark and wordmark != blank %}
+    #shopify-section-{{ section.id }} .site-footer__wordmark {
+      font-size: min({{ wordmark_vw | round: 2 }}vw, {{ wordmark_px }}px);
+    }
+  {%- endif %}
+{% endstyle %}
+
+<footer
+  class="site-footer section scheme color-{{ scheme }}"
+  data-section-id="{{ section.id }}"
+  aria-labelledby="{{ heading_id }}"
+>
+  <h2 id="{{ heading_id }}" class="visually-hidden">{{ footer_label }}</h2>
+
+  <div class="page-width">
+    {%- if section.blocks.size > 0 -%}
+      <div class="site-footer__grid">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'brand' -%}
+              <div class="site-footer__block site-footer__block--brand" {{ block.shopify_attributes }}>
+                {%- if block.settings.show_logo -%}
+                  <a href="{{ routes.root_url }}" class="site-footer__logo">
+                    {%- if settings.logo != blank -%}
+                      {%- assign logo_width_2x = settings.logo_width | times: 2 -%}
+                      {%- assign logo_sizes = settings.logo_width | append: 'px' -%}
+                      {{
+                        settings.logo
+                        | image_url: width: logo_width_2x
+                        | image_tag:
+                          class: 'site-footer__logo-image',
+                          widths: '120, 180, 240, 320, 400, 600',
+                          sizes: logo_sizes,
+                          loading: 'lazy',
+                          alt: shop.name
+                      }}
+                    {%- else -%}
+                      <span class="site-footer__logo-text">{{ shop.name | escape }}</span>
+                    {%- endif -%}
+                  </a>
+                {%- endif -%}
+                {%- if block.settings.text != blank -%}
+                  <div class="site-footer__brand-text rte">{{ block.settings.text }}</div>
+                {%- endif -%}
+                {%- if block.settings.show_stripe -%}
+                  <div class="tri-stripe site-footer__stripe" aria-hidden="true"><span></span></div>
+                {%- endif -%}
+              </div>
+
+            {%- when 'links' -%}
+              {%- assign block_menu = block.settings.menu -%}
+              {%- if block_menu.links.size > 0 -%}
+                {%- capture link_list -%}
+                  <ul class="site-footer__list" role="list">
+                    {%- for link in block_menu.links -%}
+                      <li>
+                        <a
+                          href="{{ link.url }}"
+                          class="site-footer__link"
+                          {% if link.current %}
+                            aria-current="page"
+                          {% endif %}
+                        >
+                          {{- link.title | escape -}}
+                        </a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endcapture -%}
+                <div class="site-footer__block site-footer__block--links" {{ block.shopify_attributes }}>
+                  {%- if block.settings.heading != blank -%}
+                    <h3 class="site-footer__heading hidden-mobile">{{ block.settings.heading | escape }}</h3>
+                    <details class="site-footer__details hidden-tablet-up">
+                      <summary class="site-footer__heading site-footer__summary">
+                        <span>{{ block.settings.heading | escape }}</span>
+                        {%- render 'icon', name: 'plus', class: 'site-footer__summary-icon' -%}
+                      </summary>
+                      {{ link_list }}
+                    </details>
+                    <div class="hidden-mobile">{{ link_list }}</div>
+                  {%- else -%}
+                    {{ link_list }}
+                  {%- endif -%}
+                </div>
+              {%- elsif request.design_mode -%}
+                <div class="site-footer__block site-footer__block--links" {{ block.shopify_attributes }}>
+                  <p class="site-footer__heading">{{ block.settings.heading | escape }}</p>
+                  <p class="site-footer__hint">{{ 'footer.editor_menu_hint' | t }}</p>
+                </div>
+              {%- endif -%}
+
+            {%- when 'text' -%}
+              <div class="site-footer__block site-footer__block--text" {{ block.shopify_attributes }}>
+                {%- if block.settings.heading != blank -%}
+                  <h3 class="site-footer__heading">{{ block.settings.heading | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.text != blank -%}
+                  <div class="site-footer__text rte">{{ block.settings.text }}</div>
+                {%- endif -%}
+              </div>
+
+            {%- when 'social' -%}
+              {%- capture social_links -%}
+                {%- render 'social-links', class: 'site-footer__social', show_labels: block.settings.show_labels -%}
+              {%- endcapture -%}
+              {%- if social_links != blank -%}
+                <div class="site-footer__block site-footer__block--social" {{ block.shopify_attributes }}>
+                  {%- if block.settings.heading != blank -%}
+                    <h3 class="site-footer__heading">{{ block.settings.heading | escape }}</h3>
+                  {%- endif -%}
+                  {{ social_links }}
+                </div>
+              {%- elsif request.design_mode -%}
+                <div class="site-footer__block site-footer__block--social" {{ block.shopify_attributes }}>
+                  <p class="site-footer__heading">{{ block.settings.heading | escape }}</p>
+                  <p class="site-footer__hint">{{ 'footer.editor_social_hint' | t }}</p>
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.show_wordmark and wordmark != blank -%}
+      <p class="site-footer__wordmark" aria-hidden="true">{{ wordmark | escape }}</p>
+    {%- endif -%}
   </div>
 
-  <div class="footer__links">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
-  </div>
+  <div class="site-footer__bottom">
+    <div class="page-width site-footer__bottom-inner">
+      <p class="site-footer__copyright">
+        <span>&copy; {{ 'now' | date: '%Y' }}</span>
+        <a href="{{ routes.root_url }}">{{ shop.name | escape }}</a>
+        {%- if section.settings.copyright_text != blank -%}
+          <span aria-hidden="true">·</span>
+          <span>{{ section.settings.copyright_text | escape }}</span>
+        {%- endif -%}
+      </p>
 
-  <div class="footer__payment">
-    {% if section.settings.show_payment_icons %}
-      {% for type in shop.enabled_payment_types %}
-        {{ type | payment_type_svg_tag }}
-      {% endfor %}
-    {% endif %}
+      {%- if section.settings.show_policies and shop.policies.size > 0 -%}
+        <ul class="site-footer__policies" role="list" aria-label="{{ policies_label | escape }}">
+          {%- for policy in shop.policies -%}
+            <li><a href="{{ policy.url }}">{{ policy.title | escape }}</a></li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if show_country or show_language -%}
+        {%- assign form_id = 'FooterLocalization-' | append: section.id -%}
+        {%- form 'localization', id: form_id, class: 'site-footer__localization' -%}
+          <p class="visually-hidden">{{ localization_label }}</p>
+          {%- if show_country -%}
+            <div class="site-footer__select-field">
+              <label for="FooterCountry-{{ section.id }}" class="site-footer__select-label">{{ country_label }}</label>
+              <div class="select">
+                <select id="FooterCountry-{{ section.id }}" name="country_code" class="select__select site-footer__select">
+                  {%- for country in localization.available_countries -%}
+                    <option
+                      value="{{ country.iso_code }}"
+                      {% if country.iso_code == localization.country.iso_code %}
+                        selected
+                      {% endif %}
+                    >
+                      {{ country.name | escape }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
+                    </option>
+                  {%- endfor -%}
+                </select>
+                {%- render 'icon', name: 'chevron-down' -%}
+              </div>
+            </div>
+          {%- endif -%}
+          {%- if show_language -%}
+            <div class="site-footer__select-field">
+              <label for="FooterLanguage-{{ section.id }}" class="site-footer__select-label">{{ language_label }}</label>
+              <div class="select">
+                <select id="FooterLanguage-{{ section.id }}" name="locale_code" class="select__select site-footer__select">
+                  {%- for language in localization.available_languages -%}
+                    <option
+                      value="{{ language.iso_code }}"
+                      lang="{{ language.iso_code }}"
+                      {% if language.iso_code == localization.language.iso_code %}
+                        selected
+                      {% endif %}
+                    >
+                      {{ language.endonym_name | capitalize }}
+                    </option>
+                  {%- endfor -%}
+                </select>
+                {%- render 'icon', name: 'chevron-down' -%}
+              </div>
+            </div>
+          {%- endif -%}
+          <button type="submit" class="button button--small button--secondary site-footer__apply">{{ apply_label }}</button>
+        {%- endform -%}
+      {%- endif -%}
+
+      {%- if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0 -%}
+        <ul class="site-footer__payment" role="list" aria-label="{{ payment_label | escape }}">
+          {%- for type in shop.enabled_payment_types -%}
+            <li>{{ type | payment_type_svg_tag: class: 'site-footer__payment-icon' }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
   </div>
 </footer>
 
-{% stylesheet %}
-  footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-  }
-  footer a {
-    text-decoration: none;
-    color: var(--color-foreground);
-  }
-  footer .footer__links,
-  footer .footer__payment {
-    display: flex;
-    gap: 1rem;
-  }
-{% endstylesheet %}
-
 {% schema %}
 {
-  "name": "t:general.footer",
+  "name": "Footer",
+  "tag": "div",
+  "class": "section-footer",
+  "max_blocks": 8,
+  "enabled_on": {
+    "groups": ["footer"]
+  },
   "settings": [
     {
-      "type": "link_list",
-      "id": "menu",
-      "label": "t:labels.menu"
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wordmark",
+      "label": "Großen Schriftzug anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "wordmark_text",
+      "label": "Schriftzug-Text",
+      "info": "Leer = Shopname. Die Größe passt sich der Textlänge an."
+    },
+    {
+      "type": "header",
+      "content": "Untere Leiste"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Zusatz neben dem Copyright"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_policies",
+      "label": "Rechtliche Seiten anzeigen",
+      "default": true,
+      "info": "Richtlinien aus Einstellungen → Richtlinien."
     },
     {
       "type": "checkbox",
       "id": "show_payment_icons",
-      "label": "t:labels.show_payment_icons",
+      "label": "Zahlungsarten anzeigen",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country_selector",
+      "label": "Länderauswahl anzeigen",
+      "default": true,
+      "info": "Nur sichtbar, wenn mehr als ein Land/Markt aktiv ist."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_language_selector",
+      "label": "Sprachauswahl anzeigen",
+      "default": true,
+      "info": "Nur sichtbar, wenn mehr als eine Sprache veröffentlicht ist."
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Marke",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_logo",
+          "label": "Logo bzw. Shopname anzeigen",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Skate Supply mit Werkstatt-Know-how: unabhängige Marken, ehrliche Beratung und ein Board-Builder, der mitdenkt.</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_stripe",
+          "label": "Retro-Streifen anzeigen",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "links",
+      "name": "Linkliste",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Überschrift",
+          "default": "Shop"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menü",
+          "default": "footer",
+          "info": "Empfohlen: skate-footer-shop, skate-footer-help, skate-footer-about."
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Überschrift",
+          "default": "Service"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Fragen zu Setup, Größe oder Bestellung? Schreib uns – wir antworten werktags innerhalb von 24 Stunden.</p>"
+        }
+      ]
+    },
+    {
+      "type": "social",
+      "name": "Social Media",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Überschrift",
+          "default": "Social"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_labels",
+          "label": "Plattform-Namen anzeigen",
+          "default": true
+        },
+        {
+          "type": "paragraph",
+          "content": "Profil-Links pflegst du unter Theme-Einstellungen → Social Media."
+        }
+      ]
     }
   ]
 }
