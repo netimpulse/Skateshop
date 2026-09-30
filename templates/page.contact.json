@@ -1,0 +1,46 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page",
+      "settings": {
+        "show_breadcrumbs": true,
+        "eyebrow": "Service",
+        "heading_size": "h-display",
+        "intro": "<p>Fragen zu Bestellung, Größe oder deinem Board-Build? Schreib uns – wir antworten in der Regel innerhalb eines Werktags.</p>",
+        "show_content": true,
+        "lead_paragraph": false,
+        "width": "wide",
+        "image_ratio": "16-9",
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 16
+      }
+    },
+    "contact": {
+      "type": "contact-form",
+      "settings": {
+        "eyebrow": "",
+        "heading": "",
+        "show_phone": true,
+        "info_heading": "",
+        "form_position": "left",
+        "color_scheme": "scheme-1",
+        "padding_top": 32,
+        "padding_bottom": 96
+      }
+    }
+  },
+  "order": [
+    "main",
+    "contact"
+  ]
+}
