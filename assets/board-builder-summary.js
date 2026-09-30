@@ -219,21 +219,31 @@ export class BuilderSummary {
     if (button) button.setAttribute('aria-busy', String(busy));
   }
 
+  /**
+   * Returns parts that are definitely unavailable (404 or variant not available). Inconclusive answers
+   * (throttling, network) do not block – the cart API rejects unavailable items anyway and we roll back.
+   * Requests run sequentially to stay below storefront rate limits.
+   */
   async checkAvailability(parts) {
-    const checks = await Promise.all(
-      parts.map(async ({ part, entry }) => {
-        try {
-          const response = await fetch(route(`products/${encodeURIComponent(entry.product.handle)}.js`), { headers: { Accept: 'application/json' } });
-          if (!response.ok) return { part, ok: false };
-          const data = await response.json();
-          const variant = (data.variants || []).find((item) => item.id === entry.variant.id);
-          return { part, ok: Boolean(variant?.available) };
-        } catch {
-          return { part, ok: false };
+    const unavailable = [];
+    for (const { part, entry } of parts) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const response = await fetch(route(`products/${encodeURIComponent(entry.product.handle)}.js`), { credentials: 'same-origin' });
+        if (response.status === 404) {
+          unavailable.push(part);
+          continue;
         }
-      })
-    );
-    return checks.filter((check) => !check.ok).map((check) => check.part);
+        if (!response.ok) continue;
+        // eslint-disable-next-line no-await-in-loop
+        const data = await response.json();
+        const variant = (data.variants || []).find((item) => item.id === entry.variant.id);
+        if (!variant || variant.available === false) unavailable.push(part);
+      } catch {
+        /* inconclusive */
+      }
+    }
+    return unavailable;
   }
 
   async addToCart() {

@@ -12,6 +12,8 @@ const STORAGE_KEY = "skateshop:builder:v1";
 async function openBuilder(page: Page) {
   const response = await page.goto(withTheme(DEMO.builderPath), { waitUntil: "domcontentloaded" });
   test.skip(!response || response.status() === 404, "Builder-Seite fehlt (Seed nicht gelaufen)");
+  const challenged = response?.status() === 429 || (await page.locator("text=/verified before you can proceed|Verifying your connection/i").count()) > 0;
+  test.skip(challenged, "Bot-Prüfung des Stores (429/Challenge) – später erneut ausführen");
   await expect(page.locator("board-builder")).toBeVisible();
   await expect(page.locator("[data-bb-list]")).toHaveAttribute("aria-busy", "false", { timeout: 20_000 });
 }
@@ -41,9 +43,14 @@ async function clearCart(page: Page) {
 test.describe("Board Builder", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((key) => {
-      if (!sessionStorage.getItem("bb-test-init")) {
-        localStorage.removeItem(key);
-        sessionStorage.setItem("bb-test-init", "1");
+      try {
+        if (window !== window.top) return;
+        if (!sessionStorage.getItem("bb-test-init")) {
+          localStorage.removeItem(key);
+          sessionStorage.setItem("bb-test-init", "1");
+        }
+      } catch {
+        /* sandboxed frame */
       }
     }, STORAGE_KEY);
   });
@@ -132,7 +139,12 @@ test.describe("Board Builder", () => {
 
   test("manipulierter Speicher führt zu sauberem Start", async ({ page }) => {
     await page.addInitScript((key) => {
-      localStorage.setItem(key, JSON.stringify({ v: 1, saved: Date.now(), step: "wheels", sel: { deck: { p: "1", v: 2, h: "<img src=x onerror=alert(1)>" } } }));
+      try {
+        if (window !== window.top) return;
+        localStorage.setItem(key, JSON.stringify({ v: 1, saved: Date.now(), step: "wheels", sel: { deck: { p: "1", v: 2, h: "<img src=x onerror=alert(1)>" } } }));
+      } catch {
+        /* sandboxed frame */
+      }
     }, STORAGE_KEY);
     const errors = collectThemeErrors(page);
     await openBuilder(page);
