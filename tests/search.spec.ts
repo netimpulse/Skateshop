@@ -11,6 +11,8 @@ const SHOTS = "qa-screenshots";
 // Only Chromium is installed (/opt/pw-browsers); the mobile project keeps the iPhone 13 viewport, touch and UA.
 test.use({ browserName: "chromium" });
 
+const PLATFORM_NOISE = /shopify-marketing_assets|\/shopifycloud\/|preview_bar|monorail/;
+
 /** Logs in through the storefront password page when global setup could not (password from env). */
 async function passPasswordPage(page: Page) {
   const password = process.env.SHOPIFY_STOREFRONT_PASSWORD;
@@ -29,7 +31,8 @@ async function open(page: Page, target: string) {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(`console: ${message.text()}`);
+    // Resources of Shopify's own preview bar / platform scripts are not part of the theme.
+    if (message.type() === "error" && !PLATFORM_NOISE.test(message.location().url)) errors.push(`console: ${message.text()}`);
   });
   let response = await page.goto(withTheme(target), { waitUntil: "domcontentloaded" });
   if (await passPasswordPage(page)) response = await page.goto(withTheme(target), { waitUntil: "domcontentloaded" });
