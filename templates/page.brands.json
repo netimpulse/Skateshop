@@ -16,7 +16,7 @@
         "eyebrow": "Marken",
         "heading_size": "h-display",
         "intro": "<p>Von Decks bis Kugellager: alle Marken in unserem Sortiment auf einen Blick. Wähle einen Buchstaben oder stöbere durch unsere Featured Brands.</p>",
-        "show_content": true,
+        "show_content": false,
         "lead_paragraph": false,
         "width": "wide",
         "image_ratio": "16-9",
