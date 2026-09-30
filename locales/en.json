@@ -284,6 +284,19 @@
       "title": "Login"
     }
   },
+  "footer": {
+    "editor_menu_hint": "Choose a menu for this link list (e.g. skate-footer-shop).",
+    "editor_social_hint": "Add profile links under Theme settings → Social media.",
+    "label": "Footer",
+    "localization": {
+      "country": "Country/region",
+      "label": "Choose country and language",
+      "language": "Language",
+      "submit": "Apply"
+    },
+    "payment_methods": "Payment methods",
+    "policies": "Legal"
+  },
   "general": {
     "account": "Account",
     "continue_shopping": "Continue shopping",
@@ -303,6 +316,21 @@
     "expired": "This gift card has expired",
     "expires_on": "Expires on {{ expires_on }}",
     "use_at_checkout": "Use this gift card at checkout"
+  },
+  "header": {
+    "announcement": {
+      "label": "Announcements"
+    },
+    "drawer": {
+      "title": "Menu"
+    },
+    "home_label": "{{ shop }} – Home",
+    "mega": {
+      "categories": "Categories",
+      "view_all": "View all {{ title }}"
+    },
+    "nav_label": "Main navigation",
+    "search_open": "Open search"
   },
   "pages": {
     "form": {
@@ -370,6 +398,25 @@
   "search": {
     "no_results_html": "No results for \"{{ terms }}\"",
     "placeholder": "Search decks, trucks, brands …",
+    "predictive": {
+      "clear": "Clear search",
+      "collections": "Categories",
+      "error_rate_limited": "Too many searches in a short time. Please try again in a moment or use the search page.",
+      "error_unavailable": "Quick search is currently unavailable.",
+      "keyboard_hint": "↑ ↓ Navigate · Enter Search · Esc Close",
+      "label": "Search products, brands and categories",
+      "loading": "Searching …",
+      "no_results": "No results for “{{ terms }}”.",
+      "pages": "Pages",
+      "popular": "Popular searches",
+      "products": "Products",
+      "search_page": "Go to search page",
+      "status_none": "No results found.",
+      "status_one": "1 result found.",
+      "status_other": "[count] results found.",
+      "suggestions": "Suggestions",
+      "view_all": "All results for “{{ terms }}”"
+    },
     "results_for_html": "{{ count }} results for \"{{ terms }}\"",
     "submit": "Search",
     "title": "Search"

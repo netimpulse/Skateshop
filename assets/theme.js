@@ -287,6 +287,21 @@ define('scroll-slider', ScrollSlider);
 define('marquee-strip', MarqueeStrip);
 define('parallax-media', ParallaxMedia);
 
+// Theme editor: selecting a block inside a closed disclosure panel (e.g. a mega menu promo) opens the panel.
+document.addEventListener('shopify:block:select', (event) => {
+  const nav = event.target.closest?.('disclosure-nav');
+  if (!nav) return;
+  const triggers = Array.from(nav.querySelectorAll('[aria-controls]'));
+  for (let node = event.target; node && node !== nav; node = node.parentElement) {
+    const trigger = node.id && triggers.find((item) => item.getAttribute('aria-controls') === node.id);
+    if (trigger) {
+      nav.toggle(trigger, true);
+      return;
+    }
+  }
+});
+document.addEventListener('shopify:block:deselect', (event) => event.target.closest?.('disclosure-nav')?.closeAll());
+
 initReveal();
 document.documentElement.classList.add('theme-ready');
 document.addEventListener('shopify:section:load', (event) => initReveal(event.target));

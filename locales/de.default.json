@@ -284,6 +284,19 @@
       "title": "Anmelden"
     }
   },
+  "footer": {
+    "editor_menu_hint": "Wähle ein Menü für diese Linkliste (z. B. skate-footer-shop).",
+    "editor_social_hint": "Trage Profil-Links unter Theme-Einstellungen → Social Media ein.",
+    "label": "Fußbereich",
+    "localization": {
+      "country": "Land/Region",
+      "label": "Land und Sprache wählen",
+      "language": "Sprache",
+      "submit": "Übernehmen"
+    },
+    "payment_methods": "Zahlungsarten",
+    "policies": "Rechtliches"
+  },
   "general": {
     "account": "Konto",
     "continue_shopping": "Weiter einkaufen",
@@ -303,6 +316,21 @@
     "expired": "Diese Geschenkkarte ist abgelaufen",
     "expires_on": "Gültig bis {{ expires_on }}",
     "use_at_checkout": "Löse diese Geschenkkarte an der Kasse ein"
+  },
+  "header": {
+    "announcement": {
+      "label": "Ankündigungen"
+    },
+    "drawer": {
+      "title": "Menü"
+    },
+    "home_label": "{{ shop }} – Startseite",
+    "mega": {
+      "categories": "Kategorien",
+      "view_all": "Alle {{ title }} ansehen"
+    },
+    "nav_label": "Hauptnavigation",
+    "search_open": "Suche öffnen"
   },
   "pages": {
     "form": {
@@ -370,6 +398,25 @@
   "search": {
     "no_results_html": "Keine Ergebnisse für „{{ terms }}“",
     "placeholder": "Suche nach Decks, Achsen, Marken …",
+    "predictive": {
+      "clear": "Eingabe löschen",
+      "collections": "Kategorien",
+      "error_rate_limited": "Zu viele Suchanfragen in kurzer Zeit. Bitte versuche es gleich noch einmal oder nutze die Suchseite.",
+      "error_unavailable": "Die Schnellsuche ist gerade nicht verfügbar.",
+      "keyboard_hint": "↑ ↓ Navigieren · Enter Suchen · Esc Schließen",
+      "label": "Produkte, Marken und Kategorien suchen",
+      "loading": "Suche läuft …",
+      "no_results": "Keine Treffer für „{{ terms }}“.",
+      "pages": "Seiten",
+      "popular": "Beliebte Suchen",
+      "products": "Produkte",
+      "search_page": "Zur Suchseite",
+      "status_none": "Keine Ergebnisse gefunden.",
+      "status_one": "1 Ergebnis gefunden.",
+      "status_other": "[count] Ergebnisse gefunden.",
+      "suggestions": "Vorschläge",
+      "view_all": "Alle Ergebnisse für „{{ terms }}“"
+    },
     "results_for_html": "{{ count }} Ergebnisse für „{{ terms }}“",
     "submit": "Suchen",
     "title": "Suche"
