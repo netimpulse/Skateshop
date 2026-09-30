@@ -983,8 +983,14 @@
 
 .product-related__track {
   margin: 0;
-  --scroller-item: 62%;
   --scroller-item-tablet: 38%;
+}
+
+@media (max-width: 749px) {
+  /* Only below 750px – theme.css derives --scroller-item from the tablet/desktop variables above that. */
+  .product-related__track {
+    --scroller-item: 62%;
+  }
 }
 
 /* ul[role='list'] resets padding with higher specificity than .scroller – restore the slider gutters. */

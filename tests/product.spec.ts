@@ -115,6 +115,7 @@ test.describe("Produktdetailseite", () => {
       const dialog = gallery.locator("dialog[data-lightbox]");
       await expect(dialog).toHaveAttribute("open", "");
       await expect(dialog.locator("img").first()).toBeVisible();
+      await page.waitForTimeout(500); // let the fade-in finish before the screenshot
       if (!fs.existsSync(SCREENSHOTS)) fs.mkdirSync(SCREENSHOTS, { recursive: true });
       await page.screenshot({ path: path.join(SCREENSHOTS, `product-${testInfo.project.name}-lightbox.png`) });
       await page.keyboard.press("Escape");
@@ -251,6 +252,11 @@ test.describe("Produktdetailseite", () => {
     const firstHandle = first.split("/products/")[1];
     await expect(section.locator(`[data-product-card] a[href*="/products/${firstHandle}"]`).first()).toBeAttached();
     await expect(section.locator("[data-product-card]")).toHaveCount(1);
+    if (testInfo.project.name === "desktop") {
+      const card = await section.locator("[data-product-card]").first().boundingBox();
+      const viewport = page.viewportSize();
+      expect(card && viewport ? card.width / viewport.width : 1, "Karte max. ca. eine Spalte breit").toBeLessThan(0.4);
+    }
 
     if (!fs.existsSync(SCREENSHOTS)) fs.mkdirSync(SCREENSHOTS, { recursive: true });
     await section.scrollIntoViewIfNeeded();
