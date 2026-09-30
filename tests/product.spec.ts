@@ -218,7 +218,7 @@ test.describe("Produktdetailseite", () => {
       .toBe(true);
   });
 
-  test("Recently Viewed erscheint nach dem zweiten Produktbesuch", async ({ page }) => {
+  test("Recently Viewed erscheint nach dem zweiten Produktbesuch", async ({ page }, testInfo) => {
     const urls = await findProductUrls(page, 2);
     test.skip(urls.length < 2, "Weniger als zwei Produkte im Shop");
     const [first, second] = urls;
@@ -233,6 +233,10 @@ test.describe("Produktdetailseite", () => {
     const firstHandle = first.split("/products/")[1];
     await expect(section.locator(`[data-product-card] a[href*="/products/${firstHandle}"]`).first()).toBeAttached();
     await expect(section.locator("[data-product-card]")).toHaveCount(1);
+
+    if (!fs.existsSync(SCREENSHOTS)) fs.mkdirSync(SCREENSHOTS, { recursive: true });
+    await section.scrollIntoViewIfNeeded();
+    await section.screenshot({ path: path.join(SCREENSHOTS, `product-${testInfo.project.name}-recently-viewed.png`) });
 
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("skateshop:recently-viewed:v1") || "[]"));
     expect(stored.slice(0, 2)).toEqual([second.split("/products/")[1], firstHandle]);
@@ -254,6 +258,9 @@ test.describe("Produktdetailseite", () => {
       await expect(page.locator("[data-gallery-current]")).toBeVisible();
       await dots.nth(1).click();
       await expect(dots.nth(1)).toHaveAttribute("aria-current", "true");
+      // The counter follows the real scroll position of the track.
+      await expect(page.locator("[data-gallery-current]")).toHaveText("02");
+      await page.evaluate(() => window.scrollTo(0, 0));
     }
     await screenshot(page, testInfo, "mobile");
   });
