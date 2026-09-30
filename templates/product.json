@@ -1,20 +1,177 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "main": {
       "type": "product",
-      "settings": {}
+      "blocks": {
+        "breadcrumbs": {
+          "type": "breadcrumbs",
+          "settings": {}
+        },
+        "vendor": {
+          "type": "vendor",
+          "settings": {}
+        },
+        "title": {
+          "type": "title",
+          "settings": {
+            "size": "h2"
+          }
+        },
+        "rating": {
+          "type": "rating",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_tax_note": true
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "size_guide_label": ""
+          }
+        },
+        "quantity": {
+          "type": "quantity",
+          "settings": {}
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "add_label": "",
+            "show_dynamic_checkout": false
+          }
+        },
+        "delivery": {
+          "type": "delivery",
+          "settings": {
+            "low_stock_threshold": 5,
+            "in_stock_text": "",
+            "low_stock_text": "",
+            "backorder_text": "",
+            "sold_out_text": ""
+          }
+        },
+        "specs": {
+          "type": "specs",
+          "settings": {
+            "heading": "",
+            "show_sku": false
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "excerpt_words": 40
+          }
+        },
+        "builder_cta": {
+          "type": "builder_cta",
+          "settings": {
+            "heading": "",
+            "text": "",
+            "link_label": ""
+          }
+        }
+      },
+      "block_order": [
+        "breadcrumbs",
+        "vendor",
+        "title",
+        "rating",
+        "price",
+        "variant_picker",
+        "quantity",
+        "buy_buttons",
+        "delivery",
+        "specs",
+        "description",
+        "builder_cta"
+      ],
+      "settings": {
+        "gallery_layout": "thumbnails",
+        "media_ratio": "square",
+        "media_fit": "contain",
+        "enable_lightbox": true,
+        "media_width": "large",
+        "sticky_info": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 24,
+        "padding_bottom": 64
+      }
+    },
+    "details": {
+      "type": "product-details",
+      "blocks": {
+        "description": {
+          "type": "details",
+          "settings": {
+            "heading": "",
+            "open": true
+          }
+        },
+        "features": {
+          "type": "features",
+          "settings": {
+            "heading": "",
+            "open": false
+          }
+        },
+        "size_guide": {
+          "type": "size_guide",
+          "settings": {
+            "heading": "",
+            "open": false
+          }
+        },
+        "shipping": {
+          "type": "shipping",
+          "settings": {
+            "heading": "",
+            "open": false
+          }
+        }
+      },
+      "block_order": ["description", "features", "size_guide", "shipping"],
+      "settings": {
+        "show_eyebrow": true,
+        "eyebrow": "",
+        "heading": "",
+        "color_scheme": "scheme-1",
+        "padding_top": 48,
+        "padding_bottom": 64
+      }
+    },
+    "related": {
+      "type": "related-products",
+      "settings": {
+        "show_eyebrow": true,
+        "eyebrow": "",
+        "heading": "",
+        "limit": 4,
+        "layout": "grid",
+        "columns_desktop": "4",
+        "color_scheme": "scheme-1",
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "recently_viewed": {
+      "type": "recently-viewed",
+      "settings": {
+        "show_eyebrow": true,
+        "eyebrow": "",
+        "heading": "",
+        "limit": 4,
+        "layout": "slider",
+        "columns_desktop": "4",
+        "color_scheme": "scheme-1",
+        "padding_top": 64,
+        "padding_bottom": 80
+      }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main", "details", "related", "recently_viewed"]
 }

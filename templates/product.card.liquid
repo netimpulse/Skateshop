@@ -1,0 +1,8 @@
+{% layout none %}
+{%- comment -%}
+  HTML endpoint for "recently viewed" (recently-viewed.js): GET products/<handle>?view=card returns one product card.
+  Not meant to be assigned to products in the admin.
+{%- endcomment -%}
+<div data-product-card-wrapper>
+  {% render 'product-card', product: product, show_quick_add: false %}
+</div>

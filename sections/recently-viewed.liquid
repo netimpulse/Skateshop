@@ -1,0 +1,183 @@
+{%- comment -%}
+  Recently viewed products. recently-viewed.js stores the handle of every product page in localStorage
+  (skateshop:recently-viewed:v1, max. 12) and loads up to `limit` cards through the alternate template
+  product.card (`products/<handle>?view=card`). The section stays hidden until at least one card is loaded.
+{%- endcomment -%}
+
+{{ 'section-product.css' | asset_url | stylesheet_tag }}
+{% render 'section-style',
+  section_id: section.id,
+  padding_top: section.settings.padding_top,
+  padding_bottom: section.settings.padding_bottom
+%}
+
+{%- liquid
+  assign heading_id = 'Heading-' | append: section.id
+  assign default_eyebrow = 'products.recently_viewed.eyebrow' | t
+  assign eyebrow = section.settings.eyebrow | default: default_eyebrow
+  unless section.settings.show_eyebrow
+    assign eyebrow = blank
+  endunless
+  assign default_heading = 'products.recently_viewed.heading' | t
+  assign heading = section.settings.heading | default: default_heading
+  assign columns = section.settings.columns_desktop
+-%}
+
+<section
+  class="section product-recent scheme color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  aria-labelledby="{{ heading_id }}"
+  data-testid="recently-viewed"
+  {% unless request.design_mode %}
+    hidden
+  {% endunless %}
+>
+  <recently-viewed
+    class="product-recent__inner"
+    data-section-id="{{ section.id }}"
+    data-limit="{{ section.settings.limit }}"
+    {% if request.page_type == 'product' %}
+      data-current-handle="{{ product.handle }}"
+    {% endif %}
+  >
+    <div class="page-width">
+      {% render 'section-heading',
+        eyebrow: eyebrow,
+        heading: heading,
+        heading_id: heading_id,
+        heading_class: 'h3'
+      %}
+    </div>
+
+    {%- if request.design_mode -%}
+      <div class="page-width">
+        <p class="product-recent__editor-note label-mono" data-recently-viewed-note>
+          {{- 'products.recently_viewed.editor_note' | t -}}
+        </p>
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.layout == 'slider' -%}
+      <scroll-slider class="product-related__slider">
+        <div class="page-width product-related__controls scroller-controls">
+          <button type="button" class="icon-button" data-slider-prev aria-label="{{ 'accessibility.previous_slide' | t }}">
+            {%- render 'icon', name: 'arrow-left' -%}
+          </button>
+          <button type="button" class="icon-button" data-slider-next aria-label="{{ 'accessibility.next_slide' | t }}">
+            {%- render 'icon', name: 'arrow-right' -%}
+          </button>
+        </div>
+        <ul
+          class="scroller product-related__track product-related__track--d{{ columns }}"
+          role="list"
+          data-slider-track
+          data-recently-viewed-list
+        ></ul>
+      </scroll-slider>
+    {%- else -%}
+      <div class="page-width">
+        <ul
+          class="grid product-related__grid product-related__grid--d{{ columns }}"
+          role="list"
+          data-recently-viewed-list
+        ></ul>
+      </div>
+    {%- endif -%}
+  </recently-viewed>
+</section>
+
+<script type="module" src="{{ 'recently-viewed.js' | asset_url }}"></script>
+
+{% schema %}
+{
+  "name": "Zuletzt angesehen",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Zeigt die zuletzt besuchten Produktseiten dieses Browsers (lokal gespeichert, ohne aktuelles Produkt). Ohne Verlauf bleibt die Section unsichtbar."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_eyebrow",
+      "label": "Label über der Überschrift anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Label-Text",
+      "info": "Leer = Standardtext"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "info": "Leer = Standardtext „Zuletzt angesehen“"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Anzahl Produkte",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Darstellung",
+      "options": [
+        { "value": "grid", "label": "Raster" },
+        { "value": "slider", "label": "Slider" }
+      ],
+      "default": "slider"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Spalten (Desktop)",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" },
+        { "value": "5", "label": "5" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Farbschema",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Zuletzt angesehen"
+    }
+  ]
+}
+{% endschema %}
