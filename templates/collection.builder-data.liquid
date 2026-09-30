@@ -1,0 +1,8 @@
+{% layout none %}
+{%- paginate collection.products by 50 -%}
+{"handle": {{ collection.handle | json }}, "count": {{ collection.products_count | json }}, "pages": {{ paginate.pages | json }}, "products": [
+{%- for product in collection.products -%}
+{"id": {{ product.id | json }}, "title": {{ product.title | json }}, "w": {{ product.metafields.custom.deck_width.value | json }}}{% unless forloop.last %},{% endunless %}
+{%- endfor -%}
+]}
+{%- endpaginate -%}
