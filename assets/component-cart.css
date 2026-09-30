@@ -214,12 +214,6 @@
   gap: var(--space-s) var(--space-m);
 }
 
-.cart-item__quantity,
-.cart-summary__note-input {
-  border-color: var(--color-border);
-  border-color: color-mix(in srgb, var(--color-text) 35%, transparent);
-}
-
 .cart-item__quantity {
   grid-template-columns: 2.5rem 2.75rem 2.5rem;
   height: 2.75rem;
