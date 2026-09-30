@@ -9,6 +9,9 @@ import { withTheme } from "./fixtures";
  * Sprachunabhängig über data-testid / Rollen; deutsche Storefront unter /de.
  */
 
+// Only Chromium is installed in /opt/pw-browsers; the "mobile" project (iPhone 13) keeps its viewport, UA and touch emulation.
+test.use({ browserName: "chromium" });
+
 const LOCALE = "/de";
 const SCREENSHOTS = "qa-screenshots";
 const IGNORED_CONSOLE = /(web-pixels|monorail|shopify-perf|trekkie|Content Security Policy|favicon|preview_bar|analytics|captcha|cloudflare)/i;
