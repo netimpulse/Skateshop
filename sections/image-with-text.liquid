@@ -8,6 +8,15 @@
   assign s = section.settings
   assign heading_id = 'Heading-' | append: section.id
   assign classes = 'image-with-text--' | append: s.layout | append: ' image-with-text--mobile-' | append: s.mobile_layout | append: ' image-with-text--align-' | append: s.vertical_alignment
+
+  assign show_button_1 = false
+  if s.button_label != blank and s.button_link != blank
+    assign show_button_1 = true
+  endif
+  assign show_button_2 = false
+  if s.button_label_2 != blank and s.button_link_2 != blank
+    assign show_button_2 = true
+  endif
 -%}
 
 <section
@@ -39,12 +48,12 @@
       {%- if s.text != blank -%}
         <div class="image-with-text__text rte">{{ s.text }}</div>
       {%- endif -%}
-      {%- if s.button_label != blank and s.button_link != blank or s.button_label_2 != blank and s.button_link_2 != blank -%}
+      {%- if show_button_1 or show_button_2 -%}
         <div class="rich-text__actions">
-          {%- if s.button_label != blank and s.button_link != blank -%}
+          {%- if show_button_1 -%}
             <a class="button" href="{{ s.button_link }}">{{ s.button_label | escape }}</a>
           {%- endif -%}
-          {%- if s.button_label_2 != blank and s.button_link_2 != blank -%}
+          {%- if show_button_2 -%}
             <a class="button button--secondary" href="{{ s.button_link_2 }}">{{ s.button_label_2 | escape }}</a>
           {%- endif -%}
         </div>
