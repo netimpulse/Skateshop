@@ -194,6 +194,7 @@
 
 .content-page__title {
   max-width: 22ch;
+  hyphens: auto;
 }
 
 .content-page__intro {
@@ -407,6 +408,7 @@
 .content-card__title {
   font-size: var(--text-h4);
   line-height: 1.1;
+  hyphens: auto;
 }
 
 .content-card__link {
@@ -510,6 +512,7 @@
 
 .content-article__title {
   max-width: 20ch;
+  hyphens: auto;
 }
 
 .content-article__standfirst {

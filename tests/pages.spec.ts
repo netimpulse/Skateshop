@@ -20,6 +20,8 @@ async function open(page: Page, route: string): Promise<Response | null> {
     .locator("text=/verify you are human|connection needs to be verified|Just a moment/i")
     .count();
   test.skip(challenge > 0 || response?.status() === 429, "Store zeigt Cloudflare-Prüfung / 429 – später erneut");
+  const gated = !route.startsWith("/password") && new URL(page.url()).pathname.endsWith("/password");
+  test.skip(gated, "Storefront-Passwort aktiv – Login im global-setup fehlgeschlagen");
   return response;
 }
 
