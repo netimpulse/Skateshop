@@ -10,27 +10,58 @@ import { withTheme } from "./fixtures";
  * Seed pages: /pages/brands (template brands), /pages/skate-contact (template contact).
  */
 
+// Only Chromium is installed in /opt/pw-browsers; the mobile project keeps its iPhone 13 viewport/touch profile.
+test.use({ browserName: "chromium" });
+
 const LOCALE = process.env.QA_LOCALE ?? "/de";
 const SHOTS = "qa-screenshots";
+// Shopify platform scripts (analytics, preview bar) are not theme code; their aborted fetches are ignored.
+const PLATFORM_NOISE = [/\/cdn\/shopifycloud\//, /\/checkouts\/internal\//];
+
+const isPasswordGate = (page: Page) => new URL(page.url()).pathname.endsWith("/password");
+
+/** Logs in through the storefront password form when the global setup could not. */
+async function passStorefrontGate(page: Page): Promise<boolean> {
+  const password = process.env.SHOPIFY_STOREFRONT_PASSWORD;
+  if (!password) return false;
+  const closedDisclosure = page.locator('details:not([open]):has(input[type="password"]) > summary');
+  if ((await closedDisclosure.count()) > 0) await closedDisclosure.first().click();
+  const input = page.locator('input[type="password"]').first();
+  if ((await input.count()) === 0) return false;
+  await input.fill(password);
+  await Promise.all([
+    page.waitForURL((url) => !url.pathname.endsWith("/password"), { timeout: 15_000 }).catch(() => undefined),
+    page.locator('form:has(input[type="password"]) [type="submit"]').first().click(),
+  ]);
+  return !isPasswordGate(page);
+}
 
 async function open(page: Page, route: string): Promise<Response | null> {
-  const response = await page.goto(withTheme(`${LOCALE}${route}`), { waitUntil: "domcontentloaded" });
+  const url = withTheme(`${LOCALE}${route}`);
+  let response = await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("load");
-  const challenge = await page
-    .locator("text=/verify you are human|connection needs to be verified|Just a moment/i")
-    .count();
-  test.skip(challenge > 0 || response?.status() === 429, "Store zeigt Cloudflare-Prüfung / 429 – später erneut");
-  const gated = !route.startsWith("/password") && new URL(page.url()).pathname.endsWith("/password");
-  test.skip(gated, "Storefront-Passwort aktiv – Login im global-setup fehlgeschlagen");
+  const challenge = async () =>
+    (await page.locator("text=/verify you are human|connection needs to be verified|Just a moment/i").count()) > 0;
+  test.skip((await challenge()) || response?.status() === 429, "Store zeigt Cloudflare-Prüfung / 429 – später erneut");
+
+  if (!route.startsWith("/password") && isPasswordGate(page)) {
+    const passed = await passStorefrontGate(page);
+    test.skip(!passed, "Storefront-Passwort aktiv und Login nicht möglich");
+    response = await page.goto(url, { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("load");
+    test.skip(await challenge(), "Store zeigt Cloudflare-Prüfung – später erneut");
+  }
   return response;
 }
 
 function collectErrors(page: Page, ignore: RegExp[] = []): string[] {
   const errors: string[] = [];
+  const patterns = [...PLATFORM_NOISE, ...ignore];
   page.on("console", (message) => {
     if (message.type() !== "error") return;
     const text = message.text();
-    if (ignore.some((pattern) => pattern.test(text))) return;
+    const source = message.location().url || "";
+    if (patterns.some((pattern) => pattern.test(text) || pattern.test(source))) return;
     errors.push(`console: ${text}`);
   });
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
