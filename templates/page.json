@@ -11,7 +11,18 @@
   "sections": {
     "main": {
       "type": "page",
-      "settings": {}
+      "settings": {
+        "show_breadcrumbs": true,
+        "eyebrow": "",
+        "heading_size": "h1",
+        "show_content": true,
+        "lead_paragraph": true,
+        "width": "narrow",
+        "image_ratio": "16-9",
+        "color_scheme": "scheme-1",
+        "padding_top": 40,
+        "padding_bottom": 96
+      }
     }
   },
   "order": [
