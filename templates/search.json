@@ -19,6 +19,7 @@
         "filters_expanded": "first",
         "show_filter_counts": true,
         "enable_sorting": true,
+        "suggestions": ["decks", "trucks", "wheels", "bearings", "griptape", "hardware", "completes"],
         "color_scheme": "scheme-1",
         "padding_top": 32,
         "padding_bottom": 80

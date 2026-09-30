@@ -192,7 +192,8 @@ class FacetFilters extends HTMLElement {
   captureFocus() {
     const active = document.activeElement;
     if (!active || active === document.body || !this.contains(active)) return null;
-    return { id: active.id || null, dialog: active.closest('dialog[open]') };
+    const typing = active instanceof HTMLInputElement && active.matches('[data-facets-price]');
+    return { id: active.id || null, dialog: active.closest('dialog[open]'), value: typing ? active.value : null };
   }
 
   restoreFocus(state, toResults = false) {
@@ -200,6 +201,11 @@ class FacetFilters extends HTMLElement {
     const same = state?.id ? document.getElementById(state.id) : null;
     if (same && !toResults) {
       if (document.activeElement !== same) same.focus({ preventScroll: true });
+      // Keep what the shopper is typing into a price field (a newer debounced update follows) and put the caret at the end.
+      if (state.value !== null && same instanceof HTMLInputElement) {
+        same.value = '';
+        same.value = state.value;
+      }
       return;
     }
     const fallback = state?.dialog?.open

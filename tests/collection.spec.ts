@@ -236,6 +236,33 @@ test.describe("Collection – Filter per AJAX (Desktop)", () => {
     }
   });
 
+  test("Preisfilter wird verzögert angewendet, Fokus bleibt im Feld", async ({ page }) => {
+    const { status, challenged } = await open(page);
+    test.skip(challenged, "Bot-Prüfung des Shops aktiv");
+    test.skip(status === 404, `${COLLECTION} existiert nicht (Seed fehlt)`);
+    const sidebar = page.getByTestId("facets-sidebar");
+    const priceMax = sidebar.locator("input[data-facets-price]").nth(1);
+    test.skip((await priceMax.count()) === 0, "Kein Preisfilter vorhanden");
+
+    await page.waitForLoadState("load");
+    await page.evaluate(() => ((window as unknown as { __facetsMarker: string }).__facetsMarker = "kept"));
+    await priceMax.evaluate((input) => {
+      const details = input.closest("details");
+      if (details) details.open = true;
+    });
+    const id = (await priceMax.getAttribute("id")) as string;
+    const ceiling = Number(await priceMax.getAttribute("placeholder")) || 100;
+    const value = String(Math.max(1, Math.floor(ceiling / 2)));
+
+    await priceMax.click();
+    await page.keyboard.type(value, { delay: 60 });
+    await expect(page).toHaveURL(new RegExp(`filter\\.v\\.price\\.lte=${value}`));
+    await expect(page.getByTestId("facet-chip")).toHaveCount(1);
+    await expect(page.locator(`#${id}`)).toHaveValue(value);
+    expect(await page.evaluate(() => document.activeElement?.id)).toBe(id);
+    expect(await page.evaluate(() => (window as unknown as { __facetsMarker?: string }).__facetsMarker)).toBe("kept");
+  });
+
   test("Pagination lädt Seite 2 ohne Full-Reload", async ({ page }) => {
     const { status, challenged } = await open(page);
     test.skip(challenged, "Bot-Prüfung des Shops aktiv");

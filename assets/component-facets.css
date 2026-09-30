@@ -63,8 +63,8 @@
 .facets__heading {
   display: flex;
   align-items: center;
-  min-height: 2.75rem;
-  /* same height as the toolbar so both rules line up */
+  /* same outer height as the toolbar (44px control + padding + rule) so both rules line up */
+  min-height: calc(2.75rem + var(--space-s) + var(--border-width));
   padding-block-end: var(--space-s);
   border-bottom: var(--border-width) solid var(--color-text);
   font-family: var(--font-mono-family);
