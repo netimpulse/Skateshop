@@ -11,7 +11,20 @@
   "sections": {
     "main": {
       "type": "collections",
-      "settings": {}
+      "settings": {
+        "eyebrow": "Shop",
+        "show_breadcrumbs": true,
+        "sort": "default",
+        "image_ratio": "4 / 3",
+        "columns_desktop": "3",
+        "columns_mobile": "1",
+        "hide_empty": true,
+        "hide_builder": true,
+        "exclude_handles": "frontpage, all",
+        "color_scheme": "scheme-1",
+        "padding_top": 32,
+        "padding_bottom": 80
+      }
     }
   },
   "order": [
