@@ -670,7 +670,7 @@
 }
 
 @media (min-width: 750px) and (max-width: 989px) {
-  .product-gallery__track {
+  .product-gallery .product-gallery__track {
     gap: var(--space-s);
     padding-inline: var(--page-margin);
     scroll-padding-inline: var(--page-margin);
@@ -827,7 +827,7 @@
   text-overflow: ellipsis;
 }
 
-.product-lightbox__list {
+.product-lightbox .product-lightbox__list {
   display: grid;
   gap: var(--space-l);
   max-width: 1400px;
@@ -985,6 +985,12 @@
   margin: 0;
   --scroller-item: 62%;
   --scroller-item-tablet: 38%;
+}
+
+/* ul[role='list'] resets padding with higher specificity than .scroller – restore the slider gutters. */
+.product-related__track.scroller {
+  padding-inline: var(--page-margin);
+  padding-block-end: var(--space-m);
 }
 
 .product-related__track--d3 {

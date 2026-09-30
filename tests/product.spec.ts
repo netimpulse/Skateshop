@@ -114,6 +114,9 @@ test.describe("Produktdetailseite", () => {
       await zoom.click();
       const dialog = gallery.locator("dialog[data-lightbox]");
       await expect(dialog).toHaveAttribute("open", "");
+      await expect(dialog.locator("img").first()).toBeVisible();
+      if (!fs.existsSync(SCREENSHOTS)) fs.mkdirSync(SCREENSHOTS, { recursive: true });
+      await page.screenshot({ path: path.join(SCREENSHOTS, `product-${testInfo.project.name}-lightbox.png`) });
       await page.keyboard.press("Escape");
       await expect(dialog).not.toHaveAttribute("open", "");
       await expect(zoom).toBeFocused();
