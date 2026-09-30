@@ -173,9 +173,12 @@ async function main() {
     ...(await list('templates', '.liquid')),
   ];
   const usedKeys = new Set();
+  const dynamicPrefixes = new Set();
   const keyPattern = /['"]([a-z0-9_]+(?:\.[a-z0-9_]+)+)['"]\s*\|\s*t\b/g;
+  const prefixPattern = /['"]([a-z0-9_]+(?:\.[a-z0-9_]+)*\.)['"]\s*\|\s*append|prepend:\s*['"]([a-z0-9_]+(?:\.[a-z0-9_]+)*\.)['"]/g;
   for (const file of liquidFiles) {
     const source = await read(file);
+    for (const match of source.matchAll(prefixPattern)) dynamicPrefixes.add(match[1] || match[2]);
     for (const match of source.matchAll(keyPattern)) {
       const key = match[1];
       usedKeys.add(key);
@@ -189,7 +192,8 @@ async function main() {
   if (flags.unused) {
     for (const key of Object.keys(defaultKeys)) {
       const base = PLURAL_KEYS.has(key.slice(key.lastIndexOf('.') + 1)) ? key.slice(0, key.lastIndexOf('.')) : key;
-      if (!usedKeys.has(key) && !usedKeys.has(base)) warn(defaultName, `unused key "${key}"`);
+      const dynamic = [...dynamicPrefixes].some((prefix) => key.startsWith(prefix));
+      if (!usedKeys.has(key) && !usedKeys.has(base) && !dynamic) warn(defaultName, `unused key "${key}"`);
     }
   }
 

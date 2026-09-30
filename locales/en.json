@@ -12,9 +12,7 @@
     "breadcrumbs": "Breadcrumbs",
     "close": "Close",
     "close_menu": "Close menu",
-    "external_link": "Opens external website.",
     "loading": "Loading …",
-    "new_window": "Opens in a new window.",
     "next_slide": "Next",
     "open_menu": "Open menu",
     "pagination": "Pagination",
@@ -24,7 +22,6 @@
     "skip_to_content": "Skip to content",
     "social_links": "Social media",
     "star_rating": "{{ rating }} out of {{ max }} stars",
-    "unit_price_separator": "per",
     "vendor": "Vendor:"
   },
   "blog": {
@@ -262,7 +259,23 @@
     "update": "Update"
   },
   "collections": {
-    "title": "Categories"
+    "empty": "This category is still empty.",
+    "empty_filtered": "No products match these filters.",
+    "empty_filtered_hint": "Remove a filter or reset all of them.",
+    "empty_hint": "Check back soon – or browse the other categories.",
+    "list_empty": "No categories yet.",
+    "product_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "products_heading": "Products",
+    "seo": {
+      "heading": "More about {{ title }}",
+      "read_less": "Show less",
+      "read_more": "Read more"
+    },
+    "title": "Categories",
+    "view_all": "View all categories"
   },
   "contact": {
     "form": {
@@ -276,13 +289,35 @@
     "heading": "Write to us",
     "info_heading": "How to reach us"
   },
-  "customers": {
-    "login": {
-      "email": "Email",
-      "password": "Password",
-      "submit": "Sign in",
-      "title": "Login"
-    }
+  "filters": {
+    "active": "Active filters",
+    "apply": "Apply filters",
+    "clear_all": "Clear all",
+    "pagination": {
+      "next": "Next page",
+      "previous": "Previous page"
+    },
+    "price_chip_from": "from {{ price }}",
+    "price_chip_to": "up to {{ price }}",
+    "price_from": "From",
+    "price_max": "Highest price: {{ price }}",
+    "price_to": "To",
+    "remove": "Remove filter",
+    "reset": "Reset",
+    "reset_all": "Reset all filters",
+    "selected_count": {
+      "one": "{{ count }} filter active",
+      "other": "{{ count }} filters active"
+    },
+    "show_less": "Show less",
+    "show_more": {
+      "one": "+ {{ count }} more",
+      "other": "+ {{ count }} more"
+    },
+    "show_results": "Show ({{ count }})",
+    "sort_by": "Sort",
+    "sort_submit": "Sort",
+    "title": "Filter"
   },
   "footer": {
     "editor_menu_hint": "Choose a menu for this link list (e.g. skate-footer-shop).",
@@ -307,8 +342,7 @@
       "tagged": "Tagged \"{{ tags }}\""
     },
     "read_more": "Read more",
-    "search": "Search",
-    "view_all": "View all"
+    "search": "Search"
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
@@ -375,8 +409,7 @@
         "other": "+{{ count }} colors"
       },
       "quick_add": "Quick add",
-      "select_variant": "Select variant",
-      "sold_out": "Sold out"
+      "select_variant": "Select variant"
     },
     "delivery": {
       "backorder": "On backorder – ships in 5–10 business days",
@@ -462,6 +495,9 @@
     }
   },
   "search": {
+    "empty_hint": "Check the spelling, try a broader term or browse our categories.",
+    "intro": "What are you looking for?",
+    "label": "Search term",
     "no_results_html": "No results for \"{{ terms }}\"",
     "placeholder": "Search decks, trucks, brands …",
     "predictive": {
@@ -483,8 +519,19 @@
       "suggestions": "Suggestions",
       "view_all": "All results for “{{ terms }}”"
     },
-    "results_for_html": "{{ count }} results for \"{{ terms }}\"",
+    "results": {
+      "count": {
+        "one": "{{ count }} result",
+        "other": "{{ count }} results"
+      },
+      "for_html": "for “{{ terms }}”",
+      "heading": "Search results",
+      "pages": "Pages & articles",
+      "type_article": "Article",
+      "type_page": "Page"
+    },
     "submit": "Search",
+    "suggestions": "Popular categories",
     "title": "Search"
   },
   "sections": {
