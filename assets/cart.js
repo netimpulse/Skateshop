@@ -52,8 +52,9 @@ export function updateLines(updates, { source = 'cart' } = {}) {
   return mutate(routes.cartUpdate, { updates }, source);
 }
 
+/** Mutations from the drawer/cart page, and sources ending in ":silent", never open the drawer. */
 export function shouldOpenDrawer(source) {
-  return config.cartType === 'drawer' && !['cart-drawer', 'main-cart'].includes(source);
+  return config.cartType === 'drawer' && !['cart-drawer', 'main-cart'].includes(source) && !String(source).endsWith(':silent');
 }
 
 // ------------------------------------------------------------------ Cart count badges

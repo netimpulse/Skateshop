@@ -1,0 +1,100 @@
+{% doc %}
+  SVG skeleton of the board builder preview (top/bottom view + side profile). Geometry, colors and
+  image layers are set by <board-preview> (assets/board-builder-preview.js); fixed viewBoxes avoid layout shift.
+
+  @param {string} id - Unique id suffix (section.id)
+  @param {string} [label] - Accessible name of the preview figure
+
+  @example
+  {% render 'board-preview', id: section.id %}
+{% enddoc %}
+
+{%- liquid
+  assign clip_id = 'bb-deck-clip-' | append: id
+  assign grain_id = 'bb-wood-' | append: id
+  assign checker_id = 'bb-checker-' | append: id
+  assign title_id = 'bb-preview-title-' | append: id
+  assign empty_label = 'builder.preview.empty' | t
+-%}
+
+<board-preview class="bb-preview" data-clip-id="{{ clip_id }}">
+  <div class="bb-preview__toolbar">
+    <p class="bb-preview__fig label-mono">{{ 'builder.preview.figure' | t }}</p>
+    <div class="bb-preview__views" role="group" aria-label="{{ 'builder.preview.view' | t }}">
+      <button type="button" class="bb-preview__view" aria-pressed="true" data-view="bottom">{{ 'builder.preview.bottom' | t }}</button>
+      <button type="button" class="bb-preview__view" aria-pressed="false" data-view="top">{{ 'builder.preview.top' | t }}</button>
+    </div>
+  </div>
+
+  <figure class="bb-preview__figure">
+    <svg class="bb-preview__plan" viewBox="0 0 800 240" role="img" aria-labelledby="{{ title_id }}" data-view="bottom">
+      <title id="{{ title_id }}" data-preview-title>{{ label | default: empty_label }}</title>
+      <defs>
+        <clipPath id="{{ clip_id }}">
+          <rect data-el="deck-clip" x="80" y="37" width="640" height="165" rx="82.5"/>
+        </clipPath>
+        <pattern id="{{ grain_id }}" width="24" height="10" patternUnits="userSpaceOnUse">
+          <path d="M0 5c6-3 12 3 24 0" class="bb-svg-grain"/>
+        </pattern>
+        <pattern id="{{ checker_id }}" width="20" height="20" patternUnits="userSpaceOnUse">
+          <rect width="10" height="10" class="bb-svg-checker"/>
+          <rect x="10" y="10" width="10" height="10" class="bb-svg-checker"/>
+        </pattern>
+      </defs>
+
+      <g class="bb-svg-wheels-top" data-el="wheels-top">
+        <rect data-el="wheel" data-pos="0" class="bb-svg-wheel is-empty" x="160" y="18" width="42" height="26" rx="6"/>
+        <rect data-el="wheel" data-pos="1" class="bb-svg-wheel is-empty" x="160" y="196" width="42" height="26" rx="6"/>
+        <rect data-el="wheel" data-pos="2" class="bb-svg-wheel is-empty" x="598" y="18" width="42" height="26" rx="6"/>
+        <rect data-el="wheel" data-pos="3" class="bb-svg-wheel is-empty" x="598" y="196" width="42" height="26" rx="6"/>
+      </g>
+
+      <g class="bb-svg-deck" data-el="deck-group">
+        <rect data-el="deck-base" class="bb-svg-deck-base is-empty" x="80" y="37" width="640" height="165" rx="82.5"/>
+        <rect data-el="deck-grain" class="bb-svg-deck-grain" x="80" y="37" width="640" height="165" rx="82.5" fill="url(#{{ grain_id }})"/>
+        <image data-el="deck-layer" clip-path="url(#{{ clip_id }})" x="80" y="37" width="640" height="165" preserveAspectRatio="xMidYMid slice" hidden/>
+        <rect data-el="grip" class="bb-svg-grip" x="80" y="37" width="640" height="165" rx="82.5" hidden/>
+        <rect data-el="grip-pattern" x="80" y="37" width="640" height="165" rx="82.5" fill="url(#{{ checker_id }})" class="bb-svg-grip-pattern" hidden/>
+      </g>
+
+      <g data-el="truck" data-pos="0" class="bb-svg-truck is-empty">
+        <rect data-el="baseplate" x="159" y="99" width="44" height="42"/>
+        <rect data-el="hanger" x="174" y="37" width="14" height="165"/>
+        <circle data-el="kingpin" cx="181" cy="120" r="5"/>
+      </g>
+      <g data-el="truck" data-pos="1" class="bb-svg-truck is-empty">
+        <rect data-el="baseplate" x="597" y="99" width="44" height="42"/>
+        <rect data-el="hanger" x="612" y="37" width="14" height="165"/>
+        <circle data-el="kingpin" cx="619" cy="120" r="5"/>
+      </g>
+
+      <g data-el="hardware" class="bb-svg-hardware is-empty">
+        <circle data-el="bolt" cx="165" cy="105" r="3.5"/><circle data-el="bolt" cx="197" cy="105" r="3.5"/>
+        <circle data-el="bolt" cx="165" cy="135" r="3.5"/><circle data-el="bolt" cx="197" cy="135" r="3.5"/>
+        <circle data-el="bolt" cx="603" cy="105" r="3.5"/><circle data-el="bolt" cx="635" cy="105" r="3.5"/>
+        <circle data-el="bolt" cx="603" cy="135" r="3.5"/><circle data-el="bolt" cx="635" cy="135" r="3.5"/>
+      </g>
+
+      <g class="bb-svg-dims" aria-hidden="true">
+        <path data-el="dim-length" class="bb-svg-dim" d="M80 14h640"/>
+        <text data-el="dim-length-label" class="bb-svg-dim-label" x="400" y="10" text-anchor="middle"></text>
+        <path data-el="dim-width" class="bb-svg-dim" d="M752 37v165"/>
+        <text data-el="dim-width-label" class="bb-svg-dim-label" x="772" y="120" text-anchor="middle" transform="rotate(90 772 120)"></text>
+        <path data-el="dim-wheelbase" class="bb-svg-dim" d="M181 228h438"/>
+        <text data-el="dim-wheelbase-label" class="bb-svg-dim-label" x="400" y="224" text-anchor="middle"></text>
+      </g>
+    </svg>
+
+    <svg class="bb-preview__profile" viewBox="0 0 800 150" aria-hidden="true" focusable="false">
+      <path class="bb-svg-ground" d="M40 140h720"/>
+      <path data-el="profile-deck" class="bb-svg-profile-deck is-empty" d="M80 40 L120 58 H680 L720 40"/>
+      <rect data-el="profile-riser" data-pos="0" class="bb-svg-riser" x="160" y="58" width="44" height="0"/>
+      <rect data-el="profile-riser" data-pos="1" class="bb-svg-riser" x="596" y="58" width="44" height="0"/>
+      <path data-el="profile-truck" data-pos="0" class="bb-svg-profile-truck is-empty" d="M162 62h38l-8 30h-22z"/>
+      <path data-el="profile-truck" data-pos="1" class="bb-svg-profile-truck is-empty" d="M600 62h38l-8 30h-22z"/>
+      <circle data-el="profile-wheel" data-pos="0" class="bb-svg-profile-wheel is-empty" cx="181" cy="119" r="21"/>
+      <circle data-el="profile-wheel" data-pos="1" class="bb-svg-profile-wheel is-empty" cx="619" cy="119" r="21"/>
+      <text data-el="profile-wheel-label" class="bb-svg-dim-label" x="400" y="132" text-anchor="middle"></text>
+    </svg>
+  </figure>
+</board-preview>
